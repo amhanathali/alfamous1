@@ -30,12 +30,12 @@ const options = () => ({
 
 // ---------- Liste de versets ----------
 // items : [{ s, v, positions?, dansTraduction? }]
-async function afficherVersets(items, { titre, resume, avant = '', surligner = true, cible = null }) {
+async function afficherVersets(items, { titre, resume, avant = '', surligner = true, cible = null, vide = 'Aucun verset ne correspond.' }) {
   const zone = cible || contenu;
   if (!cible) zone.innerHTML = `<div class="titre">${titre}<span class="resume">${resume || ''}</span></div>${avant}`;
   zone.insertAdjacentHTML('beforeend', '<div class="liste"></div>');
   const liste = zone.querySelector('.liste:last-of-type');
-  if (!items.length) { liste.innerHTML = '<p class="message">Aucun verset ne correspond.</p>'; return; }
+  if (!items.length) { liste.innerHTML = `<p class="message">${vide}</p>`; return; }
   let affiches = 0;
   const suite = async () => {
     const lot = items.slice(affiches, affiches + PAR_PAGE);
@@ -155,6 +155,18 @@ function modeTexte() {
   return [o.motEntier ? 'mot entier' : 'partie de mot', o.contigus ? 'contigus' : null].filter(Boolean).join(' · ');
 }
 
+// Si « Mots contigus » ne donne rien, on indique combien de versets contiennent tous les termes.
+function aideContigus(nbSansContigus) {
+  if (!nbSansContigus) return 'Aucun verset ne correspond.';
+  return `Aucun verset où ces termes <b>se suivent</b>. ${pluriel(nbSansContigus, 'verset')} les contien${nbSansContigus > 1 ? 'nent' : 't'} tous à des places différentes :
+    <button class="lien-bouton" data-sans-contigus>décocher « Mots contigus »</button>.`;
+}
+contenu.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-sans-contigus]')) return;
+  $('#contigus').checked = false;
+  $('#contigus').dispatchEvent(new Event('change'));
+});
+
 function blocRepartition(resultats) {
   const rep = repartitionParSourate(resultats);
   if (!rep.length) return '';
@@ -173,6 +185,8 @@ async function vueMots(termes, langue) {
   const resultats = chercherMots(await D.toutLeTexte(), termes, langue, {
     motEntier: o.motEntier, contigus: o.contigus, source: dansTrad ? traductionActive.carte : 'coran',
   });
+  const sans = o.contigus && !resultats.length
+    ? chercherMots(await D.toutLeTexte(), termes, langue, { motEntier: o.motEntier, source: dansTrad ? traductionActive.carte : 'coran' }).length : 0;
   const occ = resultats.reduce((t, r) => t + r.positions.length, 0);
   const affichage = termes.map((t) => (langue === 'ar' ? `<span class="ar" lang="ar">${echapper(t)}</span>` : `« ${echapper(t)} »`)).join(' <span class="plus-terme">+</span> ');
   const ou = langue === 'ar' ? 'texte arabe' : dansTrad ? `traduction ${echapper(traductionActive.nom)}` : 'translittération';
@@ -180,6 +194,7 @@ async function vueMots(termes, langue) {
     titre: `<h1>${affichage}</h1>`,
     resume: `${pluriel(occ, 'mot')} surligné${occ > 1 ? 's' : ''} dans ${pluriel(resultats.length, 'verset')} · ${ou} · ${modeTexte()}`,
     avant: blocRepartition(resultats),
+    vide: o.contigus ? aideContigus(sans) : undefined,
   });
 }
 
@@ -195,7 +210,9 @@ async function vueRacines(termes) {
   message('Recherche des versets…');
   const { contigus } = options();
   const resultats = chercherRacines(await D.toutLeTexte(), termes, { contigus });
+  const sans = contigus && !resultats.length ? chercherRacines(await D.toutLeTexte(), termes).length : 0;
   await afficherVersets(resultats, {
+    vide: contigus ? aideContigus(sans) : undefined,
     titre: `<h1 lang="ar" class="ar">${termes.map((r) => `<a class="lien-racine-titre" href="${lienRequete(`r:${r}`)}">${echapper(r)}</a>`).join(' <span class="plus-terme">+</span> ')}</h1>`,
     resume: `racines · ${pluriel(resultats.length, 'verset')} contenant toutes ces racines${contigus ? ' (contiguës)' : ''} · <a href="${lienRequete(`m:${termes.join(' ')}`)}">chercher comme mots</a>`,
     avant: blocRepartition(resultats),

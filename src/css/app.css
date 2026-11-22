@@ -159,3 +159,5 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
 
 .pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
