@@ -1,0 +1,10 @@
+rules_version = '2';
+
+// Tout est fermé par défaut (les données du texte sont servies par Hosting).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

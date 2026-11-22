@@ -1,0 +1,13 @@
+# Décisions
+
+| Date | Décision | Raison |
+| --- | --- | --- |
+| 2026-11-22 | Nouvelle application reconstruite de zéro ; l'ancienne (`alfamous-amha`) n'est pas touchée | Sécurité, dette technique (fichier JS de 8 Mo comme base de données) |
+| 2026-11-22 | Une seule application, deux projets Firebase : `alfamous-essai` (tests) et `alfamous-atelier` (production), forfait Blaze, alerte de budget 10 $ CA | Tester sans risque pour la version publique |
+| 2026-11-22 | Sous-domaine `atelier.alfamous.ca` pendant la construction | L'ancienne application garde `alfamous.ca` jusqu'à la bascule |
+| 2026-11-22 | Bascule des commentaires : copies d'essai pendant la construction, copie finale le jour de la bascule, puis écriture uniquement dans la nouvelle application | Éviter deux versions divergentes |
+| 2026-11-22 | Code dans `C:\Users\gmpcd\Desktop\Alfamous1` (hors Google Drive) ; documents dans `G:\Mon disque\Gestion des projets Amha\Alfamous1` | Git et Drive se synchronisent mal |
+| 2026-11-22 | Texte découpé par sourate en JSON servi par Hosting ; commentaires = un document Firestore par commentaire | Chargement rapide, écriture concurrente, historique |
+| 2026-11-22 | Traductions au format tanzil.net, liste des langues dans `donnees/traductions/langues.json`, fichiers non versionnés | Demande de l'auteur ; conditions de tanzil.net |
+| 2026-11-22 | Région des données : `northamerica-northeast1` (Montréal) | Choix de l'auteur : projet basé au Québec |
+| 2026-11-22 | Traduction Mountadana laissée de côté (absente de tanzil.net) | Choix de l'auteur |

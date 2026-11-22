@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "alfamous-essai",
+    "essai": "alfamous-essai",
+    "prod": "alfamous-atelier"
+  }
+}

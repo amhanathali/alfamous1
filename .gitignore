@@ -1,0 +1,22 @@
+# Dépendances et productions
+node_modules/
+dist/
+.firebase/
+*.log
+
+# Secrets — jamais dans Git
+.env
+.env.*
+*adminsdk*.json
+key*.json
+client_secret*.json
+service-account*.json
+
+# Traductions tanzil.net (téléchargées localement, jamais versionnées)
+donnees/traductions/*.txt
+donnees/traductions/*.xml
+
+# Divers
+.DS_Store
+Thumbs.db
+desktop.ini

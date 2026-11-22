@@ -1,0 +1,10 @@
+{
+  "source": "https://tanzil.net/trans/",
+  "format": "Tanzil « Text (with aya numbers) » : une ligne par verset, sourate|verset|texte",
+  "traductions": [
+    { "id": "fr.hamidullah", "langue": "fr", "nom": "Muhammad Hamidullah", "actif": true },
+    { "id": "en.yusufali", "langue": "en", "nom": "Abdullah Yusuf Ali", "actif": true },
+    { "id": "es.garcia", "langue": "es", "nom": "Isa García", "actif": true },
+    { "id": "ber.mensur", "langue": "kab", "nom": "Ramdane At Mansour", "actif": true }
+  ]
+}
