@@ -159,3 +159,19 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
 
 .pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Versets voisins (bas de carte) */
+.voisins { display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.voisin {
+  display: inline-flex; align-items: center; gap: 4px; background: none; cursor: pointer;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px 2px 8px; font-size: 13px; color: var(--discret);
+}
+.voisin[data-voisin="1"] { padding: 2px 8px 2px 12px; }
+.voisin:hover, .voisin:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.voisin svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.voisin:disabled { opacity: .5; cursor: wait; }
+.verset.contexte { border-style: dashed; box-shadow: none; }
+@keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
+.verset.eclair { animation: eclair 1.2s ease-out; }

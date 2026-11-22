@@ -22,6 +22,15 @@ const preferences = {
 };
 
 let traductionActive = null; // { id, nom, carte: Map « s:v » → texte }
+let nbVersets = []; // nombre de versets par sourate (index = numéro de sourate)
+
+// Verset voisin (précédent : sens = -1, suivant : sens = 1), en passant d'une sourate à l'autre.
+function voisin(s, v, sens) {
+  if (sens < 0) return v > 1 ? [s, v - 1] : s > 1 ? [s - 1, nbVersets[s - 1]] : null;
+  return v < nbVersets[s] ? [s, v + 1] : s < 114 ? [s + 1, 1] : null;
+}
+const ICONE_HAUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+const ICONE_BAS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const options = () => ({
   motEntier: $('#mot-entier').checked,
   contigus: $('#contigus').checked,
@@ -30,12 +39,12 @@ const options = () => ({
 
 // ---------- Liste de versets ----------
 // items : [{ s, v, positions?, dansTraduction? }]
-async function afficherVersets(items, { titre, resume, avant = '', surligner = true, cible = null }) {
+async function afficherVersets(items, { titre, resume, avant = '', surligner = true, cible = null, vide = 'Aucun verset ne correspond.' }) {
   const zone = cible || contenu;
   if (!cible) zone.innerHTML = `<div class="titre">${titre}<span class="resume">${resume || ''}</span></div>${avant}`;
   zone.insertAdjacentHTML('beforeend', '<div class="liste"></div>');
   const liste = zone.querySelector('.liste:last-of-type');
-  if (!items.length) { liste.innerHTML = '<p class="message">Aucun verset ne correspond.</p>'; return; }
+  if (!items.length) { liste.innerHTML = `<p class="message">${vide}</p>`; return; }
   let affiches = 0;
   const suite = async () => {
     const lot = items.slice(affiches, affiches + PAR_PAGE);
@@ -65,20 +74,52 @@ function surlignerMots(texte, positions, attributs = () => '') {
   return texte.split(/\s+/).map((w, i) => `<span class="mot${set.has(i) ? ' surligne' : ''}"${attributs(i)}>${echapper(w)}</span>`).join(' ');
 }
 
-function carteVerset(s, x, motsVerset, resultat) {
+function boutonsVoisins(s, v) {
+  const avant = voisin(s, v, -1); const apres = voisin(s, v, 1);
+  const bouton = (cible, sens, icone, libelle) => (cible
+    ? `<button type="button" class="voisin" data-voisin="${sens}" title="Afficher le verset ${libelle} (${cible.join(':')})" aria-label="Afficher le verset ${libelle} ${cible.join(':')}">${sens < 0 ? icone : ''}<span>${cible.join(':')}</span>${sens > 0 ? icone : ''}</button>`
+    : '');
+  return `<div class="voisins">${bouton(avant, -1, ICONE_HAUT, 'précédent')}${bouton(apres, 1, ICONE_BAS, 'suivant')}</div>`;
+}
+
+function carteVerset(s, x, motsVerset, resultat, contexte = false) {
   const nbMots = x.ar.split(/\s+/).length;
   const cliquable = motsVerset && motsVerset.length === nbMots;
   const posAr = resultat && !resultat.dansTraduction ? resultat.positions : null;
   const ar = surlignerMots(x.ar, posAr, (i) => (cliquable ? ` tabindex="0" data-ref="${s}:${x.v}:${i}"` : ''));
   const trad = traductionActive?.carte.get(`${s}:${x.v}`);
   const tradHtml = trad ? (resultat?.dansTraduction ? surlignerMots(trad, resultat.positions) : echapper(trad)) : '';
-  return `<article class="verset">
+  return `<article class="verset${contexte ? ' contexte' : ''}" data-cle="${s}:${x.v}">
     <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span></div>
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
     ${trad ? `<p class="trad">${tradHtml}</p>` : ''}
+    ${nbVersets.length ? boutonsVoisins(s, x.v) : ''}
   </article>`;
 }
+
+// Afficher le verset précédent ou suivant juste au-dessus ou au-dessous de la carte.
+contenu.addEventListener('click', async (e) => {
+  const bouton = e.target.closest('[data-voisin]');
+  if (!bouton) return;
+  const carte = bouton.closest('.verset');
+  const [s, v] = carte.dataset.cle.split(':').map(Number);
+  const sens = Number(bouton.dataset.voisin);
+  const cible = voisin(s, v, sens);
+  if (!cible) return;
+  const cle = cible.join(':');
+  const adjacente = sens < 0 ? carte.previousElementSibling : carte.nextElementSibling;
+  if (adjacente?.dataset?.cle === cle) { adjacente.classList.remove('eclair'); void adjacente.offsetWidth; adjacente.classList.add('eclair'); return; }
+  bouton.disabled = true;
+  try {
+    const [t, m] = await Promise.all([D.texte(cible[0]), D.mots(cible[0]).catch(() => null)]);
+    const x = t.versets.find((y) => y.v === cible[1]);
+    carte.insertAdjacentHTML(sens < 0 ? 'beforebegin' : 'afterend', carteVerset(cible[0], x, m?.versets[cible[1]], null, true));
+    const nouvelle = sens < 0 ? carte.previousElementSibling : carte.nextElementSibling;
+    nouvelle.classList.add('eclair');
+    if (sens < 0) nouvelle.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } finally { bouton.disabled = false; }
+});
 
 // ---------- Fiche d'un mot (au clic) ----------
 async function ouvrirFiche(ref) {
@@ -155,6 +196,18 @@ function modeTexte() {
   return [o.motEntier ? 'mot entier' : 'partie de mot', o.contigus ? 'contigus' : null].filter(Boolean).join(' · ');
 }
 
+// Si « Mots contigus » ne donne rien, on indique combien de versets contiennent tous les termes.
+function aideContigus(nbSansContigus) {
+  if (!nbSansContigus) return 'Aucun verset ne correspond.';
+  return `Aucun verset où ces termes <b>se suivent</b>. ${pluriel(nbSansContigus, 'verset')} les contien${nbSansContigus > 1 ? 'nent' : 't'} tous à des places différentes :
+    <button class="lien-bouton" data-sans-contigus>décocher « Mots contigus »</button>.`;
+}
+contenu.addEventListener('click', (e) => {
+  if (!e.target.closest('[data-sans-contigus]')) return;
+  $('#contigus').checked = false;
+  $('#contigus').dispatchEvent(new Event('change'));
+});
+
 function blocRepartition(resultats) {
   const rep = repartitionParSourate(resultats);
   if (!rep.length) return '';
@@ -173,6 +226,8 @@ async function vueMots(termes, langue) {
   const resultats = chercherMots(await D.toutLeTexte(), termes, langue, {
     motEntier: o.motEntier, contigus: o.contigus, source: dansTrad ? traductionActive.carte : 'coran',
   });
+  const sans = o.contigus && !resultats.length
+    ? chercherMots(await D.toutLeTexte(), termes, langue, { motEntier: o.motEntier, source: dansTrad ? traductionActive.carte : 'coran' }).length : 0;
   const occ = resultats.reduce((t, r) => t + r.positions.length, 0);
   const affichage = termes.map((t) => (langue === 'ar' ? `<span class="ar" lang="ar">${echapper(t)}</span>` : `« ${echapper(t)} »`)).join(' <span class="plus-terme">+</span> ');
   const ou = langue === 'ar' ? 'texte arabe' : dansTrad ? `traduction ${echapper(traductionActive.nom)}` : 'translittération';
@@ -180,6 +235,7 @@ async function vueMots(termes, langue) {
     titre: `<h1>${affichage}</h1>`,
     resume: `${pluriel(occ, 'mot')} surligné${occ > 1 ? 's' : ''} dans ${pluriel(resultats.length, 'verset')} · ${ou} · ${modeTexte()}`,
     avant: blocRepartition(resultats),
+    vide: o.contigus ? aideContigus(sans) : undefined,
   });
 }
 
@@ -195,7 +251,9 @@ async function vueRacines(termes) {
   message('Recherche des versets…');
   const { contigus } = options();
   const resultats = chercherRacines(await D.toutLeTexte(), termes, { contigus });
+  const sans = contigus && !resultats.length ? chercherRacines(await D.toutLeTexte(), termes).length : 0;
   await afficherVersets(resultats, {
+    vide: contigus ? aideContigus(sans) : undefined,
     titre: `<h1 lang="ar" class="ar">${termes.map((r) => `<a class="lien-racine-titre" href="${lienRequete(`r:${r}`)}">${echapper(r)}</a>`).join(' <span class="plus-terme">+</span> ')}</h1>`,
     resume: `racines · ${pluriel(resultats.length, 'verset')} contenant toutes ces racines${contigus ? ' (contiguës)' : ''} · <a href="${lienRequete(`m:${termes.join(' ')}`)}">chercher comme mots</a>`,
     avant: blocRepartition(resultats),
@@ -347,4 +405,7 @@ async function initTraductions() {
 }
 
 window.addEventListener('hashchange', router);
-initTraductions().finally(router);
+Promise.all([
+  initTraductions(),
+  D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),
+]).finally(router);

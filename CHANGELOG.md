@@ -1,6 +1,11 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté
+- Bas de chaque verset : boutons ⌃ / ⌄ (centrés) pour afficher le verset précédent ou suivant juste
+  au-dessus ou au-dessous, sans quitter les résultats (passage d'une sourate à l'autre géré).
+- Aide quand « Mots contigus » ne donne aucun résultat (nombre de versets sans l'option, bouton pour la décocher).
+
 ### Ajouté — phase 1 : lecture et recherche
 - Application web sans connexion (`src/`) : recherche par verset (2:255, 2:1-5), sourate, page Warsh,
   mot arabe ou translittéré (option mot entier), racine ; mot à mot au clic (lecture, racine, sens) ;
