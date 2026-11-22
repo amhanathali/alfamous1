@@ -1,0 +1,686 @@
+[
+  {
+    "n": 1,
+    "versets": 7,
+    "pageDebut": 1,
+    "pageFin": 1
+  },
+  {
+    "n": 2,
+    "versets": 286,
+    "pageDebut": 2,
+    "pageFin": 49
+  },
+  {
+    "n": 3,
+    "versets": 200,
+    "pageDebut": 50,
+    "pageFin": 76
+  },
+  {
+    "n": 4,
+    "versets": 176,
+    "pageDebut": 77,
+    "pageFin": 106
+  },
+  {
+    "n": 5,
+    "versets": 120,
+    "pageDebut": 106,
+    "pageFin": 127
+  },
+  {
+    "n": 6,
+    "versets": 165,
+    "pageDebut": 128,
+    "pageFin": 150
+  },
+  {
+    "n": 7,
+    "versets": 206,
+    "pageDebut": 151,
+    "pageFin": 176
+  },
+  {
+    "n": 8,
+    "versets": 75,
+    "pageDebut": 177,
+    "pageFin": 186
+  },
+  {
+    "n": 9,
+    "versets": 129,
+    "pageDebut": 187,
+    "pageFin": 207
+  },
+  {
+    "n": 10,
+    "versets": 109,
+    "pageDebut": 208,
+    "pageFin": 221
+  },
+  {
+    "n": 11,
+    "versets": 123,
+    "pageDebut": 221,
+    "pageFin": 235
+  },
+  {
+    "n": 12,
+    "versets": 111,
+    "pageDebut": 235,
+    "pageFin": 248
+  },
+  {
+    "n": 13,
+    "versets": 43,
+    "pageDebut": 249,
+    "pageFin": 255
+  },
+  {
+    "n": 14,
+    "versets": 52,
+    "pageDebut": 255,
+    "pageFin": 261
+  },
+  {
+    "n": 15,
+    "versets": 99,
+    "pageDebut": 262,
+    "pageFin": 267
+  },
+  {
+    "n": 16,
+    "versets": 128,
+    "pageDebut": 267,
+    "pageFin": 281
+  },
+  {
+    "n": 17,
+    "versets": 111,
+    "pageDebut": 282,
+    "pageFin": 293
+  },
+  {
+    "n": 18,
+    "versets": 110,
+    "pageDebut": 293,
+    "pageFin": 304
+  },
+  {
+    "n": 19,
+    "versets": 98,
+    "pageDebut": 305,
+    "pageFin": 312
+  },
+  {
+    "n": 20,
+    "versets": 135,
+    "pageDebut": 312,
+    "pageFin": 321
+  },
+  {
+    "n": 21,
+    "versets": 112,
+    "pageDebut": 322,
+    "pageFin": 331
+  },
+  {
+    "n": 22,
+    "versets": 78,
+    "pageDebut": 332,
+    "pageFin": 341
+  },
+  {
+    "n": 23,
+    "versets": 118,
+    "pageDebut": 342,
+    "pageFin": 349
+  },
+  {
+    "n": 24,
+    "versets": 64,
+    "pageDebut": 350,
+    "pageFin": 359
+  },
+  {
+    "n": 25,
+    "versets": 77,
+    "pageDebut": 359,
+    "pageFin": 366
+  },
+  {
+    "n": 26,
+    "versets": 227,
+    "pageDebut": 367,
+    "pageFin": 376
+  },
+  {
+    "n": 27,
+    "versets": 93,
+    "pageDebut": 377,
+    "pageFin": 385
+  },
+  {
+    "n": 28,
+    "versets": 88,
+    "pageDebut": 385,
+    "pageFin": 396
+  },
+  {
+    "n": 29,
+    "versets": 69,
+    "pageDebut": 396,
+    "pageFin": 404
+  },
+  {
+    "n": 30,
+    "versets": 60,
+    "pageDebut": 404,
+    "pageFin": 410
+  },
+  {
+    "n": 31,
+    "versets": 34,
+    "pageDebut": 411,
+    "pageFin": 414
+  },
+  {
+    "n": 32,
+    "versets": 30,
+    "pageDebut": 415,
+    "pageFin": 417
+  },
+  {
+    "n": 33,
+    "versets": 73,
+    "pageDebut": 418,
+    "pageFin": 427
+  },
+  {
+    "n": 34,
+    "versets": 54,
+    "pageDebut": 428,
+    "pageFin": 434
+  },
+  {
+    "n": 35,
+    "versets": 45,
+    "pageDebut": 434,
+    "pageFin": 440
+  },
+  {
+    "n": 36,
+    "versets": 83,
+    "pageDebut": 440,
+    "pageFin": 445
+  },
+  {
+    "n": 37,
+    "versets": 182,
+    "pageDebut": 446,
+    "pageFin": 452
+  },
+  {
+    "n": 38,
+    "versets": 88,
+    "pageDebut": 453,
+    "pageFin": 458
+  },
+  {
+    "n": 39,
+    "versets": 75,
+    "pageDebut": 458,
+    "pageFin": 467
+  },
+  {
+    "n": 40,
+    "versets": 85,
+    "pageDebut": 467,
+    "pageFin": 476
+  },
+  {
+    "n": 41,
+    "versets": 54,
+    "pageDebut": 477,
+    "pageFin": 482
+  },
+  {
+    "n": 42,
+    "versets": 53,
+    "pageDebut": 483,
+    "pageFin": 489
+  },
+  {
+    "n": 43,
+    "versets": 89,
+    "pageDebut": 489,
+    "pageFin": 495
+  },
+  {
+    "n": 44,
+    "versets": 59,
+    "pageDebut": 496,
+    "pageFin": 498
+  },
+  {
+    "n": 45,
+    "versets": 37,
+    "pageDebut": 499,
+    "pageFin": 502
+  },
+  {
+    "n": 46,
+    "versets": 35,
+    "pageDebut": 502,
+    "pageFin": 506
+  },
+  {
+    "n": 47,
+    "versets": 38,
+    "pageDebut": 507,
+    "pageFin": 510
+  },
+  {
+    "n": 48,
+    "versets": 29,
+    "pageDebut": 511,
+    "pageFin": 515
+  },
+  {
+    "n": 49,
+    "versets": 18,
+    "pageDebut": 515,
+    "pageFin": 517
+  },
+  {
+    "n": 50,
+    "versets": 45,
+    "pageDebut": 518,
+    "pageFin": 520
+  },
+  {
+    "n": 51,
+    "versets": 60,
+    "pageDebut": 520,
+    "pageFin": 523
+  },
+  {
+    "n": 52,
+    "versets": 49,
+    "pageDebut": 523,
+    "pageFin": 525
+  },
+  {
+    "n": 53,
+    "versets": 62,
+    "pageDebut": 526,
+    "pageFin": 528
+  },
+  {
+    "n": 54,
+    "versets": 55,
+    "pageDebut": 528,
+    "pageFin": 531
+  },
+  {
+    "n": 55,
+    "versets": 78,
+    "pageDebut": 531,
+    "pageFin": 534
+  },
+  {
+    "n": 56,
+    "versets": 96,
+    "pageDebut": 534,
+    "pageFin": 537
+  },
+  {
+    "n": 57,
+    "versets": 29,
+    "pageDebut": 537,
+    "pageFin": 541
+  },
+  {
+    "n": 58,
+    "versets": 22,
+    "pageDebut": 542,
+    "pageFin": 545
+  },
+  {
+    "n": 59,
+    "versets": 24,
+    "pageDebut": 545,
+    "pageFin": 548
+  },
+  {
+    "n": 60,
+    "versets": 13,
+    "pageDebut": 549,
+    "pageFin": 551
+  },
+  {
+    "n": 61,
+    "versets": 14,
+    "pageDebut": 551,
+    "pageFin": 552
+  },
+  {
+    "n": 62,
+    "versets": 11,
+    "pageDebut": 553,
+    "pageFin": 554
+  },
+  {
+    "n": 63,
+    "versets": 11,
+    "pageDebut": 554,
+    "pageFin": 555
+  },
+  {
+    "n": 64,
+    "versets": 18,
+    "pageDebut": 556,
+    "pageFin": 557
+  },
+  {
+    "n": 65,
+    "versets": 12,
+    "pageDebut": 558,
+    "pageFin": 559
+  },
+  {
+    "n": 66,
+    "versets": 12,
+    "pageDebut": 560,
+    "pageFin": 561
+  },
+  {
+    "n": 67,
+    "versets": 30,
+    "pageDebut": 562,
+    "pageFin": 564
+  },
+  {
+    "n": 68,
+    "versets": 52,
+    "pageDebut": 564,
+    "pageFin": 566
+  },
+  {
+    "n": 69,
+    "versets": 52,
+    "pageDebut": 566,
+    "pageFin": 568
+  },
+  {
+    "n": 70,
+    "versets": 44,
+    "pageDebut": 568,
+    "pageFin": 570
+  },
+  {
+    "n": 71,
+    "versets": 28,
+    "pageDebut": 570,
+    "pageFin": 571
+  },
+  {
+    "n": 72,
+    "versets": 28,
+    "pageDebut": 572,
+    "pageFin": 573
+  },
+  {
+    "n": 73,
+    "versets": 20,
+    "pageDebut": 574,
+    "pageFin": 575
+  },
+  {
+    "n": 74,
+    "versets": 56,
+    "pageDebut": 575,
+    "pageFin": 577
+  },
+  {
+    "n": 75,
+    "versets": 40,
+    "pageDebut": 577,
+    "pageFin": 578
+  },
+  {
+    "n": 76,
+    "versets": 31,
+    "pageDebut": 578,
+    "pageFin": 580
+  },
+  {
+    "n": 77,
+    "versets": 50,
+    "pageDebut": 580,
+    "pageFin": 581
+  },
+  {
+    "n": 78,
+    "versets": 40,
+    "pageDebut": 582,
+    "pageFin": 583
+  },
+  {
+    "n": 79,
+    "versets": 46,
+    "pageDebut": 583,
+    "pageFin": 584
+  },
+  {
+    "n": 80,
+    "versets": 42,
+    "pageDebut": 585,
+    "pageFin": 585
+  },
+  {
+    "n": 81,
+    "versets": 29,
+    "pageDebut": 586,
+    "pageFin": 586
+  },
+  {
+    "n": 82,
+    "versets": 19,
+    "pageDebut": 587,
+    "pageFin": 587
+  },
+  {
+    "n": 83,
+    "versets": 36,
+    "pageDebut": 587,
+    "pageFin": 589
+  },
+  {
+    "n": 84,
+    "versets": 25,
+    "pageDebut": 589,
+    "pageFin": 589
+  },
+  {
+    "n": 85,
+    "versets": 22,
+    "pageDebut": 590,
+    "pageFin": 590
+  },
+  {
+    "n": 86,
+    "versets": 17,
+    "pageDebut": 591,
+    "pageFin": 591
+  },
+  {
+    "n": 87,
+    "versets": 19,
+    "pageDebut": 591,
+    "pageFin": 592
+  },
+  {
+    "n": 88,
+    "versets": 26,
+    "pageDebut": 592,
+    "pageFin": 592
+  },
+  {
+    "n": 89,
+    "versets": 30,
+    "pageDebut": 593,
+    "pageFin": 593
+  },
+  {
+    "n": 90,
+    "versets": 20,
+    "pageDebut": 594,
+    "pageFin": 594
+  },
+  {
+    "n": 91,
+    "versets": 15,
+    "pageDebut": 595,
+    "pageFin": 595
+  },
+  {
+    "n": 92,
+    "versets": 21,
+    "pageDebut": 595,
+    "pageFin": 596
+  },
+  {
+    "n": 93,
+    "versets": 11,
+    "pageDebut": 596,
+    "pageFin": 596
+  },
+  {
+    "n": 94,
+    "versets": 8,
+    "pageDebut": 596,
+    "pageFin": 596
+  },
+  {
+    "n": 95,
+    "versets": 8,
+    "pageDebut": 597,
+    "pageFin": 597
+  },
+  {
+    "n": 96,
+    "versets": 19,
+    "pageDebut": 597,
+    "pageFin": 597
+  },
+  {
+    "n": 97,
+    "versets": 5,
+    "pageDebut": 598,
+    "pageFin": 598
+  },
+  {
+    "n": 98,
+    "versets": 8,
+    "pageDebut": 598,
+    "pageFin": 599
+  },
+  {
+    "n": 99,
+    "versets": 8,
+    "pageDebut": 599,
+    "pageFin": 599
+  },
+  {
+    "n": 100,
+    "versets": 11,
+    "pageDebut": 599,
+    "pageFin": 600
+  },
+  {
+    "n": 101,
+    "versets": 11,
+    "pageDebut": 600,
+    "pageFin": 600
+  },
+  {
+    "n": 102,
+    "versets": 8,
+    "pageDebut": 600,
+    "pageFin": 600
+  },
+  {
+    "n": 103,
+    "versets": 3,
+    "pageDebut": 601,
+    "pageFin": 601
+  },
+  {
+    "n": 104,
+    "versets": 9,
+    "pageDebut": 601,
+    "pageFin": 601
+  },
+  {
+    "n": 105,
+    "versets": 5,
+    "pageDebut": 601,
+    "pageFin": 601
+  },
+  {
+    "n": 106,
+    "versets": 4,
+    "pageDebut": 602,
+    "pageFin": 602
+  },
+  {
+    "n": 107,
+    "versets": 7,
+    "pageDebut": 602,
+    "pageFin": 602
+  },
+  {
+    "n": 108,
+    "versets": 3,
+    "pageDebut": 602,
+    "pageFin": 602
+  },
+  {
+    "n": 109,
+    "versets": 6,
+    "pageDebut": 603,
+    "pageFin": 603
+  },
+  {
+    "n": 110,
+    "versets": 3,
+    "pageDebut": 603,
+    "pageFin": 603
+  },
+  {
+    "n": 111,
+    "versets": 5,
+    "pageDebut": 603,
+    "pageFin": 603
+  },
+  {
+    "n": 112,
+    "versets": 4,
+    "pageDebut": 604,
+    "pageFin": 604
+  },
+  {
+    "n": 113,
+    "versets": 5,
+    "pageDebut": 604,
+    "pageFin": 604
+  },
+  {
+    "n": 114,
+    "versets": 6,
+    "pageDebut": 604,
+    "pageFin": 604
+  }
+]
