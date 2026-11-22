@@ -73,13 +73,31 @@ for (const r of versets) {
   });
 }
 
+// Basmala : le classeur la place au début du verset 1 de chaque sourate (sauf 1 et 9).
+// On la retire du verset et on la signale par « basmala: true » sur la sourate.
+const BASMALA = parSourate.get(1)?.find((x) => x.v === 1)?.ar.split(/\s+/) || [];
+const sansDiacritiques = (t) => t.replace(/[^\u0621-\u064A\u0671]/g, '');
+const avecBasmala = new Set();
+for (const [s, liste] of parSourate) {
+  const v1 = liste.find((x) => x.v === 1);
+  if (s === 1 || !v1) continue;
+  const mots = v1.ar.split(/\s+/);
+  if (mots.length > 4 && mots.slice(0, 4).map(sansDiacritiques).join(' ') === BASMALA.map(sansDiacritiques).join(' ')) {
+    v1.ar = mots.slice(4).join(' ');
+    v1.racines = v1.racines.slice(4);
+    v1.tr = translittererVerset(v1.ar);
+    avecBasmala.add(s);
+  }
+}
+rapport.push(`Basmala retirée du verset 1 de ${avecBasmala.size} sourates`);
+
 const sourates = [];
 for (const [s, liste] of [...parSourate].sort((a, b) => a[0] - b[0])) {
   liste.sort((a, b) => a.v - b.v);
   liste.forEach((x, i) => { if (x.v !== i + 1) rapport.push(`Sourate ${s} : verset ${x.v} à la position ${i + 1}`); });
-  ecrire(`donnees/texte/${num(s)}.json`, { sourate: s, versets: liste });
+  ecrire(`donnees/texte/${num(s)}.json`, { sourate: s, basmala: avecBasmala.has(s), versets: liste });
   const pages = liste.map((x) => x.page).filter(Boolean);
-  sourates.push({ n: s, versets: liste.length, pageDebut: Math.min(...pages), pageFin: Math.max(...pages) });
+  sourates.push({ n: s, versets: liste.length, basmala: avecBasmala.has(s), pageDebut: Math.min(...pages), pageFin: Math.max(...pages) });
 }
 ecrire('donnees/sourates.json', sourates, false);
 

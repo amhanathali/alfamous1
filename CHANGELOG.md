@@ -1,7 +1,15 @@
 # Journal des changements
 
 ## [Non publié]
-### Ajouté
+### Ajouté — phase 1 : lecture et recherche
+- Application web sans connexion (`src/`) : recherche par verset (2:255, 2:1-5), sourate, page Warsh,
+  mot arabe ou translittéré (option mot entier), racine ; mot à mot au clic (lecture, racine, sens) ;
+  vue racine avec amis, amis contigus et répartition par sourate ; thème clair/sombre ; mobile.
+- Moteur de recherche testé (`src/js/recherche.js`, `npm test`).
+- `npm run construire` (dossier `dist/` pour Firebase Hosting, sans `import/`), `npm run servir` (essai local),
+  `npm run traductions` (téléchargement tanzil.net, à lancer sur le PC).
+- Basmala séparée du verset 1 (112 sourates), affichée en tête de sourate.
+
 - Socle du dépôt : licence GPL v3, README, règles de travail (CLAUDE.md), décisions.
 - Configuration Firebase des projets `alfamous-essai` et `alfamous-atelier`.
 - Règles Firestore et Storage fermées par défaut.

@@ -106,6 +106,9 @@ function translitterer(L, debutDeMot = false) {
 
     if (l === 'ٱ' && k > 0 && L[k + 1]?.l === 'ل') {        // article après préfixe : وَٱلْأَرْضِ → wa-l-ʾarḍi
       const apres = L[k + 2];
+      if (L[k + 1].signes.includes(SHADDA)) {               // وَٱلَّذِينَ → wa-llaḏīna
+        out += '-ll' + voyelle(L[k + 1].signes); k++; continue;
+      }
       if (apres && SOLAIRES.has(apres.l) && apres.signes.includes(SHADDA) && !L[k + 1].signes) {
         out += `-${CONSONNES[apres.l]}-`; simple = true;
       } else out += '-l-';

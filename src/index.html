@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alfamous — l'atelier du codex</title>
+  <meta name="description" content="Étudier le texte coranique par le texte : recherche par verset, mot et racine, mot à mot, racines voisines.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238a4b16'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='serif'%3EA%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+  <link rel="stylesheet" href="css/app.css">
+  <script>
+    // Thème choisi avant l'affichage (évite un éclair blanc).
+    try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <header class="entete">
+    <div class="entete-haut">
+      <a class="logo" href="#/">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+      <div class="entete-actions">
+        <label class="choix-trad" hidden>
+          <span>Traduction</span>
+          <select id="traduction"><option value="">Aucune</option></select>
+        </label>
+        <button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre" aria-label="Changer de thème">◐</button>
+      </div>
+    </div>
+    <form id="formulaire" class="recherche" role="search">
+      <input id="requete" type="search" autocomplete="off" spellcheck="false"
+        placeholder="2:255 · 36 · p 50 · رحم · رحمة · rahma" aria-label="Rechercher">
+      <button type="submit">Chercher</button>
+    </form>
+    <div class="options">
+      <label><input id="mot-entier" type="checkbox"> Mot entier</label>
+      <span class="exemples">Exemples :
+        <a href="#/q/2:255">2:255</a> <a href="#/q/36">36</a> <a href="#/q/p%2050">p 50</a>
+        <a href="#/q/%D8%B1%D8%AD%D9%85" lang="ar">رحم</a> <a href="#/q/sabr">sabr</a>
+      </span>
+    </div>
+  </header>
+
+  <main id="contenu" aria-live="polite"></main>
+
+  <aside id="fiche-mot" class="fiche-mot" hidden></aside>
+
+  <footer class="pied">
+    Alfamous1 — code sous licence GPL v3 ·
+    <a href="https://github.com/amhanathali/alfamous1">source</a> ·
+    traductions : <a href="https://tanzil.net/trans/">tanzil.net</a>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

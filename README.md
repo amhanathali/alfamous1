@@ -20,3 +20,13 @@ Successeur de l'application Alfamous (`amhanathali/alfamous`), reconstruite de z
 Code sous GPL v3 (voir `LICENSE`). Les traductions proviennent de
 [tanzil.net/trans](https://tanzil.net/trans/) et restent soumises à leurs propres conditions
 (usage non commercial).
+
+## Essayer et déployer (sur le PC)
+```bat
+npm test
+npm run traductions      &REM facultatif : télécharge les traductions tanzil.net
+npm run construire
+npm run servir           &REM essai local : http://localhost:5005
+firebase deploy --only hosting --project essai
+```
+Le déploiement en production (`--project prod`) se fait uniquement avec l'accord de l'auteur.
