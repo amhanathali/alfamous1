@@ -40,6 +40,13 @@ const ecrire = (chemin, donnees, compact = true) => {
 const num = (n) => String(n).padStart(3, '0');
 const rapport = [];
 
+// Signatures harmonisées à la demande de l'auteur : « Amha » = « Amha Nathali » ; sans signature = « Anonyme ».
+const ALIAS_AUTEURS = { 'amha': 'Amha Nathali', 'anonyme': 'Anonyme' };
+const harmoniser = (c) => {
+  const a = (c.auteur || '').trim();
+  return { ...c, auteur: a ? (ALIAS_AUTEURS[a.toLowerCase()] || a) : 'Anonyme' };
+};
+
 // ---------- Versets1 ----------
 const versets = lire('Versets1');
 const entete = versets.shift();
@@ -62,7 +69,7 @@ for (const r of versets) {
     tr: translittererVerset(r[col.Coran]),
   });
   decouperCommentaires(r[col['Trad.Lex']]).forEach((c, ordre) => {
-    commentairesVersets.push({ sourate: s, verset: v, ordre, ...c });
+    commentairesVersets.push({ sourate: s, verset: v, ordre, ...harmoniser(c) });
   });
 }
 
@@ -115,7 +122,7 @@ for (const [cle, texte] of lexique) {
       if (/^CSC-Tradition$/i.test(c.auteur || '')) { ecartesCsc++; return false; }
       return true;
     })
-    .forEach((c, ordre) => entreesLexique.push({ cle: cle.trim(), ordre, ...c }));
+    .forEach((c, ordre) => entreesLexique.push({ cle: cle.trim(), ordre, ...harmoniser(c) }));
 }
 
 ecrire('import/commentaires-versets.json', commentairesVersets, false);
