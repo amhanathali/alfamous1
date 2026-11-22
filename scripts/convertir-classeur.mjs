@@ -7,7 +7,8 @@
 // Produit :
 //   donnees/texte/001.json … 114.json   arabe, racines, page Warsh, translittération (versionné)
 //   donnees/mots/001.json … 114.json    mot à mot : [translittération, racine, arabe, sens] (versionné)
-//   donnees/racines.json                index racine → occurrences « s:v:n » (versionné)
+//   donnees/racines.json                index racine → occurrences « s:v:n », d'après la colonne Racines
+//                                       de Versets1 (alignée mot à mot sur le texte), comme l'ancienne application
 //   donnees/sourates.json               nombre de versets, première et dernière page (versionné)
 //   import/commentaires-versets.json    commentaires à importer dans Firestore (NON versionné)
 //   import/lexique.json                 entrées du lexique à importer dans Firestore (NON versionné)
@@ -73,21 +74,49 @@ for (const r of versets) {
   });
 }
 
+// Basmala : le classeur la place au début du verset 1 de chaque sourate (sauf 1 et 9).
+// On la retire du verset et on la signale par « basmala: true » sur la sourate.
+const BASMALA = parSourate.get(1)?.find((x) => x.v === 1)?.ar.split(/\s+/) || [];
+const sansDiacritiques = (t) => t.replace(/[^\u0621-\u064A\u0671]/g, '');
+const avecBasmala = new Set();
+for (const [s, liste] of parSourate) {
+  const v1 = liste.find((x) => x.v === 1);
+  if (s === 1 || !v1) continue;
+  const mots = v1.ar.split(/\s+/);
+  if (mots.length > 4 && mots.slice(0, 4).map(sansDiacritiques).join(' ') === BASMALA.map(sansDiacritiques).join(' ')) {
+    v1.ar = mots.slice(4).join(' ');
+    v1.racines = v1.racines.slice(4);
+    v1.tr = translittererVerset(v1.ar);
+    avecBasmala.add(s);
+  }
+}
+rapport.push(`Basmala retirée du verset 1 de ${avecBasmala.size} sourates`);
+
 const sourates = [];
 for (const [s, liste] of [...parSourate].sort((a, b) => a[0] - b[0])) {
   liste.sort((a, b) => a.v - b.v);
   liste.forEach((x, i) => { if (x.v !== i + 1) rapport.push(`Sourate ${s} : verset ${x.v} à la position ${i + 1}`); });
-  ecrire(`donnees/texte/${num(s)}.json`, { sourate: s, versets: liste });
+  ecrire(`donnees/texte/${num(s)}.json`, { sourate: s, basmala: avecBasmala.has(s), versets: liste });
   const pages = liste.map((x) => x.page).filter(Boolean);
-  sourates.push({ n: s, versets: liste.length, pageDebut: Math.min(...pages), pageFin: Math.max(...pages) });
+  sourates.push({ n: s, versets: liste.length, basmala: avecBasmala.has(s), pageDebut: Math.min(...pages), pageFin: Math.max(...pages) });
 }
 ecrire('donnees/sourates.json', sourates, false);
+
+const racines = new Map();
+for (const [s, liste] of [...parSourate].sort((a, b) => a[0] - b[0])) {
+  for (const x of liste) {
+    if (x.racines.length !== x.ar.split(/\s+/).length) rapport.push(`${s}:${x.v} : ${x.racines.length} racines pour ${x.ar.split(/\s+/).length} mots`);
+    x.racines.forEach((r, i) => {
+      if (!racines.has(r)) racines.set(r, []);
+      racines.get(r).push(`${s}:${x.v}:${i + 1}`);
+    });
+  }
+}
 
 // ---------- Feuille22 : mot à mot ----------
 const mots = lire('Feuille22');
 mots.shift();
 const motsParSourate = new Map();
-const racines = new Map();
 let motsHorsFormat = 0;
 for (const r of mots) {
   const id = (r[0] || '').trim();
@@ -102,10 +131,6 @@ for (const r of mots) {
   if (!motsParSourate.has(s)) motsParSourate.set(s, {});
   const parVerset = motsParSourate.get(s);
   (parVerset[v] ||= [])[n - 1] = [tr, racine, ar, sens.join(' | ')];
-  if (racine) {
-    if (!racines.has(racine)) racines.set(racine, []);
-    racines.get(racine).push(`${s}:${v}:${n}`);
-  }
 }
 for (const [s, parVerset] of motsParSourate) ecrire(`donnees/mots/${num(s)}.json`, { sourate: s, versets: parVerset });
 ecrire('donnees/racines.json', Object.fromEntries([...racines].sort((a, b) => a[0].localeCompare(b[0], 'ar'))));
@@ -134,7 +159,8 @@ for (const c of [...commentairesVersets, ...entreesLexique]) auteurs[c.auteur ||
 const resume = [
   `Sourates : ${sourates.length}`,
   `Versets : ${sourates.reduce((t, x) => t + x.versets, 0)}`,
-  `Mots (mot à mot) : ${[...racines.values()].reduce((t, x) => t + x.length, 0)} avec racine ; ${motsHorsFormat} hors format`,
+  `Mots (mot à mot) : ${[...motsParSourate.values()].reduce((t, pv) => t + Object.values(pv).reduce((u, l) => u + l.length, 0), 0)} ; ${motsHorsFormat} hors format`,
+  `Mots du texte (avec racine) : ${[...racines.values()].reduce((t, x) => t + x.length, 0)}`,
   `Racines distinctes : ${racines.size}`,
   `Commentaires de versets : ${commentairesVersets.length} (${commentairesVersets.filter((c) => !c.date).length} sans date)`,
   `Entrées du lexique : ${entreesLexique.length} (${entreesLexique.filter((c) => !c.date).length} sans date) ; ${ecartesCsc} entrées « CSC-Tradition » écartées`,

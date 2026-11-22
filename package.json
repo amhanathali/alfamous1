@@ -1,0 +1,15 @@
+{
+  "name": "alfamous1",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Alfamous1 — l'atelier du codex",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "convertir": "node scripts/convertir-classeur.mjs",
+    "traductions": "node scripts/telecharger-traductions.mjs",
+    "construire": "node scripts/construire.mjs",
+    "servir": "node scripts/servir.mjs"
+  }
+}
