@@ -1,0 +1,132 @@
+#!/usr/bin/env node
+// Convertit les exports CSV du classeur Lexique-Coran en fichiers de données d'Alfamous1.
+//
+// Usage : node scripts/convertir-classeur.mjs <dossier des CSV>
+// Le dossier doit contenir « Lexique-Coran - Versets1.csv », « … - Lexique1.csv », « … - Feuille22.csv ».
+//
+// Produit :
+//   donnees/texte/001.json … 114.json   arabe, racines, page Warsh, translittération (versionné)
+//   donnees/mots/001.json … 114.json    mot à mot : [translittération, racine, arabe, sens] (versionné)
+//   donnees/racines.json                index racine → occurrences « s:v:n » (versionné)
+//   donnees/sourates.json               nombre de versets, première et dernière page (versionné)
+//   import/commentaires-versets.json    commentaires à importer dans Firestore (NON versionné)
+//   import/lexique.json                 entrées du lexique à importer dans Firestore (NON versionné)
+//   import/rapport.txt                  contrôles et anomalies (NON versionné)
+//
+// Colonnes ignorées :
+//   - traductions du classeur (Hamidullah, Yusuf Ali, AMZ, ES, Mountadana) : elles viennent de tanzil.net ;
+//   - transcriptions « CSC » (coran-seul.com) : la translittération est recalculée par Alfamous1
+//     à partir du texte arabe (scripts/lib/translitteration.mjs).
+// Les définitions de racines signées « CSC-Tradition » (coran-seul.com) restent dans import/, hors de Git.
+
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { lireCsv } from './lib/csv.mjs';
+import { decouperCommentaires } from './lib/commentaires.mjs';
+import { translittererVerset, translittererMot } from './lib/translitteration.mjs';
+
+const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
+const source = process.argv[2];
+if (!source) { console.error('Usage : node scripts/convertir-classeur.mjs <dossier des CSV>'); process.exit(1); }
+
+const lire = (onglet) => lireCsv(readFileSync(join(source, `Lexique-Coran - ${onglet}.csv`), 'utf8'));
+const ecrire = (chemin, donnees, compact = true) => {
+  const complet = join(RACINE, chemin);
+  mkdirSync(dirname(complet), { recursive: true });
+  writeFileSync(complet, JSON.stringify(donnees, null, compact ? 0 : 2) + '\n');
+};
+const num = (n) => String(n).padStart(3, '0');
+const rapport = [];
+
+// ---------- Versets1 ----------
+const versets = lire('Versets1');
+const entete = versets.shift();
+const col = Object.fromEntries(entete.map((nom, i) => [nom, i]));
+for (const nom of ['Soura', 'Aya', 'Coran', 'Trad.Lex', 'Racines', 'nWarsh']) {
+  if (!(nom in col)) throw new Error(`Colonne manquante dans Versets1 : ${nom}`);
+}
+
+const parSourate = new Map();
+const commentairesVersets = [];
+for (const r of versets) {
+  const s = Number(r[col.Soura]); const v = Number(r[col.Aya]);
+  if (!s || !v) continue;
+  if (!parSourate.has(s)) parSourate.set(s, []);
+  parSourate.get(s).push({
+    v,
+    ar: r[col.Coran].trim(),
+    racines: r[col.Racines].trim().split(/\s+/).filter(Boolean),
+    page: Number(r[col.nWarsh]) || null,
+    tr: translittererVerset(r[col.Coran]),
+  });
+  decouperCommentaires(r[col['Trad.Lex']]).forEach((c, ordre) => {
+    commentairesVersets.push({ sourate: s, verset: v, ordre, ...c });
+  });
+}
+
+const sourates = [];
+for (const [s, liste] of [...parSourate].sort((a, b) => a[0] - b[0])) {
+  liste.sort((a, b) => a.v - b.v);
+  liste.forEach((x, i) => { if (x.v !== i + 1) rapport.push(`Sourate ${s} : verset ${x.v} à la position ${i + 1}`); });
+  ecrire(`donnees/texte/${num(s)}.json`, { sourate: s, versets: liste });
+  const pages = liste.map((x) => x.page).filter(Boolean);
+  sourates.push({ n: s, versets: liste.length, pageDebut: Math.min(...pages), pageFin: Math.max(...pages) });
+}
+ecrire('donnees/sourates.json', sourates, false);
+
+// ---------- Feuille22 : mot à mot ----------
+const mots = lire('Feuille22');
+mots.shift();
+const motsParSourate = new Map();
+const racines = new Map();
+let motsHorsFormat = 0;
+for (const r of mots) {
+  const id = (r[0] || '').trim();
+  const m = id.match(/^(\d+)\.(\d+)#(\d+)$/);
+  if (!m) continue;
+  const [s, v, n] = m.slice(1).map(Number);
+  // Format : [translittération | racine | arabe | sens] ; le sens peut contenir « | »
+  const parties = (r[1] || '').trim().replace(/^\[/, '').replace(/\]$/, '').split('|').map((x) => x.trim());
+  if (parties.length < 4) { motsHorsFormat++; rapport.push(`Mot ${id} hors format : ${r[1]}`); continue; }
+  const [, racine, ar, ...sens] = parties;   // la translittération CSC est remplacée
+  const tr = translittererMot(ar);
+  if (!motsParSourate.has(s)) motsParSourate.set(s, {});
+  const parVerset = motsParSourate.get(s);
+  (parVerset[v] ||= [])[n - 1] = [tr, racine, ar, sens.join(' | ')];
+  if (racine) {
+    if (!racines.has(racine)) racines.set(racine, []);
+    racines.get(racine).push(`${s}:${v}:${n}`);
+  }
+}
+for (const [s, parVerset] of motsParSourate) ecrire(`donnees/mots/${num(s)}.json`, { sourate: s, versets: parVerset });
+ecrire('donnees/racines.json', Object.fromEntries([...racines].sort((a, b) => a[0].localeCompare(b[0], 'ar'))));
+
+// ---------- Lexique1 ----------
+const lexique = lire('Lexique1');
+lexique.shift();
+const entreesLexique = [];
+for (const [cle, texte] of lexique) {
+  if (!cle || !cle.trim()) continue;
+  decouperCommentaires(texte).forEach((c, ordre) => entreesLexique.push({ cle: cle.trim(), ordre, ...c }));
+}
+
+ecrire('import/commentaires-versets.json', commentairesVersets, false);
+ecrire('import/lexique.json', entreesLexique, false);
+
+// ---------- Rapport ----------
+const auteurs = {};
+for (const c of [...commentairesVersets, ...entreesLexique]) auteurs[c.auteur || '(sans signature)'] = (auteurs[c.auteur || '(sans signature)'] || 0) + 1;
+const resume = [
+  `Sourates : ${sourates.length}`,
+  `Versets : ${sourates.reduce((t, x) => t + x.versets, 0)}`,
+  `Mots (mot à mot) : ${[...racines.values()].reduce((t, x) => t + x.length, 0)} avec racine ; ${motsHorsFormat} hors format`,
+  `Racines distinctes : ${racines.size}`,
+  `Commentaires de versets : ${commentairesVersets.length} (${commentairesVersets.filter((c) => !c.date).length} sans date)`,
+  `Entrées du lexique : ${entreesLexique.length} (${entreesLexique.filter((c) => !c.date).length} sans date)`,
+  `Auteurs : ${Object.entries(auteurs).sort((a, b) => b[1] - a[1]).map(([a, n]) => `${a} (${n})`).join(', ')}`,
+];
+mkdirSync(join(RACINE, 'import'), { recursive: true });
+writeFileSync(join(RACINE, 'import/rapport.txt'), [...resume, '', 'Anomalies :', ...rapport].join('\n') + '\n');
+console.log(resume.join('\n'));
+console.log(`Anomalies : ${rapport.length} (détail dans import/rapport.txt)`);
