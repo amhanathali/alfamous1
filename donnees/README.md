@@ -20,5 +20,5 @@ Chaque mot est translittéré isolément (forme de citation). Exemple (1:1) : `b
 
 ## Sources exclues du dépôt
 - Traductions : tanzil.net (voir `traductions/`).
-- Définitions de racines « CSC-Tradition » et transcriptions de coran-seul.com : non publiées ici
-  (pas d'autorisation de l'éditeur à ce jour).
+- Transcriptions de coran-seul.com : remplacées par la translittération d'Alfamous1.
+- Définitions de racines « CSC-Tradition » (coran-seul.com) : écartées du lexique, car traditionnelles.

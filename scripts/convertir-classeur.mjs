@@ -17,7 +17,8 @@
 //   - traductions du classeur (Hamidullah, Yusuf Ali, AMZ, ES, Mountadana) : elles viennent de tanzil.net ;
 //   - transcriptions « CSC » (coran-seul.com) : la translittération est recalculée par Alfamous1
 //     à partir du texte arabe (scripts/lib/translitteration.mjs).
-// Les définitions de racines signées « CSC-Tradition » (coran-seul.com) restent dans import/, hors de Git.
+// Les entrées du lexique signées « CSC-Tradition » (définitions traditionnelles de coran-seul.com)
+// sont écartées, à la demande de l'auteur : elles ne relèvent pas de la méthode Alfamous.
 
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -106,9 +107,15 @@ ecrire('donnees/racines.json', Object.fromEntries([...racines].sort((a, b) => a[
 const lexique = lire('Lexique1');
 lexique.shift();
 const entreesLexique = [];
+let ecartesCsc = 0;
 for (const [cle, texte] of lexique) {
   if (!cle || !cle.trim()) continue;
-  decouperCommentaires(texte).forEach((c, ordre) => entreesLexique.push({ cle: cle.trim(), ordre, ...c }));
+  decouperCommentaires(texte)
+    .filter((c) => {
+      if (/^CSC-Tradition$/i.test(c.auteur || '')) { ecartesCsc++; return false; }
+      return true;
+    })
+    .forEach((c, ordre) => entreesLexique.push({ cle: cle.trim(), ordre, ...c }));
 }
 
 ecrire('import/commentaires-versets.json', commentairesVersets, false);
@@ -123,7 +130,7 @@ const resume = [
   `Mots (mot à mot) : ${[...racines.values()].reduce((t, x) => t + x.length, 0)} avec racine ; ${motsHorsFormat} hors format`,
   `Racines distinctes : ${racines.size}`,
   `Commentaires de versets : ${commentairesVersets.length} (${commentairesVersets.filter((c) => !c.date).length} sans date)`,
-  `Entrées du lexique : ${entreesLexique.length} (${entreesLexique.filter((c) => !c.date).length} sans date)`,
+  `Entrées du lexique : ${entreesLexique.length} (${entreesLexique.filter((c) => !c.date).length} sans date) ; ${ecartesCsc} entrées « CSC-Tradition » écartées`,
   `Auteurs : ${Object.entries(auteurs).sort((a, b) => b[1] - a[1]).map(([a, n]) => `${a} (${n})`).join(', ')}`,
 ];
 mkdirSync(join(RACINE, 'import'), { recursive: true });
