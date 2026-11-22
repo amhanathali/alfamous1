@@ -22,6 +22,15 @@ const preferences = {
 };
 
 let traductionActive = null; // { id, nom, carte: Map « s:v » → texte }
+let nbVersets = []; // nombre de versets par sourate (index = numéro de sourate)
+
+// Verset voisin (précédent : sens = -1, suivant : sens = 1), en passant d'une sourate à l'autre.
+function voisin(s, v, sens) {
+  if (sens < 0) return v > 1 ? [s, v - 1] : s > 1 ? [s - 1, nbVersets[s - 1]] : null;
+  return v < nbVersets[s] ? [s, v + 1] : s < 114 ? [s + 1, 1] : null;
+}
+const ICONE_HAUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
+const ICONE_BAS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const options = () => ({
   motEntier: $('#mot-entier').checked,
   contigus: $('#contigus').checked,
@@ -65,20 +74,52 @@ function surlignerMots(texte, positions, attributs = () => '') {
   return texte.split(/\s+/).map((w, i) => `<span class="mot${set.has(i) ? ' surligne' : ''}"${attributs(i)}>${echapper(w)}</span>`).join(' ');
 }
 
-function carteVerset(s, x, motsVerset, resultat) {
+function boutonsVoisins(s, v) {
+  const avant = voisin(s, v, -1); const apres = voisin(s, v, 1);
+  const bouton = (cible, sens, icone, libelle) => (cible
+    ? `<button type="button" class="voisin" data-voisin="${sens}" title="Afficher le verset ${libelle} (${cible.join(':')})" aria-label="Afficher le verset ${libelle} ${cible.join(':')}">${sens < 0 ? icone : ''}<span>${cible.join(':')}</span>${sens > 0 ? icone : ''}</button>`
+    : '');
+  return `<div class="voisins">${bouton(avant, -1, ICONE_HAUT, 'précédent')}${bouton(apres, 1, ICONE_BAS, 'suivant')}</div>`;
+}
+
+function carteVerset(s, x, motsVerset, resultat, contexte = false) {
   const nbMots = x.ar.split(/\s+/).length;
   const cliquable = motsVerset && motsVerset.length === nbMots;
   const posAr = resultat && !resultat.dansTraduction ? resultat.positions : null;
   const ar = surlignerMots(x.ar, posAr, (i) => (cliquable ? ` tabindex="0" data-ref="${s}:${x.v}:${i}"` : ''));
   const trad = traductionActive?.carte.get(`${s}:${x.v}`);
   const tradHtml = trad ? (resultat?.dansTraduction ? surlignerMots(trad, resultat.positions) : echapper(trad)) : '';
-  return `<article class="verset">
+  return `<article class="verset${contexte ? ' contexte' : ''}" data-cle="${s}:${x.v}">
     <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span></div>
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
     ${trad ? `<p class="trad">${tradHtml}</p>` : ''}
+    ${nbVersets.length ? boutonsVoisins(s, x.v) : ''}
   </article>`;
 }
+
+// Afficher le verset précédent ou suivant juste au-dessus ou au-dessous de la carte.
+contenu.addEventListener('click', async (e) => {
+  const bouton = e.target.closest('[data-voisin]');
+  if (!bouton) return;
+  const carte = bouton.closest('.verset');
+  const [s, v] = carte.dataset.cle.split(':').map(Number);
+  const sens = Number(bouton.dataset.voisin);
+  const cible = voisin(s, v, sens);
+  if (!cible) return;
+  const cle = cible.join(':');
+  const adjacente = sens < 0 ? carte.previousElementSibling : carte.nextElementSibling;
+  if (adjacente?.dataset?.cle === cle) { adjacente.classList.remove('eclair'); void adjacente.offsetWidth; adjacente.classList.add('eclair'); return; }
+  bouton.disabled = true;
+  try {
+    const [t, m] = await Promise.all([D.texte(cible[0]), D.mots(cible[0]).catch(() => null)]);
+    const x = t.versets.find((y) => y.v === cible[1]);
+    carte.insertAdjacentHTML(sens < 0 ? 'beforebegin' : 'afterend', carteVerset(cible[0], x, m?.versets[cible[1]], null, true));
+    const nouvelle = sens < 0 ? carte.previousElementSibling : carte.nextElementSibling;
+    nouvelle.classList.add('eclair');
+    if (sens < 0) nouvelle.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } finally { bouton.disabled = false; }
+});
 
 // ---------- Fiche d'un mot (au clic) ----------
 async function ouvrirFiche(ref) {
@@ -364,4 +405,7 @@ async function initTraductions() {
 }
 
 window.addEventListener('hashchange', router);
-initTraductions().finally(router);
+Promise.all([
+  initTraductions(),
+  D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),
+]).finally(router);
