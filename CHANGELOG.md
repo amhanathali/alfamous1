@@ -10,6 +10,16 @@
   `npm run traductions` (téléchargement tanzil.net, à lancer sur le PC).
 - Basmala séparée du verset 1 (112 sourates), affichée en tête de sourate.
 
+### Ajouté — recherche avancée (parité avec l'ancienne application)
+- Plusieurs mots ou racines (espace ou « + ») : versets contenant TOUS les termes ; option « mots contigus »
+  (fenêtre de k mots, ordre libre) ; « mot entier » ; préfixes `r:` (racines) et `m:` (mots).
+- Normalisation de l'ancienne application : lettres ا و ي non tapées ignorées (AWY), ة → ت, formes d'alif unifiées.
+- Recherche dans la traduction tanzil choisie (« chercher le latin dans la traduction »), avec surlignage.
+- Vue racine : onglets Versets, Amis (N paires, versets, distance moyenne et minimale, lien = N / distance
+  moyenne, tri), Amis contigus (distance 1), Déclinaisons (formes et fréquences) ; répartition par sourate.
+- Statistiques de toutes les racines (`#/stats`), filtre par première lettre.
+- Index des racines construit sur la colonne Racines de Versets1 (alignée mot à mot), comme l'ancienne application.
+
 - Socle du dépôt : licence GPL v3, README, règles de travail (CLAUDE.md), décisions.
 - Configuration Firebase des projets `alfamous-essai` et `alfamous-atelier`.
 - Règles Firestore et Storage fermées par défaut.

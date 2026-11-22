@@ -29,14 +29,20 @@
     </div>
     <form id="formulaire" class="recherche" role="search">
       <input id="requete" type="search" autocomplete="off" spellcheck="false"
-        placeholder="2:255 · 36 · p 50 · رحم · رحمة · rahma" aria-label="Rechercher">
+        placeholder="2:255 · p 50 · رحم غفر · رحمن رحيم · sabr" aria-label="Rechercher">
       <button type="submit">Chercher</button>
     </form>
     <div class="options">
-      <label><input id="mot-entier" type="checkbox"> Mot entier</label>
+      <label title="Le mot doit être exactement le terme cherché"><input id="mot-entier" type="checkbox"> Mot entier</label>
+      <label title="Les termes doivent se suivre, dans n'importe quel ordre"><input id="contigus" type="checkbox"> Mots contigus</label>
+      <label hidden>Chercher le latin dans
+        <select id="source"><option value="coran">la translittération</option><option value="traduction">la traduction</option></select>
+      </label>
       <span class="exemples">Exemples :
-        <a href="#/q/2:255">2:255</a> <a href="#/q/36">36</a> <a href="#/q/p%2050">p 50</a>
-        <a href="#/q/%D8%B1%D8%AD%D9%85" lang="ar">رحم</a> <a href="#/q/sabr">sabr</a>
+        <a href="#/q/2:255">2:255</a> <a href="#/q/p%2050">p 50</a>
+        <a href="#/q/%D8%B1%D8%AD%D9%85" lang="ar">رحم</a>
+        <a href="#/q/%D8%B1%D8%AD%D9%85%20%D8%BA%D9%81%D8%B1" lang="ar">رحم غفر</a>
+        <a href="#/q/sabr">sabr</a> <a href="#/stats">statistiques</a>
       </span>
     </div>
   </header>
