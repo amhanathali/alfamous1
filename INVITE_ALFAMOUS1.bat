@@ -1,7 +1,11 @@
 @echo off
-REM Ouvre une invite de commandes directement dans le dossier Alfamous1
-REM (quel que soit le dossier de depart habituel de cmd.exe).
+REM Ouvre une invite de commandes dans le dossier Alfamous1 et met le code a jour.
+REM git pull --ff-only : avance seulement si c est sans risque, jamais de fusion.
 cd /d "%~dp0"
-title Alfamous1 - invite de commandes
-echo Dossier : %CD%
-cmd /k "git branch --show-current"
+REM Bloc lu en entier avant execution : git pull peut modifier ce fichier sans risque.
+(
+  title Alfamous1 - invite de commandes
+  echo Dossier : %CD%
+  git pull --ff-only || echo ATTENTION : mise a jour impossible, modifications locales ?
+  cmd /k "git branch --show-current"
+)
