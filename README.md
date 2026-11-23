@@ -21,12 +21,16 @@ Code sous GPL v3 (voir `LICENSE`). Les traductions proviennent de
 [tanzil.net/trans](https://tanzil.net/trans/) et restent soumises à leurs propres conditions
 (usage non commercial).
 
-## Essayer et déployer (sur le PC)
+## Essayer en local (sans déployer)
+Double-cliquer sur **LANCER_ALFAMOUS1.bat** : le navigateur s'ouvre sur http://localhost:5050.
+Toute modification du code se voit en rechargeant la page (F5). Fermer la fenêtre noire arrête le serveur.
+(Équivalent : `npm run servir`. Pour essayer exactement ce qui sera déployé : `npm run construire` puis `npm run servir:dist`.)
+
+## Déployer (sur le PC)
 ```bat
 npm test
-npm run traductions      &REM facultatif : télécharge les traductions tanzil.net
+npm run traductions      &REM facultatif : télécharge les commentaires traditionnels (tanzil.net)
 npm run construire
-npm run servir           &REM essai local : http://localhost:5005
 firebase deploy --only hosting --project essai
 ```
 Le déploiement en production (`--project prod`) se fait uniquement avec l'accord de l'auteur.

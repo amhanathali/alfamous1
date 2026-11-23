@@ -10,6 +10,7 @@
     "convertir": "node scripts/convertir-classeur.mjs",
     "traductions": "node scripts/telecharger-traductions.mjs",
     "construire": "node scripts/construire.mjs",
-    "servir": "node scripts/servir.mjs"
+    "servir": "node scripts/servir.mjs",
+    "servir:dist": "node scripts/servir.mjs --dist"
   }
 }

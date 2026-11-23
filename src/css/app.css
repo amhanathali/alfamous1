@@ -49,10 +49,18 @@ select { background: var(--surface); border: 1px solid var(--bordure); border-ra
 .bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
 
 .recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
 .recherche input {
-  flex: 1; min-width: 0; font-size: 18px; padding: 10px 14px; border-radius: 10px;
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
   border: 1px solid var(--bordure); background: var(--surface);
 }
+.recherche .effacer {
+  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.recherche .effacer:hover { color: var(--accent); }
+.options select { max-width: 280px; }
 .recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .recherche button {
   border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
@@ -175,3 +183,5 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .verset.contexte { border-style: dashed; box-shadow: none; }
 @keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
 .verset.eclair { animation: eclair 1.2s ease-out; }
+
+.trad-source { display: block; font-size: 12px; color: var(--discret); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }

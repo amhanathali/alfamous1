@@ -93,7 +93,7 @@ function carteVerset(s, x, motsVerset, resultat, contexte = false) {
     <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span></div>
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
-    ${trad ? `<p class="trad">${tradHtml}</p>` : ''}
+    ${trad ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${tradHtml}</p>` : ''}
     ${nbVersets.length ? boutonsVoisins(s, x.v) : ''}
   </article>`;
 }
@@ -230,7 +230,7 @@ async function vueMots(termes, langue) {
     ? chercherMots(await D.toutLeTexte(), termes, langue, { motEntier: o.motEntier, source: dansTrad ? traductionActive.carte : 'coran' }).length : 0;
   const occ = resultats.reduce((t, r) => t + r.positions.length, 0);
   const affichage = termes.map((t) => (langue === 'ar' ? `<span class="ar" lang="ar">${echapper(t)}</span>` : `« ${echapper(t)} »`)).join(' <span class="plus-terme">+</span> ');
-  const ou = langue === 'ar' ? 'texte arabe' : dansTrad ? `traduction ${echapper(traductionActive.nom)}` : 'translittération';
+  const ou = langue === 'ar' ? 'texte arabe' : dansTrad ? `commentaire traditionnel ${echapper(traductionActive.nom)}` : 'translittération';
   await afficherVersets(resultats, {
     titre: `<h1>${affichage}</h1>`,
     resume: `${pluriel(occ, 'mot')} surligné${occ > 1 ? 's' : ''} dans ${pluriel(resultats.length, 'verset')} · ${ou} · ${modeTexte()}`,
@@ -343,10 +343,11 @@ function message(html) { contenu.innerHTML = `<p class="message">${html}</p>`; }
 // ---------- Routage (#/q/…, #/stats) ----------
 async function router() {
   fiche.hidden = true;
-  if (location.hash === '#/stats') { $('#requete').value = ''; document.title = 'Statistiques — Alfamous'; return vueStats().catch(erreur); }
+  if (location.hash === '#/stats') { $('#requete').value = ''; $('#effacer').hidden = true; document.title = 'Statistiques — Alfamous'; return vueStats().catch(erreur); }
   const m = location.hash.match(/^#\/q\/(.*)$/);
   const q = m ? decodeURIComponent(m[1]).trim() : '';
   $('#requete').value = q;
+  $('#effacer').hidden = !q;
   try {
     if (!q) { document.title = "Alfamous — l'atelier du codex"; return await vueAccueil(); }
     document.title = `${q} — Alfamous`;
@@ -359,6 +360,13 @@ async function router() {
   } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
 }
 function erreur(e) { console.error(e); message(`<span class="erreur">Erreur : ${echapper(e.message)}</span>`); }
+
+// Croix pour effacer le champ de recherche
+const champ = $('#requete');
+const majCroix = () => { $('#effacer').hidden = !champ.value; };
+champ.addEventListener('input', majCroix);
+$('#effacer').addEventListener('click', () => { champ.value = ''; majCroix(); champ.focus(); });
+champ.addEventListener('keydown', (e) => { if (e.key === 'Escape' && champ.value) { e.stopPropagation(); champ.value = ''; majCroix(); } });
 
 $('#formulaire').addEventListener('submit', (e) => {
   e.preventDefault();
@@ -379,7 +387,8 @@ $('#theme').addEventListener('click', () => {
   preferences.ecrire('theme', nouveau);
 });
 
-// Traductions : seulement celles dont le fichier tanzil a été déployé.
+// Commentaires traditionnels (traductions tanzil.net), cités seulement pour la comparaison.
+// Seuls ceux dont le fichier a été déployé sont proposés.
 async function initTraductions() {
   try {
     const [{ traductions }, deployees] = await Promise.all([D.langues(), D.traductionsDisponibles()]);
@@ -395,7 +404,7 @@ async function initTraductions() {
       preferences.ecrire('traduction', select.value);
       const source = $('#source');
       source.closest('label').hidden = !traductionActive;
-      source.querySelector('[value="traduction"]').textContent = traductionActive ? `la traduction (${traductionActive.nom})` : 'la traduction';
+      source.querySelector('[value="traduction"]').textContent = traductionActive ? `le commentaire traditionnel (${traductionActive.nom})` : 'le commentaire traditionnel';
       if (!traductionActive) source.value = 'coran';
     };
     $('#source').value = preferences.lire('source', 'coran');

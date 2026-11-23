@@ -11,3 +11,5 @@
 | 2026-11-22 | Traductions au format tanzil.net, liste des langues dans `donnees/traductions/langues.json`, fichiers non versionnés | Demande de l'auteur ; conditions de tanzil.net |
 | 2026-11-22 | Région des données : `northamerica-northeast1` (Montréal) | Choix de l'auteur : projet basé au Québec |
 | 2026-11-22 | Traduction Mountadana laissée de côté (absente de tanzil.net) | Choix de l'auteur |
+| 2026-11-23 | Les traductions tanzil.net sont des « commentaires traditionnels », affichés seulement pour la comparaison ; les commentaires d'Alfamous sont le contenu principal | Demande de l'auteur |
+| 2026-11-23 | Essai local avant tout déploiement : LANCER_ALFAMOUS1.bat (port 5050) ; émulateurs Firebase (Auth, Firestore) à partir de la phase 2 | Demande de l'auteur |
