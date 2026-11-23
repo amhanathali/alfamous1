@@ -64,10 +64,12 @@ En ligne, la configuration Firebase vient de Hosting (`/__/firebase/init.json`) 
 `alfamous-essai`, la production dans `alfamous-atelier`. Le SDK Firebase est servi par l'application (`vendor/firebase/`).
 
 ## Déployer (sur le PC)
+**Double-cliquer sur deployerAlfamous1.bat** (site d'essai), ou `deployerAlfamous1.bat prod` (production, confirmation
+« PROD » demandée). Arrêter d'abord les émulateurs d'ESSAI_LOCAL.bat (les tests des règles en lancent d'autres).
+Le script met le code à jour (branche `main`, `git pull --ff-only`), lance `npm test` et `npm run test:regles`,
+construit `dist/`, puis déploie le site et les règles et index Firestore :
 ```bat
-npm test
-npm run traductions      &REM facultatif : télécharge les commentaires traditionnels (tanzil.net)
-npm run construire
-firebase deploy --only hosting --project essai
+npm run traductions      &REM facultatif, une fois : télécharge les commentaires traditionnels (tanzil.net)
+npx firebase deploy --only hosting,firestore --project essai
 ```
-Le déploiement en production (`--project prod`) se fait uniquement avec l'accord de l'auteur.
+Tout déploiement se fait uniquement avec l'accord de l'auteur ; la production (`prod`) aussi.
