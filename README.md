@@ -26,6 +26,20 @@ Double-cliquer sur **LANCER_ALFAMOUS1.bat** : le navigateur s'ouvre sur http://l
 Toute modification du code se voit en rechargeant la page (F5). Fermer la fenêtre noire arrête le serveur.
 (Équivalent : `npm run servir`. Pour essayer exactement ce qui sera déployé : `npm run construire` puis `npm run servir:dist`.)
 
+## Émulateurs Firebase (phase 2 : comptes, commentaires)
+Double-cliquer sur **LANCER_EMULATEURS.bat** (la première fois, il installe les outils avec `npm install`).
+Auth, Firestore et Storage tournent sur le PC, avec un projet fictif `demo-alfamous1` : rien n'est écrit
+dans `alfamous-essai` ni dans `alfamous-atelier`. Console : http://localhost:4000.
+Les données d'essai sont gardées dans `.emulateurs/` (non versionné) ; supprimer ce dossier pour repartir de zéro.
+
+| Commande | Effet |
+| --- | --- |
+| `npm run emulateurs` | Lance les émulateurs (comme le .bat) |
+| `npm run emulateurs:peupler` | Crée 4 comptes d'essai, niveaux 0 à 3 (`visiteur`, `membre`, `modo`, `admin` @essai.local, mot de passe `essai123`) |
+| `npm run test:regles` | Démarre les émulateurs, teste les règles Firestore et Storage (`tests/regles/`), puis les arrête |
+
+Prérequis : Java 21 (déjà installé sur le PC).
+
 ## Déployer (sur le PC)
 ```bat
 npm test

@@ -23,3 +23,7 @@ desktop.ini
 
 # Données à importer dans Firestore (commentaires, lexique) : jamais dans Git
 import/
+
+# Émulateurs Firebase : données locales d'essai (comptes, commentaires) et journaux
+.emulateurs/
+*-debug.log

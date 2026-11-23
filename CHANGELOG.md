@@ -1,6 +1,14 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : émulateurs Firebase
+- `LANCER_EMULATEURS.bat` / `npm run emulateurs` : Auth, Firestore et Storage en local sur le projet fictif
+  `demo-alfamous1` (aucun accès au nuage), console http://localhost:4000, données d'essai gardées dans `.emulateurs/`.
+- `npm run emulateurs:peupler` : comptes d'essai des niveaux 0 à 3 (revendication `niveau`, docs/DROITS.md).
+- `npm run test:regles` : tests des règles avec les émulateurs (`tests/regles/`) ; premier test : tout est fermé
+  pour tous les niveaux.
+- Outils de développement : firebase-tools, firebase, firebase-admin, @firebase/rules-unit-testing.
+
 ### Ajouté
 - Lancement local rapide : double-clic sur `LANCER_ALFAMOUS1.bat` (http://localhost:5050), mode développement
   sans reconstruction (F5 suffit) ; `npm run servir:dist` pour essayer exactement ce qui sera déployé.
