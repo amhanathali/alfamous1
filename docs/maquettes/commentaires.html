@@ -222,6 +222,8 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .com-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
 .com-entete h3 { margin: 0; font-size: 15px; }
 .com-entete .discret { font-size: 13px; color: var(--discret); }
+.com-liste { max-height: 460px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.signal { color: #b42318; font-size: 12px; }
 .com { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bordure); }
 .com:last-of-type { border-bottom: 0; }
 .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
@@ -235,7 +237,7 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .com-actions button:hover { color: var(--accent); text-decoration: underline; }
 .com-actions .danger:hover { color: #b42318; }
 .com.masque { opacity: .6; }
-.com.masque .com-texte { text-decoration: line-through; text-decoration-color: var(--discret); }
+.com.masque .com-texte:not(.placeholder) { text-decoration: line-through; text-decoration-color: var(--discret); }
 .bandeau-masque { font-size: 12px; color: var(--discret); background: var(--fond); border: 1px solid var(--bordure); border-radius: 6px; padding: 1px 8px; display: inline-block; margin-top: 4px; }
 .toi { font-size: 11px; background: var(--accent); color: var(--surface); border-radius: 999px; padding: 0 6px; }
 
@@ -294,9 +296,9 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 </header>
 
 <main>
-  <p class="note-maquette"><b>Ce qui est proposé.</b> Chaque verset garde son allure actuelle ; un bouton « commentaires » s'ajoute
-    à droite des boutons ⌃ / ⌄. Fermé par défaut, il montre le nombre de commentaires et les déplie sous le verset.
-    Les commentaires ci-dessous sont des <b>textes d'essai</b> (aucun contenu réel). Changez de niveau dans le bandeau pour voir ce que chacun peut faire.</p>
+  <p class="note-maquette"><b>Version 2, avec les décisions du 23 nov.</b> Le bouton à droite de ⌃ / ⌄ ouvre et ferme les commentaires de ce verset seulement ;
+    les plus récents d'abord, la liste défile si elle est longue. Les commentaires sont des <b>textes d'essai</b>.
+    Changez de niveau dans le bandeau pour voir ce que chacun peut faire.</p>
 
   <div class="titre"><h1>Sourate 112 <span class="ar" lang="ar">الإخلاص</span></h1><span class="resume">exemple de résultat</span></div>
   <div id="versets"></div>
@@ -305,15 +307,15 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
   <div class="lexique" id="lexique"></div>
 
   <section class="questions">
-    <h2>Questions avant de coder</h2>
+    <h2>Décisions de l'auteur (23 nov. 2026)</h2>
     <ol>
-      <li><b>Place</b> : commentaires dépliés <i>sous le verset</i> (proposé) ou dans un panneau latéral ?</li>
-      <li><b>Ouverture</b> : fermés par défaut avec compteur (proposé), ou ouverts quand un seul verset est affiché (ex. 2:255) ?</li>
-      <li><b>Ordre</b> : du plus ancien au plus récent (proposé) ?</li>
-      <li><b>Réponses</b> : pas de réponse à un commentaire ; pour discuter, « Ouvrir une discussion » crée un fil du forum lié au verset (proposé). D'accord ?</li>
-      <li><b>Mise en forme</b> : texte simple, avec liens automatiques vers les versets (2:255) et les racines (r:أحد) ; pas de gras ni d'images. Longueur maximale 4 000 caractères ?</li>
-      <li><b>Commentaire masqué</b> : invisible pour les niveaux 0 et 1 (proposé), ou remplacé par « commentaire masqué » ?</li>
-      <li><b>Signaler</b> (hors grille des droits) : un membre peut signaler un commentaire aux modérateurs. À ajouter ou non ?</li>
+      <li>Commentaires sous le verset.</li>
+      <li>Fermés par défaut ; un seul bouton ouvre et ferme, et seulement pour son verset.</li>
+      <li>Les plus récents en premier : contributeur, date, puis le commentaire ; la liste défile si elle est longue.</li>
+      <li>Pas de réponse à un commentaire ; « Ouvrir une discussion » crée un fil du forum lié au verset.</li>
+      <li>Texte simple, liens automatiques vers les versets (2:255) et les racines (r:…), 4 000 caractères au plus.</li>
+      <li>Commentaire masqué : la mention « Commentaire masqué par un modérateur » reste visible pour tous ; le texte, seulement pour les modérateurs et l'admin.</li>
+      <li>Bouton « Signaler » pour les membres ; les modérateurs voient le nombre de signalements.</li>
     </ol>
   </section>
 </main>
@@ -324,7 +326,7 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 const VERSETS = {"v1": {"ref": "112:1", "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ", "tr": "qul huwa allāhu aḥadun", "page": 604, "id": "v1", "n": 3}, "v2": {"ref": "112:2", "ar": "ٱللَّهُ ٱلصَّمَدُ", "tr": "allāhu aṣ-ṣamadu", "page": 604, "id": "v2", "n": 0}};
 const NOMS = { 1: 'Membre Essai', 2: 'Modo Essai', 3: 'Admin Essai' };
 let niveau = 1;
-const ouverts = new Set(['v1', 'lex']);
+const ouverts = new Set(); // tout fermé au départ ; chaque bouton n'ouvre que son verset
 const brouillons = {};
 const echap = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -338,6 +340,10 @@ const COMS = {
       { date: '20 nov. 2026', texte: "[Texte d'essai] Commentaire du membre connecté : il peut le modifier (les versions sont gardées), pas le supprimer." }] },
     { id: 'c', auteur: 'Autre Membre', date: '21 nov. 2026', masque: { par: 'Modo Essai', date: '22 nov. 2026' }, versions: [
       { date: '21 nov. 2026', texte: "[Texte d'essai] Commentaire masqué par un modérateur (réversible)." }] },
+    { id: 'd', auteur: 'Autre Membre', date: '22 nov. 2026', signalements: 1, versions: [
+      { date: '22 nov. 2026', texte: "[Texte d'essai] Commentaire signalé une fois : les modérateurs voient le compteur ⚑." }] },
+    { id: 'e', auteur: 'Amha Nathali', date: '23 nov. 2026', versions: [
+      { date: '23 nov. 2026', texte: "[Texte d'essai] Le plus récent s'affiche en haut. Quand la liste est longue, elle défile dans sa zone sans allonger la page.\n\nDeuxième paragraphe d'essai pour donner de la hauteur." }] },
   ],
   v2: [],
   lex: [
@@ -352,12 +358,13 @@ function enrichir(t) {
     .replace(/\b(\d{1,3}:\d{1,3})\b/g, '<a href="#">$1</a>')
     .replace(/r:([؀-ۿ]+)/g, '<a href="#" class="ar" lang="ar">$1</a>');
 }
-const visibles = (cle) => COMS[cle].filter((c) => !c.masque || niveau >= 2);
+// Plus récents en premier ; un commentaire masqué reste à sa place (mention visible pour tous).
+const visibles = (cle) => [...COMS[cle]].reverse();
 
 function blocCommentaires(cle, cible) {
   const liste = visibles(cle);
   const nbMasques = COMS[cle].filter((c) => c.masque).length;
-  const coms = liste.map((c) => {
+  const coms = '<div class="com-liste">' + liste.map((c) => {
     const actuelle = c.versions[c.versions.length - 1];
     const moi = niveau === 1 && c.auteur === NOMS[1];
     const acts = [];
@@ -367,7 +374,8 @@ function blocCommentaires(cle, cible) {
       ? `<button data-act="demasquer" data-c="${c.id}" data-k="${cle}">Démasquer</button>`
       : `<button data-act="masquer" data-c="${c.id}" data-k="${cle}">Masquer</button>`);
     if (niveau >= 3) acts.push(`<button class="danger" data-act="supprimer" data-c="${c.id}" data-k="${cle}">Supprimer définitivement</button>`);
-    if (niveau >= 1 && !moi) acts.push(`<button data-act="signaler">Signaler</button>`);
+    if (niveau === 1 && !moi && !c.masque) acts.push(`<button data-act="signaler" data-c="${c.id}" data-k="${cle}">${c.signale ? 'Signalé ✓' : 'Signaler'}</button>`);
+    if (niveau >= 2 && c.signalements) acts.push(`<span class="signal">⚑ ${c.signalements} signalement${c.signalements > 1 ? 's' : ''}</span>`);
     const edition = c.enEdition
       ? `<div class="ecrire"><textarea id="ed-${c.id}">${echap(actuelle.texte)}</textarea>
           <div class="ecrire-bas"><span>L'ancienne version reste dans l'historique.</span>
@@ -379,11 +387,13 @@ function blocCommentaires(cle, cible) {
       <div>
         <div class="com-meta"><span class="auteur">${echap(c.auteur)}</span>${moi ? '<span class="toi">vous</span>' : ''}
           <span>${c.date}</span>${c.versions.length > 1 ? '<span>· modifié</span>' : ''}</div>
-        ${edition}
-        ${c.masque ? `<span class="bandeau-masque">Masqué par ${c.masque.par} le ${c.masque.date} — invisible pour les visiteurs et les membres</span>` : ''}
+        ${c.masque && niveau < 2
+          ? '<p class="com-texte placeholder">Commentaire masqué par un modérateur.</p>'
+          : edition}
+        ${c.masque && niveau >= 2 ? `<span class="bandeau-masque">Masqué par ${c.masque.par} le ${c.masque.date} — les visiteurs et les membres ne voient que la mention « Commentaire masqué »</span>` : ''}
         ${acts.length && !c.enEdition ? `<div class="com-actions">${acts.join('')}</div>` : ''}
       </div></div>`;
-  }).join('');
+  }).join('') + '</div>';
 
   const vide = liste.length ? '' : '<p class="aide" style="margin:6px 0">Aucun commentaire pour l\'instant.</p>';
   const ecrire = niveau === 0
@@ -398,7 +408,7 @@ function blocCommentaires(cle, cible) {
       ${niveau >= 1 ? `<a href="#">+ Ouvrir une discussion sur ${cible}</a>` : ''}</div>`;
   return `<section class="commentaires">
     <div class="com-entete"><h3>Commentaires Alfamous · ${liste.length}</h3>
-      <span class="discret">du plus ancien au plus récent${niveau >= 2 && nbMasques ? ` · dont ${nbMasques} masqué` : ''}</span></div>
+      <span class="discret">les plus récents en premier${nbMasques ? ` · dont ${nbMasques} masqué` : ''}</span></div>
     ${coms}${vide}${ecrire}${forum}</section>`;
 }
 
@@ -490,10 +500,12 @@ document.addEventListener('click', (e) => {
       return;
     case 'confirmer-suppr': COMS[k] = COMS[k].filter((x) => x.id !== c); fermer(); break;
     case 'signaler':
-      fenetre(`<h3>Signaler ce commentaire</h3><p>Les modérateurs reçoivent le signalement et décident de le masquer ou non.</p>
-        <p class="aide">(Fonction proposée en plus de la grille des droits : à confirmer.)</p>
-        <div class="fenetre-bas"><button class="btn" data-fermer>Fermer</button></div>`);
+      if (com.signale) return;
+      fenetre(`<h3>Signaler ce commentaire</h3><p>Le signalement va aux modérateurs, qui décident de le masquer ou non. L'auteur n'est pas prévenu.</p>
+        <div class="ecrire" style="margin:0"><textarea id="motif" placeholder="Motif (facultatif)" maxlength="500" style="min-height:60px"></textarea></div>
+        <div class="fenetre-bas"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-act="confirmer-signal" data-c="${c}" data-k="${k}">Signaler</button></div>`);
       return;
+    case 'confirmer-signal': com.signale = true; com.signalements = (com.signalements || 0) + 1; fermer(); break;
   }
   rendre();
 });

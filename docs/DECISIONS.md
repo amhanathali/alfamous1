@@ -15,3 +15,7 @@
 | 2026-11-23 | Essai local avant tout déploiement : LANCER_ALFAMOUS1.bat (port 5050) ; émulateurs Firebase (Auth, Firestore) à partir de la phase 2 | Demande de l'auteur |
 | 2026-11-23 | Droits d'accès : niveaux 0 (visiteur) à 3 (admin), écriture dès le niveau 1 (courriel vérifié), sans validation ; modérateur = masquer, admin = supprimer ; détail dans docs/DROITS.md | Décision de l'auteur |
 | 2026-11-23 | Trois espaces reliés sans fusion : commentaires Alfamous (versets et lexique), Mes Notes (privées), forum ; une note publiée devient un fil du forum | Décision de l'auteur |
+| 2026-11-23 | Commentaires : sous le verset, fermés par défaut, un seul bouton ouvre et ferme ceux de ce verset ; les plus récents en premier (contributeur, date, texte), liste qui défile | Décision de l'auteur sur la maquette (docs/maquettes/commentaires.html) |
+| 2026-11-23 | Pas de réponse à un commentaire : « Ouvrir une discussion » crée un fil du forum lié au verset ; texte simple avec liens automatiques (2:255, r:…), 4 000 caractères au plus | Décision de l'auteur |
+| 2026-11-23 | Commentaire masqué : mention visible pour tous, texte réservé aux modérateurs ; bouton « Signaler » ajouté | Décision de l'auteur |
+| 2026-11-23 | Niveau 1 déduit du courriel vérifié dans les règles (pas de Cloud Function) ; revendication `niveau` seulement pour 2 et 3 | Moins de pièces à maintenir ; modèle dans docs/MODELE-DONNEES.md |

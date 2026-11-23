@@ -20,11 +20,14 @@ Firestore lisent `request.auth.token.niveau` et le client ne peut jamais le modi
 | Mes Notes : créer, modifier, supprimer ses notes privées | — | ✓ | ✓ | ✓ |
 | Publier une note dans le forum ; répondre à un fil publié | — | ✓ | ✓ | ✓ |
 | Dépublier son fil (seulement s'il n'a encore aucune réponse d'autrui) | — | ✓ | ✓ | ✓ |
+| Signaler un commentaire aux modérateurs (une fois, pas le sien) | — | ✓ | ✓ | ✓ |
 | Masquer un contenu d'autrui (réversible) | — | — | ✓ | ✓ |
 | Supprimer définitivement ; changer le niveau d'un membre | — | — | — | ✓ |
 
 ## Règles complémentaires
 - Pas de validation par un modérateur : le contenu est publié tout de suite ; le modérateur masque, l'admin supprime.
+- Un commentaire masqué reste à sa place : tout le monde voit la mention « Commentaire masqué par un modérateur » ;
+  seuls les modérateurs et l'admin en lisent le texte. Les modérateurs voient le nombre de signalements.
 - Un auteur ne supprime pas son contenu publié (d'autres ont pu y répondre) ; il peut le modifier.
 - Limite de fréquence contre les robots : environ 20 écritures par heure et par membre.
 - Une note et un fil de discussion sont le même objet : privé dans « Mes Notes », public après « Publier ».

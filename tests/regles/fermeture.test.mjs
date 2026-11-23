@@ -1,5 +1,5 @@
 // Tests des règles avec les émulateurs : npm run test:regles
-// Point de départ de la phase 2 : tout est fermé, pour tous les niveaux (docs/DROITS.md).
+// Tout ce qui n'est pas ouvert explicitement reste fermé, pour tous les niveaux (docs/DROITS.md).
 // Chaque collection ouverte ensuite aura ses propres tests dans ce dossier.
 import { test, before, after } from 'node:test';
 import { readFileSync } from 'node:fs';
@@ -25,11 +25,11 @@ const profils = () => ({
   'niveau 3': env.authenticatedContext('admin', { niveau: 3, email_verified: true }),
 });
 
-test('Firestore fermé : personne ne lit ni n\'écrit', async () => {
+test('Firestore : collection non déclarée fermée à tous', async () => {
   for (const [nom, ctx] of Object.entries(profils())) {
     const db = ctx.firestore();
-    await assertFails(getDoc(doc(db, 'commentaires/x')), `${nom} : lecture`);
-    await assertFails(setDoc(doc(db, 'commentaires/x'), { texte: 'essai' }), `${nom} : écriture`);
+    await assertFails(getDoc(doc(db, 'inconnue/x')), `${nom} : lecture`);
+    await assertFails(setDoc(doc(db, 'inconnue/x'), { texte: 'essai' }), `${nom} : écriture`);
   }
 });
 

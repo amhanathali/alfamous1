@@ -1,11 +1,137 @@
 rules_version = '2';
 
-// Tout est fermé par défaut. Chaque collection sera ouverte explicitement,
-// avec des tests dans l'émulateur, au fil des phases.
+// Tout est fermé par défaut ; chaque collection est ouverte explicitement et testée
+// avec l'émulateur (tests/regles/). Droits : docs/DROITS.md ; modèle : docs/MODELE-DONNEES.md.
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ---------- Niveaux (docs/DROITS.md) ----------
+    // 0 = visiteur ou courriel non vérifié ; 1 = inscrit vérifié (par défaut) ;
+    // 2 = modérateur, 3 = admin : revendication « niveau » posée côté serveur, jamais par le client.
+    function niveau() {
+      return request.auth == null || request.auth.token.email_verified != true
+        ? 0
+        : request.auth.token.get('niveau', 1);
+    }
+    function moi() { return request.auth.uid; }
+    // Le nom affiché vient du compte (jeton), pas du formulaire.
+    function monNom() { return request.auth.token.get('name', ''); }
+
+    function texteValide(t) { return t is string && t.size() >= 1 && t.size() <= 4000; }
+    function cibleValide(d) {
+      return (d.type == 'verset' && d.cle is string && d.cle.matches('^[0-9]{1,3}:[0-9]{1,3}$'))
+        || (d.type == 'lexique' && d.cle is string && d.cle.size() >= 1 && d.cle.size() <= 200);
+    }
+    function changes(cles) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(cles);
+    }
+
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // ---------- Commentaires Alfamous (versets et lexique) ----------
+    match /commentaires/{id} {
+      // Lecture publique. Un commentaire masqué a un texte vide : l'original est dans prive/texte.
+      allow read: if true;
+
+      // Écrire : niveau ≥ 1, publié tout de suite, signé du nom du compte.
+      allow create: if niveau() >= 1
+        && monNom().size() > 0
+        && request.resource.data.keys().hasOnly(
+             ['type', 'cle', 'auteurUid', 'auteurNom', 'texte', 'creeLe', 'modifieLe', 'nbVersions', 'masque'])
+        && request.resource.data.keys().hasAll(
+             ['type', 'cle', 'auteurUid', 'auteurNom', 'texte', 'creeLe', 'modifieLe', 'nbVersions', 'masque'])
+        && cibleValide(request.resource.data)
+        && request.resource.data.auteurUid == moi()
+        && request.resource.data.auteurNom == monNom()
+        && texteValide(request.resource.data.texte)
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.modifieLe == null
+        && request.resource.data.nbVersions == 1
+        && request.resource.data.masque == null;
+
+      // Modifier son commentaire (s'il n'est pas masqué) ; l'ancienne version est écrite
+      // dans le même lot (versions/{n}), sinon refus.
+      function modificationParAuteur() {
+        return niveau() >= 1
+          && resource.data.auteurUid == moi()
+          && resource.data.masque == null
+          && changes(['texte', 'modifieLe', 'nbVersions'])
+          && texteValide(request.resource.data.texte)
+          && request.resource.data.modifieLe == request.time
+          && request.resource.data.nbVersions == resource.data.nbVersions + 1
+          && existsAfter(/databases/$(database)/documents/commentaires/$(id)/versions/$(string(resource.data.nbVersions)));
+      }
+      // Masquer (niveau ≥ 2) : texte vidé, original déplacé dans prive/texte dans le même lot.
+      function masquage() {
+        return niveau() >= 2
+          && resource.data.masque == null
+          && changes(['masque', 'texte'])
+          && request.resource.data.texte == ''
+          && request.resource.data.masque.keys().hasOnly(['par', 'parNom', 'le'])
+          && request.resource.data.masque.par == moi()
+          && request.resource.data.masque.parNom == monNom()
+          && request.resource.data.masque.le == request.time
+          && getAfter(/databases/$(database)/documents/commentaires/$(id)/prive/texte).data.texte == resource.data.texte;
+      }
+      // Démasquer (niveau ≥ 2) : texte remis tel quel, prive/texte supprimé dans le même lot.
+      function demasquage() {
+        return niveau() >= 2
+          && resource.data.masque != null
+          && changes(['masque', 'texte'])
+          && request.resource.data.masque == null
+          && request.resource.data.texte == get(/databases/$(database)/documents/commentaires/$(id)/prive/texte).data.texte
+          && !existsAfter(/databases/$(database)/documents/commentaires/$(id)/prive/texte);
+      }
+
+      allow update: if modificationParAuteur() || masquage() || demasquage();
+
+      // Supprimer définitivement : admin seulement (l'auteur ne supprime pas son contenu publié).
+      allow delete: if niveau() >= 3;
+
+      function com() { return get(/databases/$(database)/documents/commentaires/$(id)).data; }
+      function comApres() { return getAfter(/databases/$(database)/documents/commentaires/$(id)).data; }
+
+      // Historique : versions/{n} = texte de la version n (1 = première), jamais modifié.
+      match /versions/{n} {
+        allow read: if com().masque == null || niveau() >= 2;
+        allow create: if niveau() >= 1
+          && com().auteurUid == moi()
+          && com().masque == null
+          && n == string(com().nbVersions)
+          && comApres().nbVersions == com().nbVersions + 1
+          && request.resource.data.keys().hasOnly(['texte', 'le'])
+          && request.resource.data.texte == com().texte
+          && request.resource.data.le == (com().modifieLe != null ? com().modifieLe : com().creeLe);
+        allow delete: if niveau() >= 3;
+      }
+
+      // Texte d'un commentaire masqué : modérateurs et admin seulement.
+      match /prive/{doc} {
+        allow read: if niveau() >= 2;
+        allow create: if niveau() >= 2
+          && doc == 'texte'
+          && com().masque == null
+          && comApres().masque != null
+          && request.resource.data.keys().hasOnly(['texte'])
+          && request.resource.data.texte == com().texte;
+        allow delete: if (niveau() >= 2 && doc == 'texte' && comApres().masque == null)
+          || niveau() >= 3;
+      }
+
+      // Signalements : un par membre et par commentaire ; lus par les modérateurs.
+      match /signalements/{uid} {
+        allow read: if niveau() >= 2;
+        allow create: if niveau() >= 1
+          && uid == moi()
+          && com().auteurUid != moi()
+          && request.resource.data.keys().hasOnly(['motif', 'le'])
+          && request.resource.data.motif is string
+          && request.resource.data.motif.size() <= 500
+          && request.resource.data.le == request.time;
+        allow delete: if niveau() >= 2;
+      }
     }
   }
 }

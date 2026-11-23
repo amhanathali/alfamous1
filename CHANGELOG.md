@@ -1,6 +1,14 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : commentaires (règles)
+- Collection `commentaires` (versets et lexique) ouverte dans `firestore.rules` : lecture publique ; écriture dès le
+  niveau 1 (courriel vérifié), signée du nom du compte, 4 000 caractères au plus ; modification par l'auteur avec
+  historique (`versions/`) ; masquage réversible par les modérateurs (texte mis à part dans `prive/texte`) ;
+  signalements (`signalements/{uid}`) ; suppression par l'admin.
+- 12 tests de règles (`tests/regles/commentaires.test.mjs`) ; modèle de données dans `docs/MODELE-DONNEES.md`.
+- Maquette v2 des commentaires avec les décisions de l'auteur ; « Signaler » ajouté à `docs/DROITS.md`.
+
 ### Ajouté — phase 2 : émulateurs Firebase
 - `LANCER_EMULATEURS.bat` / `npm run emulateurs` : Auth, Firestore et Storage en local sur le projet fictif
   `demo-alfamous1` (aucun accès au nuage), console http://localhost:4000, données d'essai gardées dans `.emulateurs/`.
