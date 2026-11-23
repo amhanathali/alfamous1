@@ -21,6 +21,9 @@ Code sous GPL v3 (voir `LICENSE`). Les traductions proviennent de
 [tanzil.net/trans](https://tanzil.net/trans/) et restent soumises à leurs propres conditions
 (usage non commercial).
 
+## Invite de commandes
+Double-cliquer sur **INVITE_ALFAMOUS1.bat** : une fenêtre cmd s'ouvre directement dans ce dossier et affiche la branche en cours.
+
 ## Essayer en local (sans déployer)
 Double-cliquer sur **LANCER_ALFAMOUS1.bat** : le navigateur s'ouvre sur http://localhost:5050.
 Toute modification du code se voit en rechargeant la page (F5). Fermer la fenêtre noire arrête le serveur.
