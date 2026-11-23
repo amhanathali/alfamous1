@@ -1,6 +1,10 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — outils
+- `deployerAlfamous1.bat` : mise à jour du code (main), tests, tests des règles, construction, puis déploiement du site
+  et des règles et index Firestore (essai par défaut ; `prod` avec confirmation).
+
 ### Ajouté — phase 3 : lexique, racines proches, historique, copie de versets
 - Onglet **Lexique** (`#/lexique`) : toutes les entrées par ordre alphabétique arabe, nombre de définitions, occurrences
   dans le Coran, extrait ; filtre sur la clé et le texte des définitions ; Racines du Coran / Expressions et autres ;
