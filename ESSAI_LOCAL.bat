@@ -1,15 +1,16 @@
 @echo off
 REM Essai local complet en un double-clic :
+REM   0. mise a jour du code (git pull --ff-only : jamais de fusion) et des outils (npm install)
 REM   1. emulateurs Firebase (fenetre « Alfamous1 - emulateurs »)
 REM   2. comptes, commentaires, notes et fils d essai (npm run emulateurs:peupler)
 REM   3. application sur http://localhost:5050 (fenetre « Alfamous1 - local »)
 REM Pour tout arreter : Ctrl+C dans chacune des deux fenetres, puis O.
 cd /d "%~dp0"
 title Alfamous1 - essai local
-if not exist node_modules\firebase-tools (
-  echo Premiere fois : installation des outils, npm install...
-  call npm install
-)
+echo [0/3] Mise a jour du code (git pull) et des outils (npm install)...
+git pull --ff-only
+if errorlevel 1 echo ATTENTION : mise a jour impossible (modifications locales ?). On continue avec la version presente.
+call npm install --no-audit --no-fund
 echo [1/3] Lancement des emulateurs...
 start "Alfamous1 - emulateurs" cmd /k npm run emulateurs
 node scripts\attendre-emulateurs.mjs
