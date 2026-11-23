@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — lexique, racines proches, historique, copie de versets (phase 3)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Alfamous1 (copie de src/css/app.css) — feuille de style. Thème clair par défaut, sombre selon le système ou le bouton. */
+:root {
+  --fond: #f7f4ee;
+  --surface: #ffffff;
+  --texte: #1f2328;
+  --discret: #5f6670;
+  --bordure: #e3ddd2;
+  --accent: #8a4b16;
+  --accent-doux: #f3e5d6;
+  --surligne: #fbe3a6;
+  --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='clair']) {
+    --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+    --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+    --ombre: none; color-scheme: dark;
+  }
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+  --ombre: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--fond); color: var(--texte);
+  font: 17px/1.55 var(--latin);
+}
+a { color: var(--lien); }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+
+/* ---------- En-tête ---------- */
+.entete { position: sticky; top: 0; z-index: 10; background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.entete-haut, .recherche, .options, main, .pied { max-width: 920px; margin: 0 auto; }
+.entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.entete-actions { display: flex; align-items: center; gap: 10px; }
+.choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
+select, input, button { font: inherit; color: inherit; }
+select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
+.bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
+
+.recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
+.recherche input {
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  border: 1px solid var(--bordure); background: var(--surface);
+}
+.recherche .effacer {
+  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.recherche .effacer:hover { color: var(--accent); }
+.options select { max-width: 280px; }
+.recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche button {
+  border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+:root[data-theme='sombre'] .recherche button { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .recherche button { color: #1d2024; } }
+.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.exemples a { margin: 0 3px; }
+
+/* ---------- Contenu ---------- */
+main { padding: 16px; min-height: 60vh; }
+.titre { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin: 8px 0 16px; }
+.titre h1 { margin: 0; font-size: 22px; }
+.titre .ar { font-size: 30px; }
+.resume { color: var(--discret); font-size: 15px; }
+.message { padding: 24px; text-align: center; color: var(--discret); }
+.erreur { color: #b42318; }
+
+.verset {
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre);
+}
+.verset-entete { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--discret); }
+.ref { font-weight: 600; color: var(--accent); text-decoration: none; background: var(--accent-doux); padding: 1px 8px; border-radius: 999px; }
+.verset .ar { font-size: 28px; line-height: 2.1; margin: 6px 0 4px; text-align: right; }
+.mot { cursor: pointer; border-radius: 4px; padding: 0 1px; }
+.mot:hover, .mot:focus { background: var(--accent-doux); outline: none; }
+.mot.surligne { background: var(--surligne); }
+.tr { font-style: italic; color: var(--discret); font-size: 15px; margin: 0; }
+.trad { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 16px; }
+.basmala { text-align: center; font-size: 28px; margin: 4px 0 16px; }
+
+.nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0; }
+.nav a { text-decoration: none; padding: 6px 12px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); }
+.plus { display: block; margin: 12px auto; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); cursor: pointer; }
+
+/* ---------- Racine ---------- */
+.racine-titre { font-size: 44px; line-height: 1.2; }
+.panneaux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 640px) { .panneaux { grid-template-columns: 1fr; } }
+.panneau { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 14px; }
+.panneau h2 { font-size: 15px; margin: 0 0 8px; color: var(--discret); font-weight: 600; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; }
+.puce {
+  font-family: var(--arabe); font-size: 20px; text-decoration: none; color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 0 10px; background: var(--fond);
+}
+.puce small { font-family: var(--latin); font-size: 12px; color: var(--discret); margin-inline-start: 4px; }
+.puce:hover { border-color: var(--accent); }
+.repartition { display: flex; align-items: flex-end; gap: 1px; height: 60px; margin-top: 4px; }
+.repartition a { flex: 1; background: var(--accent); opacity: .75; min-height: 1px; border-radius: 1px 1px 0 0; }
+.repartition a:hover { opacity: 1; }
+.repartition-legende { display: flex; justify-content: space-between; font-size: 12px; color: var(--discret); }
+
+/* ---------- Onglets, tableaux ---------- */
+.panneau { margin-bottom: 12px; }
+.onglets { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--bordure); margin: 8px 0 12px; }
+.onglets button, .lettres button, .tableau th button {
+  background: none; border: 0; cursor: pointer; color: var(--discret); font: inherit;
+}
+.onglets button { padding: 8px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.onglets button.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.onglets small { color: var(--discret); font-weight: 400; }
+.aide { color: var(--discret); font-size: 14px; margin: 0 0 8px; }
+.tableau { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.tableau th, .tableau td { padding: 6px 10px; border-bottom: 1px solid var(--bordure); text-align: left; }
+.tableau th { background: var(--fond); font-weight: 600; font-size: 13px; color: var(--discret); }
+.tableau th button { font-weight: 600; font-size: 13px; padding: 0; }
+.tableau th button.actif { color: var(--accent); }
+.tableau td .ar { font-size: 22px; text-decoration: none; }
+.tableau tr:last-child td { border-bottom: 0; }
+.lettres { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; direction: rtl; }
+.lettres button { font-family: var(--arabe); font-size: 20px; padding: 0 10px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); color: var(--texte); }
+.lettres button.actif { border-color: var(--accent); color: var(--accent); }
+.plus-terme { color: var(--discret); font-family: var(--latin); font-size: 18px; margin: 0 4px; }
+.lien-racine-titre { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.lien-racine { font-size: 22px; }
+.fiche-actions { margin: 8px 0 0; font-size: 14px; }
+.intro ul { padding-inline-start: 20px; color: var(--texte); }
+.intro li { margin: 4px 0; }
+code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
+
+/* ---------- Accueil ---------- */
+.intro { font-size: 17px; margin-bottom: 16px; }
+.grille-sourates { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.grille-sourates a {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px; text-decoration: none; color: var(--texte);
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; padding: 8px 10px; font-size: 14px;
+}
+.grille-sourates a:hover { border-color: var(--accent); }
+.grille-sourates .n { color: var(--accent); font-weight: 600; min-width: 2.2em; }
+.grille-sourates .ar { font-size: 18px; }
+
+/* ---------- Fiche d'un mot ---------- */
+.fiche-mot {
+  position: fixed; z-index: 20; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px)); background: var(--surface); color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 14px 16px 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+}
+.fiche-mot .ar { font-size: 34px; text-align: center; margin: 0; }
+.fiche-mot dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 15px; }
+.fiche-mot dt { color: var(--discret); }
+.fiche-mot dd { margin: 0; }
+.fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+
+.pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Versets voisins (bas de carte) */
+.voisins { display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.voisin {
+  display: inline-flex; align-items: center; gap: 4px; background: none; cursor: pointer;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px 2px 8px; font-size: 13px; color: var(--discret);
+}
+.voisin[data-voisin="1"] { padding: 2px 8px 2px 12px; }
+.voisin:hover, .voisin:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.voisin svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.voisin:disabled { opacity: .5; cursor: wait; }
+.verset.contexte { border-style: dashed; box-shadow: none; }
+@keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
+.verset.eclair { animation: eclair 1.2s ease-out; }
+
+.trad-source { display: block; font-size: 12px; color: var(--discret); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+
+/* ---------- Comptes (phase 2) ---------- */
+.compte { display: flex; align-items: center; gap: 8px; font-size: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.compte-nom { font-weight: 600; }
+.badge-niveau { font-size: 12px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 0 8px; }
+.lien-bouton.alerte { color: #b42318; }
+.fenetre {
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 18px 20px; width: min(520px, calc(100% - 24px));
+  background: var(--surface); color: var(--texte); box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+}
+.fenetre::backdrop { background: rgba(0, 0, 0, .35); }
+.fenetre h2 { margin: 0 0 10px; font-size: 20px; }
+.fenetre .fermer { position: absolute; top: 8px; right: 12px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+.fenetre label { display: block; font-size: 14px; color: var(--discret); margin: 8px 0; }
+.fenetre input, .fenetre textarea {
+  display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--bordure); background: var(--fond); color: var(--texte);
+}
+.fenetre-bas { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+.form-msg { color: #b42318; font-size: 14px; margin: 6px 0 0; min-height: 1em; }
+.btn { border: 1px solid var(--bordure); background: var(--surface); color: var(--texte); border-radius: 8px; padding: 5px 14px; cursor: pointer; font-size: 14px; }
+.btn.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme='sombre'] .btn.principal { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .btn.principal { color: #1d2024; } }
+.btn.danger-plein { background: #b42318; border-color: #b42318; color: #fff; font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: wait; }
+.version { border-left: 3px solid var(--bordure); padding: 4px 10px; margin: 8px 0; white-space: pre-wrap; }
+.version.actuelle { border-color: var(--accent); }
+.version small { color: var(--discret); display: block; }
+
+/* ---------- Commentaires sous le verset ---------- */
+.verset-pied { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.verset-pied .voisins { margin: 0; padding: 0; border: 0; grid-column: 2; }
+.verset-pied .bouton-com { grid-column: 3; justify-self: end; }
+@media (max-width: 520px) { .verset-pied { grid-template-columns: 1fr auto; } .verset-pied .voisins { grid-column: 1; justify-content: flex-start; } .verset-pied .bouton-com { grid-column: 2; } }
+.bouton-com {
+  display: inline-flex; align-items: center; gap: 6px; background: none; cursor: pointer; font-size: 13px; white-space: nowrap;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px; color: var(--discret);
+}
+.bouton-com.a-des { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.bouton-com:hover, .bouton-com:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.bouton-com svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
+.commentaires { margin-top: 12px; border-top: 1px solid var(--bordure); padding-top: 10px; }
+.com-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.com-entete h3 { margin: 0; font-size: 15px; }
+.com-entete .discret { font-size: 13px; color: var(--discret); }
+.com-liste { max-height: 460px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.com { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bordure); }
+.com:last-child { border-bottom: 0; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.com-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.com-meta .auteur { color: var(--texte); font-weight: 600; font-size: 15px; }
+.toi { font-size: 11px; background: var(--accent); color: var(--surface); border-radius: 999px; padding: 0 6px; }
+.com-texte { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.com-texte .ar { font-size: 20px; }
+.com-texte.placeholder { color: var(--discret); font-style: italic; }
+.com.masque { opacity: .65; }
+.com-texte.barre { text-decoration: line-through; text-decoration-color: var(--discret); }
+.bandeau-masque { font-size: 12px; color: var(--discret); background: var(--fond); border: 1px solid var(--bordure); border-radius: 6px; padding: 1px 8px; display: inline-block; margin-top: 4px; }
+.com-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; }
+.com-actions button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--discret); font: inherit; }
+.com-actions button:hover { color: var(--accent); text-decoration: underline; }
+.com-actions .danger:hover { color: #b42318; }
+.signal { color: #b42318; font-size: 12px; }
+.ecrire { margin-top: 10px; background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px; }
+.ecrire textarea { width: 100%; min-height: 84px; resize: vertical; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 8px 10px; }
+.ecrire textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ecrire-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--discret); }
+.ecrire.connexion { text-align: center; font-size: 14px; color: var(--discret); }
+.ecrire.connexion .btn { margin: 6px 4px 0; }
+
+/* ---------- Menu Lecture / Mes Notes / Forum (phase 2) ---------- */
+.menu { display: flex; gap: 4px; max-width: 920px; margin: 8px auto 0; border-bottom: 1px solid var(--bordure); }
+.menu a { padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 15px; }
+.menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ---------- Mes Notes et forum ---------- */
+.barre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px; }
+.filtres button { border: 1px solid var(--bordure); background: var(--surface); color: var(--discret); border-radius: 999px; padding: 2px 12px; cursor: pointer; font-size: 13px; }
+.filtres button.actif { border-color: var(--accent); color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+a.btn { text-decoration: none; display: inline-block; }
+.liste-fils { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.fil-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 14px; border-bottom: 1px solid var(--bordure); text-decoration: none; color: inherit; }
+.fil-ligne:last-child { border-bottom: 0; }
+.fil-ligne:hover { background: var(--fond); }
+.fil-ligne.masque .fil-titre { font-style: italic; color: var(--discret); }
+.fil-titre { font-weight: 600; font-size: 16px; }
+.fil-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
+.fil-meta .extrait { overflow-wrap: anywhere; }
+.fil-droite { text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.fil-droite b { display: block; color: var(--texte); font-size: 15px; }
+.lien-cible { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; border: 1px solid var(--bordure); border-radius: 999px; padding: 0 8px; background: var(--fond); color: var(--texte); text-decoration: none; }
+.lien-cible .ar { font-size: 16px; }
+.etat { font-size: 11px; border-radius: 999px; padding: 0 7px; font-weight: 600; }
+.etat.prive { background: var(--fond); border: 1px solid var(--bordure); color: var(--discret); }
+.etat.publie { background: #e3f1e6; color: #1f6b35; }
+:root[data-theme='sombre'] .etat.publie { background: #1f3b27; color: #9fd9ae; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .etat.publie { background: #1f3b27; color: #9fd9ae; } }
+.vide { padding: 24px; text-align: center; color: var(--discret); margin: 0; }
+.retour { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+.editeur { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; box-shadow: var(--ombre); }
+.editeur label { display: block; font-size: 14px; color: var(--discret); margin: 10px 0 4px; }
+.editeur input[type=text], .editeur textarea, .editeur select { display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--fond); color: var(--texte); }
+.editeur textarea { min-height: 180px; resize: vertical; font: inherit; }
+.editeur input:disabled { opacity: .5; }
+.ligne-lien { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px; }
+.ligne-lien select, .ligne-lien input { margin-top: 0 !important; }
+@media (max-width: 560px) { .ligne-lien { grid-template-columns: 1fr; } }
+.editeur-bas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; }
+.editeur-bas .gauche, .editeur-bas .droite { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.aide-pub { font-size: 13px; color: var(--discret); margin: 8px 0 0; }
+.fil-tete { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.fil-tete h1 { font-size: 22px; margin: 6px 0; }
+.verset-cite { background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 6px 10px; margin: 8px 0; font-size: 13px; }
+.verset-cite .ar { font-size: 24px; text-align: right; margin: 0; }
+.message-fil { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--bordure); }
+.message-fil:last-of-type { border-bottom: 0; }
+.message-fil.masque { opacity: .65; }
+.reponses { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 4px 16px 12px; }
+.reponses h2 { font-size: 15px; margin: 10px 0 0; }
+.reponses h2 .aide { font-weight: 400; font-size: 13px; }
+.com-actions a { color: var(--discret); font-size: 13px; }
+.forum-verset { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--discret); }
+.forum-verset:empty { display: none; }
+
+
+/* ===== Maquette : bandeau ===== */
+.demo { background: #2b2f36; color: #f2efe9; font-size: 14px; padding: 10px 16px; }
+.demo-in { max-width: 920px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.demo b { color: #e0a46c; }
+.demo .roles { display: flex; gap: 4px; flex-wrap: wrap; }
+.demo .roles button { background: transparent; color: #f2efe9; border: 1px solid #5a606a; border-radius: 999px; padding: 2px 10px; cursor: pointer; font-size: 13px; }
+.demo .roles button.actif { background: #e0a46c; border-color: #e0a46c; color: #1d2024; font-weight: 600; }
+.note-maquette { border: 1px dashed var(--accent); border-radius: 10px; padding: 8px 12px; font-size: 14px; color: var(--discret); margin: 0 0 14px; background: var(--surface); }
+.note-maquette b { color: var(--texte); }
+
+/* ===== Menu ===== */
+.menu .nb { font-size: 12px; background: var(--accent-doux); color: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 4px; }
+
+/* ===== Historique sous le champ ===== */
+.champ { position: relative; }
+.historique { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.12); padding: 6px 0; font-size: 15px; }
+.historique h4 { margin: 4px 12px; font-size: 12px; color: var(--discret); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; display: flex; justify-content: space-between; }
+.historique h4 button { background: none; border: 0; color: var(--discret); font: inherit; text-transform: none; letter-spacing: 0; cursor: pointer; text-decoration: underline; }
+.historique a { display: flex; justify-content: space-between; gap: 8px; padding: 4px 12px; color: var(--texte); text-decoration: none; }
+.historique a:hover { background: var(--fond); }
+.historique a small { color: var(--discret); }
+.historique .ar { font-size: 19px; }
+
+/* ===== Lexique : liste ===== */
+.barre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filtre-lex { flex: 1; min-width: 220px; font-size: 16px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px; }
+.filtres button { border: 1px solid var(--bordure); background: var(--surface); color: var(--discret); border-radius: 999px; padding: 2px 12px; cursor: pointer; font-size: 13px; }
+.filtres button.actif { border-color: var(--accent); color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.liste-lex { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.lex-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 14px; border-bottom: 1px solid var(--bordure); color: inherit; text-decoration: none; cursor: pointer; align-items: center; }
+.lex-ligne:last-child { border-bottom: 0; }
+.lex-ligne:hover { background: var(--fond); }
+.lex-cle { font-family: var(--arabe); font-size: 24px; direction: rtl; text-align: left; }
+.lex-extrait { font-size: 14px; color: var(--discret); grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lex-droite { grid-row: 1 / span 2; grid-column: 2; text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.lex-droite b { color: var(--texte); font-size: 15px; }
+.etiquette { font-size: 11px; border-radius: 999px; padding: 0 7px; border: 1px solid var(--bordure); color: var(--discret); background: var(--fond); margin-inline-start: 6px; font-family: var(--latin); vertical-align: middle; }
+
+/* ===== Lexique : fiche ===== */
+.entree-tete { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.entree-tete .haut { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.entree-cle { font-family: var(--arabe); font-size: 48px; line-height: 1.2; direction: rtl; margin: 0; }
+.entree-tr { font-style: italic; color: var(--discret); margin: 0; }
+.chiffres { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 4px; font-size: 15px; }
+.chiffres b { font-size: 18px; }
+.liens-entree { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; margin-top: 6px; }
+.rappel { font-size: 13px; color: var(--discret); margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); }
+.bloc { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-bottom: 12px; }
+.bloc > h2 { font-size: 16px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bloc > h2 small { font-weight: 400; color: var(--discret); font-size: 13px; }
+.def { padding: 10px 0; border-bottom: 1px solid var(--bordure); }
+.def:last-of-type { border-bottom: 0; }
+.proches-opt { font-size: 14px; color: var(--discret); display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 8px; }
+.puce.avec-lex { border-color: var(--accent); background: var(--accent-doux); }
+.puce .pt { color: var(--accent); }
+.legende { font-size: 12px; color: var(--discret); margin-top: 8px; }
+.forum-ligne { font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--discret); }
+
+/* ===== Encadré lexique dans les résultats ===== */
+.encadre-lex { background: var(--accent-doux); border: 1px solid var(--accent); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; font-size: 15px; }
+.encadre-lex p { margin: 2px 0; }
+
+/* ===== Sélection et copie de versets ===== */
+.choisir { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--discret); cursor: pointer; user-select: none; }
+.verset.choisi { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.barre-copie { position: sticky; bottom: 0; z-index: 15; margin: 0 -16px; padding: 10px 16px; background: var(--surface); border-top: 2px solid var(--accent); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; box-shadow: 0 -4px 16px rgba(0,0,0,.08); }
+.barre-copie .gauche { font-size: 15px; }
+.barre-copie .droite { display: flex; gap: 6px; flex-wrap: wrap; }
+.apercu { background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; white-space: pre-wrap; font-size: 14px; max-height: 300px; overflow: auto; }
+.apercu .ar { font-size: 20px; }
+.options-copie { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 14px; margin: 8px 0; }
+.options-copie label { margin: 0 !important; }
+.toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #2b2f36; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; z-index: 60; }
+
+/* ===== Fiche-mot (rappel) ===== */
+.fiche-mot .lex-fiche { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; }
+
+/* ===== Questions ===== */
+.questions { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-top: 20px; }
+.questions h2 { font-size: 17px; margin: 0 0 6px; }
+.questions li { margin: 7px 0; }
+.voile { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.voile .fenetre { position: relative; display: block; margin: 0; max-width: 560px; width: 100%; }
+</style>
+</head>
+<body>
+<div class="demo"><div class="demo-in">
+  <span><b>MAQUETTE</b> — rien n'est enregistré · écran :</span>
+  <div class="roles" id="ecrans">
+    <button data-e="liste" class="actif">Lexique (liste)</button>
+    <button data-e="entree">Fiche d'une entrée</button>
+    <button data-e="resultats">Résultats + copie</button>
+  </div>
+  <span>voir comme :</span>
+  <div class="roles" id="roles">
+    <button data-n="0">0 · Visiteur</button>
+    <button data-n="1" class="actif">1 · Membre</button>
+    <button data-n="2">2 · Modérateur</button>
+  </div>
+</div></div>
+
+<header class="entete">
+  <div class="entete-haut">
+    <a class="logo" href="#" data-e="resultats">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+    <div class="entete-actions"><span id="compte" class="compte"></span><button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre">◐</button></div>
+  </div>
+  <nav class="menu" id="menu"></nav>
+  <form id="formulaire" class="recherche" role="search" onsubmit="return false">
+    <div class="champ">
+      <input id="requete" type="text" autocomplete="off" spellcheck="false" dir="auto" value="r:بشر" aria-label="Rechercher">
+      <div class="historique" id="historique" hidden></div>
+    </div>
+    <button type="submit" data-e="resultats">Chercher</button>
+  </form>
+</header>
+
+<main id="vue"></main>
+
+<aside id="fiche-mot" class="fiche-mot" hidden></aside>
+
+<div class="questions-hote" style="max-width:920px;margin:0 auto;padding:0 16px 24px">
+  <section class="questions">
+    <h2>Questions avant de coder</h2>
+    <ol>
+      <li><b>Accès</b> : un onglet « Lexique » dans le menu (Lecture · Lexique · Mes Notes · Forum), lisible par tous. D'accord ?</li>
+      <li><b>Fiche d'une entrée</b> : en haut, les occurrences dans le Coran (nombre, versets, lien vers la recherche) ; puis les définitions ; puis les racines proches ; puis le forum. Les occurrences d'abord, pour rappeler que le sens se déduit du texte. D'accord, ou les définitions d'abord ?</li>
+      <li><b>Définitions</b> : même fonctionnement que les commentaires de versets (plus récentes en premier, modifier avec historique, signaler, masquer, supprimer ; 4 000 caractères ; liens automatiques 2:255 et r:…). D'accord ?</li>
+      <li><b>Nouvelle entrée</b> : tout membre (niveau 1) crée une entrée en publiant la première définition. La clé est enregistrée <b>sans voyelles</b> (harakat retirées automatiquement), 200 caractères au plus, sans « / ». D'accord ?</li>
+      <li><b>« Synonymes »</b> : dans l'ancienne application, ce sont les entrées dont la clé contient au moins deux lettres <b>qui se suivent</b> dans la racine (avec l'option « sens inverse »). C'est un rapprochement par les lettres, pas par le sens. Je propose de l'appeler <b>« Racines proches (lettres communes) »</b> et de le calculer sur les 1 803 racines du Coran (avec leurs occurrences), en marquant celles qui ont une entrée au lexique. D'accord, ou garder le mot « synonymes » et se limiter au lexique ?</li>
+      <li><b>Historique des recherches</b> : gardé dans le navigateur seulement (rien dans Firestore, pas besoin de compte), 50 dernières recherches, affiché sous le champ ; ensuite les clés du lexique qui commencent par ce qui est tapé. D'accord, ou le synchroniser avec le compte (tous vos appareils) ?</li>
+      <li><b>Copie de versets</b> : une case « Choisir » sur chaque verset ; la sélection est gardée en changeant de page ; barre en bas « Copier · Aperçu · Vider ». Contenu par défaut : référence, arabe, translittération ; en option : commentaire traditionnel affiché, lien vers le verset. Copié en texte simple et en texte mis en forme (Word, courriel). D'accord ?</li>
+      <li><b>Lien avec la recherche</b> : quand on cherche une racine qui a une entrée, un encadré « Lexique » en tête des résultats ; dans la fiche d'un mot, une ligne « Lexique : n définitions » ou « Proposer une définition ». D'accord ?</li>
+    </ol>
+    <p class="aide" style="margin-top:10px">Hors phase 3 (proposé pour plus tard) : chercher un mot dans les commentaires des versets (l'ancien module Lexique le faisait) ; import des définitions existantes (phase 4).</p>
+  </section>
+</div>
+
+<div id="voile" class="voile" hidden><div class="fenetre" id="fenetre"></div></div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+{
+// ---------- Données ----------
+// Versets, translittération, positions et nombres d'occurrences : copiés des fichiers donnees/ du dépôt (racine بشر).
+// Clés du lexique et nombres de définitions : d'après l'ancien fTabLexique1.js (entrées non « CSC-Tradition »).
+// Textes des définitions, dates et noms des comptes : FICTIFS (textes d'essai).
+const VERSETS = [
+  { ref: '2:97', page: 15, ar: 'قُلْ مَن كَانَ عَدُوًّا لِّجِبْرِيلَ فَإِنَّهُۥ نَزَّلَهُۥ عَلَىٰ قَلْبِكَ بِإِذْنِ ٱللَّهِ مُصَدِّقًا لِّمَا بَيْنَ يَدَيْهِ وَهُدًى وَبُشْرَىٰ لِلْمُؤْمِنِينَ', tr: 'qul man kāna ʿaduwwan liǧibrīla faʾinnahū nazzalahū ʿalā qalbika biʾiḏni allāhi muṣaddiqan limā bayna yadayhi wahudan wabušrā lilmuʾminīna', pos: [17] },
+  { ref: '2:155', page: 24, ar: 'وَلَنَبْلُوَنَّكُم بِشَىْءٍ مِّنَ ٱلْخَوْفِ وَٱلْجُوعِ وَنَقْصٍ مِّنَ ٱلْأَمْوَٰلِ وَٱلْأَنفُسِ وَٱلثَّمَرَٰتِ وَبَشِّرِ ٱلصَّـٰبِرِينَ', tr: 'walanabluwannakum bišayʾin mina al-ḫawfi wa-l-ǧūʿi wanaqṣin mina al-ʾamwāli wa-l-ʾanfusi wa-ṯ-ṯamarāti wabašširi aṣ-ṣābirīna', pos: [11] },
+  { ref: '3:39', page: 55, ar: 'فَنَادَتْهُ ٱلْمَلَـٰٓئِكَةُ وَهُوَ قَآئِمٌ يُصَلِّى فِى ٱلْمِحْرَابِ أَنَّ ٱللَّهَ يُبَشِّرُكَ بِيَحْيَىٰ مُصَدِّقًۢا بِكَلِمَةٍ مِّنَ ٱللَّهِ وَسَيِّدًا وَحَصُورًا وَنَبِيًّا مِّنَ ٱلصَّـٰلِحِينَ', tr: 'fanādathu al-malāʾikatu wahuwa qāʾimun yuṣallī fī al-miḥrābi anna allāha yubašširuka biyaḥyā muṣaddiqan bikalimatin mina allāhi wasayyidan waḥaṣūran wanabiyyan mina aṣ-ṣāliḥīna', pos: [10] },
+];
+const OCC = { occurrences: 125, versets: 121, sourates: 47 };
+const LEXIQUE = [ // [clé, définitions, occurrences (si racine du Coran), extrait FICTIF]
+  ['ألف', 1, 22], ['أرض', 1, 461], ['أمن', 1, 874], ['إن', 1, 2344], ['الله', 1, 2699],
+  ['ب', 1, null], ['بحر', 1, 42], ['بدل', 1, 44], ['بسم الله', 1, null], ['بشر', 2, 125],
+  ['بصر', 1, 148], ['بطل', 1, 36], ['بعث', 1, 67], ['صلاة الجمعة', 2, null],
+];
+// Racines proches de بشر (calcul réel sur donnees/racines.json : clé contenant بش, شر ou بشر ; en sens inverse : رش, شب ou رشب).
+const PROCHES = {
+  direct: [['أشر', 2], ['حشر', 43, 1], ['شرب', 39, 1], ['شرح', 5, 1], ['شرد', 1], ['شرذم', 1], ['شرر', 29], ['شرط', 1], ['شرع', 5, 1], ['شرق', 17, 1], ['شرك', 168], ['شري', 25], ['عشر', 27, 1], ['نشر', 21]],
+  inverse: [['خشب', 1], ['رشد', 19, 1], ['شبه', 12], ['عرش', 33, 1], ['فرش', 6], ['قرش', 1]],
+};
+const NOMS = { 1: 'Membre Essai', 2: 'Modo Essai' };
+let DEFS = [
+  { id: 1, auteur: 'Membre Essai', texte: "[Texte d'essai] Deuxième définition, la plus récente : elle apparaît en premier. Renvois automatiques : 2:155, r:بشر.", date: '23 nov. 2026', versions: 1 },
+  { id: 2, auteur: 'Autre Membre', texte: "[Texte d'essai] Première définition de l'entrée, modifiée une fois (historique disponible).", date: '12 nov. 2026', versions: 2, signalements: 1 },
+];
+let HISTO = ['r:بشر', 'صلاة', '2:255', 'رحم غفر', 'sabr'];
+
+let niveau = 1, ecran = 'liste', filtre = 'tous', inverse = false, avecTrad = false, avecLien = false;
+const choisis = new Set(['2:155']);
+const $ = (s) => document.querySelector(s);
+const echap = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const enrichir = (t) => echap(t).replace(/\b(\d{1,3}:\d{1,3})\b/g, '<a href="#">$1</a>').replace(/r:([؀-ۿ]+)/g, '<a href="#" class="ar" lang="ar">$1</a>');
+const fmt = (n) => n.toLocaleString('fr-CA');
+
+function toast(t) { const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { e.hidden = true; }, 1800); }
+function fenetre(html) { $('#fenetre').innerHTML = `<button class="fermer" data-fermer>×</button>${html}`; $('#voile').hidden = false; }
+
+function menu() {
+  const onglets = [['resultats', 'Lecture'], ['liste', 'Lexique'], ...(niveau >= 1 ? [['', 'Mes Notes']] : []), ['', 'Forum']];
+  $('#menu').innerHTML = onglets.map(([e, l]) => `<a href="#" ${e ? `data-e="${e}"` : ''} class="${(e === ecran || (e === 'liste' && ecran === 'entree')) ? 'actif' : ''}">${l}</a>`).join('');
+  $('#compte').innerHTML = niveau ? `<span>${NOMS[niveau]}</span>` : '<a href="#">Se connecter</a>';
+}
+
+// ---------- Écran : liste du lexique ----------
+function vueListe() {
+  const q = ($('#filtre-lex')?.value || '').trim();
+  const lignes = LEXIQUE.filter(([k, , o]) => (filtre === 'tous' || (filtre === 'racines' ? o !== null : o === null)) && (!q || k.includes(q)));
+  $('#vue').innerHTML = `
+    <div class="note-maquette"><b>Lexique.</b> Clés et nombres de définitions d'après l'ancien lexique (environ 350 entrées hors « CSC-Tradition ») ; extraits fictifs. Cliquer sur <span class="ar" lang="ar">بشر</span>.</div>
+    <div class="titre"><h1>Lexique</h1><span class="resume">350 entrées · 359 définitions (ancien lexique)</span></div>
+    <div class="barre-outils">
+      <input id="filtre-lex" class="filtre-lex" type="search" dir="auto" placeholder="Chercher une clé ou un mot dans les définitions" value="${echap(q)}">
+      ${niveau >= 1 ? '<button class="btn principal" data-act="nouvelle">+ Nouvelle entrée</button>' : ''}
+    </div>
+    <div class="barre-outils">
+      <div class="filtres">${[['tous', 'Toutes'], ['racines', 'Racines du Coran'], ['expressions', 'Expressions et autres']].map(([f, l]) => `<button data-filtre="${f}" class="${filtre === f ? 'actif' : ''}">${l}</button>`).join('')}</div>
+      <span class="aide" style="margin:0">Ordre alphabétique arabe</span>
+    </div>
+    <div class="liste-lex">${lignes.length ? lignes.map(([k, n, o]) => `
+      <a class="lex-ligne" href="#" ${k === 'بشر' ? 'data-e="entree"' : 'data-autre'}>
+        <span class="lex-cle" lang="ar">${echap(k)}${o === null ? '<span class="etiquette">expression</span>' : ''}</span>
+        <span class="lex-droite"><b>${n}</b> définition${n > 1 ? 's' : ''}${o !== null ? `<br>${fmt(o)} occurrences` : ''}</span>
+        <span class="lex-extrait">[Extrait d'essai] début de la dernière définition publiée…</span>
+      </a>`).join('') : '<p class="message">Aucune entrée ne correspond.</p>'}
+    </div>`;
+  const f = $('#filtre-lex'); f.oninput = () => { const p = f.selectionStart; vueListe(); const g = $('#filtre-lex'); g.focus(); g.setSelectionRange(p, p); };
+}
+
+// ---------- Écran : fiche d'une entrée ----------
+function carteDef(d) {
+  const moi = niveau >= 1 && d.auteur === NOMS[niveau];
+  const acts = [];
+  if (moi) acts.push('<button data-act="modifier">Modifier</button>');
+  if (d.versions > 1) acts.push(`<button data-act="historique">Historique (${d.versions} versions)</button>`);
+  if (niveau >= 1 && !moi) acts.push('<button data-act="signaler">Signaler</button>');
+  if (niveau >= 2) acts.push('<button data-act="masquer">Masquer</button>');
+  return `<div class="def">
+    <div class="com-meta"><span class="auteur">${echap(d.auteur)}</span><span>${d.date}${d.versions > 1 ? ' · modifié' : ''}</span>${niveau >= 2 && d.signalements ? `<span class="signal" style="color:#b42318">⚑ ${d.signalements} signalement</span>` : ''}</div>
+    <p class="com-texte">${enrichir(d.texte)}</p>
+    ${acts.length ? `<div class="com-actions">${acts.join('')}</div>` : ''}
+  </div>`;
+}
+function vueEntree() {
+  const liste = inverse ? PROCHES.inverse : PROCHES.direct;
+  $('#vue').innerHTML = `
+    <div class="note-maquette"><b>Fiche d'une entrée</b> (adresse <code>#/lexique/بشر</code>). Chiffres et racines proches calculés sur les données du dépôt ; définitions fictives.</div>
+    <a class="retour" href="#" data-e="liste" style="display:inline-block;margin-bottom:10px;font-size:14px">← Tout le lexique</a>
+    <section class="entree-tete">
+      <div class="haut">
+        <div><p class="entree-cle" lang="ar">بشر</p><p class="aide" style="margin:0">Racine du Coran</p></div>
+        <div style="text-align:right"><button class="btn" data-act="copier-lien">Copier le lien</button></div>
+      </div>
+      <div class="chiffres"><span><b>${OCC.occurrences}</b> occurrences</span><span><b>${OCC.versets}</b> versets</span><span><b>${OCC.sourates}</b> sourates</span></div>
+      <div class="liens-entree"><a href="#" data-e="resultats">Voir les ${OCC.versets} versets</a><a href="#">Amis de la racine</a><a href="#">Déclinaisons</a><a href="#">Statistiques</a></div>
+      <p class="rappel">Le sens d'un mot se déduit de ses occurrences dans le Coran ; les définitions ci-dessous sont celles des membres.</p>
+    </section>
+
+    <section class="bloc">
+      <h2>Définitions <small>${DEFS.length} · les plus récentes en premier</small></h2>
+      ${DEFS.map(carteDef).join('')}
+      ${niveau >= 1
+        ? `<div class="ecrire"><textarea placeholder="Proposer une définition (texte simple, 4 000 caractères au plus ; 2:255 et r:… deviennent des liens)"></textarea>
+           <div class="ecrire-bas"><span>Publié tout de suite, signé ${NOMS[niveau]}.</span><button class="btn principal" data-act="publier">Publier</button></div></div>`
+        : '<div class="ecrire connexion">Connectez-vous pour proposer une définition.<br><button class="btn">Se connecter</button></div>'}
+    </section>
+
+    <section class="bloc">
+      <h2>Racines proches (lettres communes) <small>${liste.length} racines</small></h2>
+      <div class="proches-opt">
+        <span>Racines qui contiennent au moins deux lettres qui se suivent dans <span class="ar" lang="ar">${inverse ? 'رشب' : 'بشر'}</span> (<span class="ar" lang="ar">${inverse ? 'رش · شب · رشب' : 'بش · شر · بشر'}</span>)</span>
+        <label><input type="checkbox" id="inverse" ${inverse ? 'checked' : ''}> Sens inverse</label>
+      </div>
+      <div class="puces">${liste.map(([r, n, l]) => `<a class="puce${l ? ' avec-lex' : ''}" href="#">${r}<small>${n}</small>${l ? '<small class="pt">●</small>' : ''}</a>`).join('')}</div>
+      <p class="legende">Le chiffre = occurrences dans le Coran · <span style="color:var(--accent)">●</span> = a une entrée au lexique. Rapprochement par les lettres seulement, pas par le sens.</p>
+    </section>
+
+    <section class="bloc">
+      <h2>Forum</h2>
+      <div class="forum-ligne"><a href="#">1 fil sur <span class="ar" lang="ar">بشر</span></a>${niveau >= 1 ? '<a href="#">Ouvrir une discussion</a><span>Mes notes : 0</span>' : ''}</div>
+    </section>`;
+  $('#inverse').onchange = (e) => { inverse = e.target.checked; vueEntree(); };
+}
+
+// ---------- Écran : résultats d'une recherche, avec sélection ----------
+function carteVerset(v) {
+  const mots = v.ar.split(/\s+/).map((w, i) => `<span class="mot${v.pos.includes(i + 1) ? ' surligne' : ''}" data-mot="${i}" data-ref="${v.ref}">${w}</span>`).join(' ');
+  const c = choisis.has(v.ref);
+  return `<article class="verset${c ? ' choisi' : ''}">
+    <div class="verset-entete"><a class="ref" href="#">${v.ref}</a>
+      <span style="display:flex;gap:12px;align-items:center"><span>page ${v.page}</span>
+      <label class="choisir" title="Ajouter à la sélection à copier"><input type="checkbox" data-choisir="${v.ref}" ${c ? 'checked' : ''}> Choisir</label></span></div>
+    <p class="ar" lang="ar">${mots}</p>
+    <p class="tr">${v.tr}</p>
+  </article>`;
+}
+function vueResultats() {
+  $('#vue').innerHTML = `
+    <div class="note-maquette"><b>Résultats de r:<span class="ar" lang="ar">بشر</span></b> (3 versets montrés sur ${OCC.versets}, copiés des données du dépôt). Cocher « Choisir », cliquer sur un mot surligné, ou cliquer dans le champ de recherche pour l'historique.</div>
+    <div class="titre"><h1>Racine <span class="ar" lang="ar">بشر</span></h1><span class="resume">${OCC.occurrences} occurrences dans ${OCC.versets} versets</span></div>
+    <div class="encadre-lex"><p><b>Lexique</b> : 2 définitions pour <span class="ar" lang="ar">بشر</span> · <a href="#" data-e="entree">Ouvrir l'entrée</a> · 20 racines proches</p></div>
+    <div class="liste">${VERSETS.map(carteVerset).join('')}</div>
+    ${choisis.size ? `<div class="barre-copie">
+      <span class="gauche"><b>${choisis.size}</b> verset${choisis.size > 1 ? 's' : ''} choisi${choisis.size > 1 ? 's' : ''} <small class="aide">(${[...choisis].join(', ')})</small></span>
+      <span class="droite"><button class="btn" data-act="apercu">Aperçu</button><button class="btn principal" data-act="copier">Copier</button><button class="btn" data-act="vider">Vider</button></span>
+    </div>` : ''}`;
+}
+
+function texteCopie() {
+  return VERSETS.filter((v) => choisis.has(v.ref)).map((v) => [
+    `[${v.ref}]`, v.ar, v.tr,
+    ...(avecTrad ? ['(commentaire traditionnel choisi dans « Comparer avec », s\'il y en a un)'] : []),
+    ...(avecLien ? [`https://atelier.alfamous.ca/#/q/${v.ref}`] : []),
+  ].join('\n')).join('\n\n');
+}
+function apercu() {
+  fenetre(`<h2>Copier ${choisis.size} verset${choisis.size > 1 ? 's' : ''}</h2>
+    <div class="options-copie">
+      <label><input type="checkbox" checked disabled> Référence</label>
+      <label><input type="checkbox" checked disabled> Texte arabe</label>
+      <label><input type="checkbox" checked> Translittération</label>
+      <label><input type="checkbox" id="o-trad" ${avecTrad ? 'checked' : ''}> Commentaire traditionnel</label>
+      <label><input type="checkbox" id="o-lien" ${avecLien ? 'checked' : ''}> Lien vers le verset</label>
+    </div>
+    <div class="apercu">${echap(texteCopie()).replace(/([؀-ۿ][^\n]*)/g, '<span class="ar" lang="ar">$1</span>')}</div>
+    <div class="fenetre-bas"><span class="aide" style="margin:0">Texte simple + texte mis en forme (Word, courriel)</span><button class="btn principal" data-act="copier">Copier</button></div>`);
+  $('#o-trad').onchange = (e) => { avecTrad = e.target.checked; apercu(); };
+  $('#o-lien').onchange = (e) => { avecLien = e.target.checked; apercu(); };
+}
+
+function ficheMot(ref, i) {
+  const v = VERSETS.find((x) => x.ref === ref);
+  const w = v.ar.split(/\s+/)[i];
+  const tr = v.tr.split(/\s+/)[i];
+  const estBshr = v.pos.includes(+i + 1);
+  const f = $('#fiche-mot');
+  f.innerHTML = `<button class="fermer" data-fermer-fiche>×</button>
+    <p class="ar" lang="ar">${w}</p>
+    <dl><dt>Lecture</dt><dd><em>${tr}</em></dd>
+      <dt>Racine</dt><dd>${estBshr ? '<a href="#" class="ar lien-racine" lang="ar">بشر</a>' : '<span class="aide">(voir le mot à mot)</span>'}</dd>
+      <dt>Position</dt><dd>${ref}, mot ${+i + 1}</dd></dl>
+    <div class="lex-fiche">${estBshr
+      ? '<b>Lexique</b> : 2 définitions · <a href="#" data-e="entree">Ouvrir l\'entrée</a>'
+      : `<b>Lexique</b> : pas encore d'entrée${niveau >= 1 ? ' · <a href="#">Proposer une définition</a>' : ''}`}</div>
+    <p class="fiche-actions"><a href="#">Chercher ce mot</a></p>`;
+  f.hidden = false;
+}
+
+function historique(montrer) {
+  const h = $('#historique');
+  if (!montrer) { h.hidden = true; return; }
+  const q = $('#requete').value.trim();
+  const recents = HISTO.filter((x) => !q || x.includes(q) || q === 'r:بشر');
+  const lex = q && q !== 'r:بشر' ? LEXIQUE.map(([k]) => k).filter((k) => k.startsWith(q)) : [];
+  h.innerHTML = `<h4>Recherches récentes <button type="button" data-act="effacer-histo">Effacer</button></h4>
+    ${recents.length ? recents.map((x) => `<a href="#" data-histo="${echap(x)}"><span dir="auto" class="${/[؀-ۿ]/.test(x) ? 'ar' : ''}">${echap(x)}</span><small>sur cet appareil</small></a>`).join('') : '<p class="aide" style="margin:4px 12px">Aucune</p>'}
+    ${lex.length ? `<h4>Lexique</h4>${lex.map((k) => `<a href="#" data-e="entree"><span class="ar">${k}</span><small>entrée du lexique</small></a>`).join('')}` : ''}`;
+  h.hidden = false;
+}
+
+function rendre() {
+  menu();
+  document.querySelectorAll('#ecrans button').forEach((b) => b.classList.toggle('actif', b.dataset.e === ecran));
+  ({ liste: vueListe, entree: vueEntree, resultats: vueResultats })[ecran]();
+}
+
+// ---------- Événements ----------
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  if (t.closest('[data-fermer]') || t.id === 'voile') { $('#voile').hidden = true; return; }
+  if (t.closest('[data-fermer-fiche]')) { $('#fiche-mot').hidden = true; return; }
+  const r = t.closest('#roles button'); if (r) { niveau = +r.dataset.n; document.querySelectorAll('#roles button').forEach((b) => b.classList.toggle('actif', b === r)); rendre(); return; }
+  const h = t.closest('[data-histo]'); if (h) { e.preventDefault(); $('#requete').value = h.dataset.histo; historique(false); toast('Recherche relancée : ' + h.dataset.histo); return; }
+  const go = t.closest('[data-e]'); if (go) { e.preventDefault(); ecran = go.dataset.e; $('#fiche-mot').hidden = true; $('#voile').hidden = true; historique(false); rendre(); window.scrollTo(0, 0); return; }
+  if (t.closest('[data-autre]')) { e.preventDefault(); toast('Maquette : seule la fiche de بشر est montrée'); return; }
+  const f = t.closest('[data-filtre]'); if (f) { filtre = f.dataset.filtre; vueListe(); return; }
+  const m = t.closest('.mot[data-ref]'); if (m) { ficheMot(m.dataset.ref, m.dataset.mot); return; }
+  const a = t.closest('[data-act]');
+  if (a) {
+    e.preventDefault();
+    switch (a.dataset.act) {
+      case 'apercu': return apercu();
+      case 'copier': navigator.clipboard?.writeText(texteCopie()).catch(() => {}); $('#voile').hidden = true; return toast(`${choisis.size} verset(s) copié(s)`);
+      case 'vider': choisis.clear(); return vueResultats();
+      case 'effacer-histo': HISTO = []; return historique(true);
+      case 'copier-lien': return toast('Lien copié : …/#/lexique/بشر');
+      case 'nouvelle': return fenetre(`<h2>Nouvelle entrée du lexique</h2>
+        <label>Clé (mot, racine ou expression ; les voyelles seront retirées)<input type="text" dir="rtl" lang="ar" placeholder="مثال"></label>
+        <label>Première définition<textarea rows="5" placeholder="Texte simple, 4 000 caractères au plus"></textarea></label>
+        <p class="aide">Si la clé existe déjà, la définition s'ajoute à l'entrée existante.</p>
+        <div class="fenetre-bas"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-fermer>Publier</button></div>`);
+      case 'publier': return toast('Maquette : définition non enregistrée');
+      case 'historique': return fenetre(`<h2>Historique de la définition</h2>
+        <div class="def"><div class="com-meta"><span class="auteur">Version 2 (actuelle)</span><span>14 nov. 2026</span></div><p class="com-texte">${enrichir(DEFS[1].texte)}</p></div>
+        <div class="def"><div class="com-meta"><span class="auteur">Version 1</span><span>12 nov. 2026</span></div><p class="com-texte">[Texte d'essai] Version d'origine.</p></div>`);
+      default: return toast('Même fonctionnement que les commentaires de versets');
+    }
+  }
+  if (!t.closest('.champ')) historique(false);
+});
+document.addEventListener('change', (e) => {
+  const c = e.target.closest('[data-choisir]');
+  if (c) { c.checked ? choisis.add(c.dataset.choisir) : choisis.delete(c.dataset.choisir); vueResultats(); }
+});
+$('#requete').addEventListener('focus', () => historique(true));
+$('#requete').addEventListener('input', () => historique(true));
+$('#theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'sombre' ? 'clair' : 'sombre'; };
+rendre();
+}
+</script>
+</body>
+</html>

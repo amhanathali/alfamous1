@@ -1,4 +1,5 @@
-// Commentaires Alfamous sous les versets (maquette validée le 23 nov. 2026, docs/maquettes/commentaires.html).
+// Commentaires Alfamous sous les versets (maquette validée le 23 nov. 2026, docs/maquettes/commentaires.html),
+// et définitions du lexique (même modèle : type « lexique », clé = entrée ; docs/maquettes/lexique.html).
 // - Bouton à droite de ⌃ / ⌄ : fermé par défaut, ouvre et ferme les commentaires de CE verset.
 // - Les plus récents en premier ; la liste défile si elle est longue.
 // - Écrire dès le niveau 1 ; modifier le sien (historique) ; signaler ; masquer (2+) ; supprimer (3).
@@ -109,7 +110,8 @@ function dessiner(zone, liste) {
   const k = `${type}|${cle}`;
   const n = session.niveau;
   const uid = session.utilisateur?.uid;
-  const cible = type === 'verset' ? cle : 'cette entrée';
+  const lexique = type === 'lexique';
+  const cible = lexique ? `« ${cle} »` : cle;
   const nbMasques = liste.filter((c) => c.masque).length;
 
   const items = liste.map((c) => {
@@ -123,7 +125,7 @@ function dessiner(zone, liste) {
     if (n >= 2 && c.signalements) acts.push(`<span class="signal">⚑ ${c.signalements} signalement${c.signalements > 1 ? 's' : ''}</span>`);
 
     let corps;
-    if (c.masque && n < 2) corps = '<p class="com-texte placeholder">Commentaire masqué par un modérateur.</p>';
+    if (c.masque && n < 2) corps = `<p class="com-texte placeholder">${lexique ? 'Définition masquée' : 'Commentaire masqué'} par un modérateur.</p>`;
     else if (c.masque) corps = `<p class="com-texte barre">${enrichir(c.textePrive ?? '', lienRequete)}</p>
         <span class="bandeau-masque">Masqué par ${echapper(c.masque.parNom)} le ${dateCourte(c.masque.le)} — les autres ne voient que la mention « Commentaire masqué »</span>`;
     else corps = `<p class="com-texte">${enrichir(c.texte, lienRequete)}</p>`;
@@ -139,30 +141,49 @@ function dessiner(zone, liste) {
   }).join('');
 
   const ecrire = !session.utilisateur
-    ? `<div class="ecrire connexion">Pour écrire un commentaire, connectez-vous avec un compte au courriel vérifié.<br>
+    ? `<div class="ecrire connexion">Pour écrire ${lexique ? 'une définition' : 'un commentaire'}, connectez-vous avec un compte au courriel vérifié.<br>
         <button type="button" class="btn principal" data-compte="connexion">Se connecter</button>
         <button type="button" class="btn" data-compte="inscription">Créer un compte</button></div>`
     : n < 1
       ? '<div class="ecrire connexion">Vérifiez votre courriel pour pouvoir écrire. <button type="button" class="lien-bouton" data-compte="verifier">Que faire ?</button></div>'
       : `<form class="ecrire" data-com-form>
-          <textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="Votre commentaire sur ${echapper(cible)}… (renvois possibles : 2:255, r:أحد)">${echapper(brouillons.get(k) || '')}</textarea>
+          <textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="${lexique ? 'Votre définition de' : 'Votre commentaire sur'} ${echapper(cible)}… (renvois possibles : 2:255, r:أحد)">${echapper(brouillons.get(k) || '')}</textarea>
           <div class="ecrire-bas"><span>Publié tout de suite, signé « ${echapper(session.nom)} ». Vous pourrez le modifier, pas le supprimer.</span>
           <span><span data-compteur>${(brouillons.get(k) || '').length}</span> / ${TEXTE_MAX.toLocaleString('fr-CA')}
           <button class="btn principal">Publier</button></span></div>
           <p class="form-msg" role="alert"></p>
         </form>`;
 
-  zone.innerHTML = `<div class="com-entete"><h3>Commentaires Alfamous · ${liste.length}</h3>
-      <span class="discret">${liste.length > 1 ? 'les plus récents en premier' : ''}${nbMasques ? ` · dont ${nbMasques} masqué${nbMasques > 1 ? 's' : ''}` : ''}</span></div>
-    ${liste.length ? `<div class="com-liste">${items}</div>` : '<p class="aide">Aucun commentaire pour l\'instant.</p>'}
+  const fem = lexique ? 'e' : '';
+  zone.innerHTML = `<div class="com-entete"><h3>${lexique ? 'Définitions' : 'Commentaires Alfamous'} · ${liste.length}</h3>
+      <span class="discret">${liste.length > 1 ? `les plus récent${fem}s en premier` : ''}${nbMasques ? ` · dont ${nbMasques} masqué${fem}${nbMasques > 1 ? 's' : ''}` : ''}</span></div>
+    ${liste.length ? `<div class="com-liste">${items}</div>` : `<p class="aide">${lexique ? 'Aucune définition pour l\'instant.' : 'Aucun commentaire pour l\'instant.'}</p>`}
     ${ecrire}
-    ${type === 'verset' ? '<div class="forum-verset"></div>' : ''}`;
-  if (type === 'verset') ligneForum(zone.querySelector('.forum-verset'), cle);
+    ${zone.dataset.forum !== 'non' ? '<div class="forum-verset"></div>' : ''}`;
+  if (zone.dataset.forum !== 'non') ligneForum(zone.querySelector('.forum-verset'), cle, type);
 }
 
 // ---------- Actions ----------
 const trouver = (zone, id) => listes.get(`${zone.dataset.comType}|${zone.dataset.comCle}`)?.find((c) => c.id === id);
 const signature = () => ({ par: session.utilisateur.uid, parNom: session.nom });
+
+// Publier un commentaire (verset) ou une définition (lexique), avec le compteur de la limite de fréquence.
+// L'événement « commentaire-publie » prévient le lexique (liste à recharger).
+export async function publierCommentaire(type, cle, texte) {
+  const { db, F } = await firebase();
+  const lot = F.writeBatch(db);
+  lot.set(F.doc(F.collection(db, 'commentaires')), {
+    type, cle, auteurUid: session.utilisateur.uid, auteurNom: session.nom, texte,
+    creeLe: F.serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null,
+  });
+  await ajouterLimite(lot, db, F, session);
+  await avecDelai(lot.commit());
+  nombres.delete(`${type}|${cle}`);
+  document.dispatchEvent(new CustomEvent('commentaire-publie', { detail: { type, cle } }));
+}
+
+// Afficher directement les commentaires d'une zone (fiche d'une entrée du lexique).
+export const afficherCommentaires = (zone) => charger(zone);
 
 async function publier(form) {
   const zone = form.closest('.commentaires');
@@ -172,15 +193,7 @@ async function publier(form) {
   const bouton = form.querySelector('.principal');
   bouton.disabled = true; msg.textContent = '';
   try {
-    const { db, F } = await firebase();
-    const lot = F.writeBatch(db);
-    lot.set(F.doc(F.collection(db, 'commentaires')), {
-      type: zone.dataset.comType, cle: zone.dataset.comCle,
-      auteurUid: session.utilisateur.uid, auteurNom: session.nom, texte,
-      creeLe: F.serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null,
-    });
-    await ajouterLimite(lot, db, F, session);
-    await avecDelai(lot.commit());
+    await publierCommentaire(zone.dataset.comType, zone.dataset.comCle, texte);
     brouillons.delete(`${zone.dataset.comType}|${zone.dataset.comCle}`);
     await charger(zone);
   } catch (e) { msg.textContent = messageErreur(e); bouton.disabled = false; }
@@ -209,6 +222,7 @@ async function enregistrer(form) {
     lot.set(F.doc(db, `commentaires/${c.id}/versions/${c.nbVersions}`), { texte: c.texte, le: c.modifieLe ?? c.creeLe });
     lot.update(F.doc(db, `commentaires/${c.id}`), { texte, modifieLe: F.serverTimestamp(), nbVersions: c.nbVersions + 1 });
     await avecDelai(lot.commit());
+    changement(zone);
     await charger(zone);
   } catch (e) { msg.textContent = messageErreur(e); }
 }
@@ -286,6 +300,8 @@ async function signaler(form) {
   }
 }
 
+const changement = (zone) => document.dispatchEvent(new CustomEvent('commentaire-publie', { detail: { type: zone.dataset.comType, cle: zone.dataset.comCle } }));
+
 // Zone d'un commentaire dont la fenêtre est ouverte (pour recharger après l'action).
 let zoneActive = null;
 
@@ -299,7 +315,7 @@ export function initCommentaires(contenu) {
     const conf = e.target.closest('[data-com-confirmer]');
     if (conf) {
       conf.disabled = true;
-      try { await supprimer(conf.dataset.id); fermerFenetre(); if (zoneActive) await charger(zoneActive); }
+      try { await supprimer(conf.dataset.id); fermerFenetre(); if (zoneActive) { changement(zoneActive); await charger(zoneActive); } }
       catch (err) { conf.closest('dialog').querySelector('.form-msg').textContent = messageErreur(err); conf.disabled = false; }
       return;
     }
@@ -316,8 +332,8 @@ export function initCommentaires(contenu) {
         case 'historique': return await historique(zone, c);
         case 'signaler': return formulaireSignalement(c);
         case 'supprimer': return confirmerSuppression(c);
-        case 'masquer': a.disabled = true; await masquer(zone, c); return await charger(zone);
-        case 'demasquer': a.disabled = true; await demasquer(zone, c); return await charger(zone);
+        case 'masquer': a.disabled = true; await masquer(zone, c); changement(zone); return await charger(zone);
+        case 'demasquer': a.disabled = true; await demasquer(zone, c); changement(zone); return await charger(zone);
       }
     } catch (err) { a.disabled = false; ouvrirFenetre(`<h2>Action impossible</h2><p>${echapper(messageErreur(err))}</p><div class="fenetre-bas"><button type="button" class="btn" data-fermer>Fermer</button></div>`); }
   });

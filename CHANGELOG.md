@@ -1,6 +1,31 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 3 : lexique, racines proches, historique, copie de versets
+- Onglet **Lexique** (`#/lexique`) : toutes les entrées par ordre alphabétique arabe, nombre de définitions, occurrences
+  dans le Coran, extrait ; filtre sur la clé et le texte des définitions ; Racines du Coran / Expressions et autres ;
+  « + Nouvelle entrée » (niveau 1 : clé sans voyelles et première définition).
+- Fiche d'une entrée (`#/lexique/<clé>`) : occurrences, versets et sourates (si la clé est une racine), lien vers les
+  versets, les amis et les déclinaisons ; définitions (même code que les commentaires : publier, modifier avec
+  historique, signaler, masquer, supprimer) ; fils du forum et « Ouvrir une discussion » ; racines proches.
+- **Racines proches (lettres communes)**, reprise des « synonymes » de l'ancienne application, calculées sur les
+  racines du Coran, avec l'option « Sens inverse » ; entrées du lexique marquées.
+- Encadré « Lexique » en tête des résultats d'une racine ; ligne « Lexique » dans la fiche d'un mot.
+- **Historique des recherches** sous le champ (flèches, Entrée, Échap ; « Effacer ») suivi des clés du lexique qui
+  commencent par la saisie ; synchronisé entre les machines d'un compte connecté (`historiques/{uid}`), local pour
+  un visiteur.
+- **Copie de versets** : case « Choisir » sur chaque verset, barre Aperçu · Copier · Vider, options (translittération,
+  commentaire traditionnel, lien), texte simple et texte mis en forme.
+- Règles Firestore de `historiques/{uid}` et 4 tests (`tests/regles/historiques.test.mjs`) ; tests des fonctions pures
+  (`tests/lexique.test.mjs`, `historique.test.mjs`, `selection.test.mjs`) ; définitions d'essai dans
+  `npm run emulateurs:peupler`.
+- Liens « lexique » des notes et du forum cliquables ; ligne du forum aussi sous une entrée du lexique.
+
+### Ajouté — phase 3 : cadrage du lexique
+- Maquette cliquable `docs/maquettes/lexique.html` : liste du lexique, fiche d'une entrée (occurrences, définitions,
+  racines proches, forum), encadré « Lexique » dans les résultats, historique des recherches, sélection et copie de
+  versets ; 8 questions en attente. Versets et chiffres copiés de `donnees/` ; définitions fictives.
+
 ### Ajouté — phase 2 : limite de fréquence et niveaux
 - Limite de 20 publications par heure et par membre (commentaires, notes, réponses, signalements), vérifiée par les
   règles (`limites/{uid}`, écrit dans le même lot) ; message clair avec l'heure de reprise ; modérateurs et admin exemptés.

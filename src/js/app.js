@@ -1,4 +1,5 @@
-// Alfamous1 — interface de lecture et de recherche ; comptes et commentaires (phase 2).
+// Alfamous1 — interface de lecture et de recherche ; comptes et commentaires (phase 2) ;
+// lexique, historique des recherches et copie de versets (phase 3).
 import * as D from './donnees.js';
 import {
   analyserRequete, chercherMots, chercherRacines, amisRacine, trierAmis,
@@ -8,6 +9,9 @@ import { NOMS_SOURATES } from './sourates.js';
 import { initCompte, surChangement } from './compte.js';
 import { initNotes, routeNotes, menuNotes } from './notes.js';
 import { initCommentaires, boutonCommentaires } from './commentaires.js';
+import { routeLexique, initLexique, encadreLexique, clesLexique } from './lexique.js';
+import { initHistorique, noterRecherche } from './historique.js';
+import { initSelection, caseChoisir } from './selection.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -93,7 +97,7 @@ function carteVerset(s, x, motsVerset, resultat, contexte = false) {
   const trad = traductionActive?.carte.get(`${s}:${x.v}`);
   const tradHtml = trad ? (resultat?.dansTraduction ? surlignerMots(trad, resultat.positions) : echapper(trad)) : '';
   return `<article class="verset${contexte ? ' contexte' : ''}" data-cle="${s}:${x.v}">
-    <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span></div>
+    <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span class="verset-infos"><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span>${caseChoisir(`${s}:${x.v}`)}</span></div>
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
     ${trad ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${tradHtml}</p>` : ''}
@@ -140,8 +144,10 @@ async function ouvrirFiche(ref) {
       <dt>Sens</dt><dd>${echapper(sens) || '—'}</dd>
       <dt>Position</dt><dd>${s}:${v}, mot ${i + 1}</dd>
     </dl>
+    <p class="lex-fiche" hidden></p>
     <p class="fiche-actions"><a href="${lienRequete(`m:${ar}`)}">Chercher ce mot</a></p>`;
   fiche.hidden = false;
+  encadreLexique($('.lex-fiche', fiche), racine, { court: true });
   $('.fermer', fiche).onclick = () => { fiche.hidden = true; };
 }
 contenu.addEventListener('click', (e) => { const el = e.target.closest('.mot[data-ref]'); if (el) ouvrirFiche(el.dataset.ref); });
@@ -284,6 +290,7 @@ async function vueRacine(R) {
   contenu.innerHTML = `<div class="titre"><h1 class="ar racine-titre" lang="ar">${echapper(R)}</h1>
       <span class="resume">racine · ${pluriel(total, 'occurrence')} dans ${pluriel(resultats.length, 'verset')} et ${pluriel(nbS, 'sourate')} · ${pluriel(dec.formes.length, 'forme')}
       · <a href="${lienRequete(`m:${R}`)}">chercher comme mot</a></span></div>
+    <p class="encadre-lex" hidden></p>
     ${blocRepartition(resultats)}
     <div class="onglets" role="tablist">
       <button role="tab" data-onglet="versets" class="actif">Versets</button>
@@ -296,6 +303,7 @@ async function vueRacine(R) {
     <div class="onglet" id="o-contigus" hidden><p class="aide">Racines des mots immédiatement voisins (distance 1).</p><div class="t"></div></div>
     <div class="onglet" id="o-formes" hidden></div>`;
 
+  encadreLexique($('.encadre-lex', contenu), R);
   // Onglets
   contenu.querySelectorAll('[data-onglet]').forEach((b) => b.addEventListener('click', () => {
     contenu.querySelectorAll('[data-onglet]').forEach((x) => x.classList.toggle('actif', x === b));
@@ -353,6 +361,12 @@ async function router() {
     try { await routeNotes(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
+  // Lexique (#/lexique, #/lexique/<clé>)
+  if (/^#\/lexique(\/|$)/.test(location.hash)) {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeLexique(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
   if (location.hash === '#/stats') { $('#requete').value = ''; $('#effacer').hidden = true; document.title = 'Statistiques — Alfamous'; return vueStats().catch(erreur); }
   const m = location.hash.match(/^#\/q\/(.*)$/);
   const q = m ? decodeURIComponent(m[1]).trim() : '';
@@ -361,6 +375,7 @@ async function router() {
   try {
     if (!q) { document.title = "Alfamous — l'atelier du codex"; return await vueAccueil(); }
     document.title = `${q} — Alfamous`;
+    noterRecherche(q);
     const r = analyserRequete(q, new Set(Object.keys(await D.racines())));
     if (r.type === 'versets') return await vueSourate(r.sourate, r.de, r.a);
     if (r.type === 'sourate') return await vueSourate(r.sourate);
@@ -426,9 +441,12 @@ async function initTraductions() {
 window.addEventListener('hashchange', router);
 initCommentaires(contenu);
 initNotes(contenu);
+initLexique();
+initHistorique({ lexique: clesLexique });
+initSelection({ traduction: () => traductionActive });
 initCompte();
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
-surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/)/.test(location.hash)) router(); });
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$)/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

@@ -74,6 +74,24 @@ compteurs du fil (`nbReponses`, `nbReponsesAutrui`, `activiteLe`) se font dans l
 - **Modifier un fil publié** : `versions/{nbVersions}` + mise à jour, dans le même lot.
 - **Masquer / démasquer** (2+), **supprimer** un fil publié et ses réponses (3).
 
+## Lexique (phase 3)
+Pas de collection à part : une **entrée** du lexique est l'ensemble des commentaires `type: 'lexique'` de même `cle`
+(mot, racine ou expression). La clé est enregistrée **sans voyelles** (harakat, signes coraniques et tatwīl retirés par
+`normaliserCle`, `src/js/lexique-outils.js`), espaces simples, 200 caractères au plus. Créer une entrée = publier sa
+première définition. Mêmes règles, mêmes opérations que les commentaires de versets (ci-dessus).
+
+Lecture : la liste (`#/lexique`) lit une fois par visite toutes les définitions (`where type == 'lexique'`, environ 360
+documents après l'import) ; la fiche (`#/lexique/<clé>`) lit les définitions de la clé ; l'encadré des résultats et la
+fiche d'un mot n'utilisent qu'une requête de comptage. À revoir (document d'index par clé) si le lexique dépasse
+quelques milliers de définitions.
+
+## `historiques/{uid}` — historique des recherches
+`{ recherches: [{ q, t }], majLe }` : 50 recherches au plus (`q` ≤ 200 caractères, `t` en millisecondes), la plus récente
+en premier. Lu, écrit et effacé par son seul titulaire (tout compte connecté, même au courriel non vérifié) ; personne
+d'autre, modérateurs et admin compris. Le navigateur garde une copie locale ; à la connexion et à chaque recherche
+(après 1,5 s), copie locale et document sont fusionnés dans une transaction (`fusionnerHistoriques`). Les visiteurs ont
+seulement la copie locale. Pas de limite de fréquence (document privé, réécrit sur place).
+
 ## `limites/{uid}` — limite de fréquence
 `{ debut, n, dernier }` : début de la fenêtre d'une heure, nombre de publications, dernière publication.
 Chaque publication d'un membre (commentaire, note, réponse, signalement) écrit ce document dans le même lot :
@@ -81,4 +99,5 @@ Chaque publication d'un membre (commentaire, note, réponse, signalement) écrit
 Modérateurs et admin exemptés.
 
 ## À venir
-- Import des 335 commentaires et 369 entrées du lexique (phase 4, par script admin).
+- Import des 335 commentaires et 369 entrées du lexique (phase 4, par script admin) ; les clés du lexique passent par
+  `normaliserCle` à l'import.

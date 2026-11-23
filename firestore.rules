@@ -58,6 +58,20 @@ service cloud.firestore {
         && ((resource.data.debut <= request.time - duration.value(1, 'h') && nouvelleFenetre()) || memeFenetre());
     }
 
+    // ---------- Historique des recherches (phase 3) ----------
+    // Document privé : lu et écrit par son seul titulaire (tout compte connecté, même au courriel non vérifié),
+    // pour retrouver ses recherches sur toutes ses machines. 50 recherches au plus.
+    match /historiques/{uid} {
+      function historiqueValide() {
+        return request.resource.data.keys().hasOnly(['recherches', 'majLe'])
+          && request.resource.data.recherches is list
+          && request.resource.data.recherches.size() <= 50
+          && request.resource.data.majLe == request.time;
+      }
+      allow read, delete: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid && historiqueValide();
+    }
+
     // ---------- Commentaires Alfamous (versets et lexique) ----------
     match /commentaires/{id} {
       // Lecture publique. Un commentaire masqué a un texte vide : l'original est dans prive/texte.
