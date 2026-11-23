@@ -28,7 +28,7 @@ pause
 exit /b 0
 :echec
 echo.
-echo Les emulateurs n ont pas demarre. Lire la fenetre « Alfamous1 - emulateurs ».
+echo Les emulateurs n ont pas demarre. Lire la fenetre "Alfamous1 - emulateurs".
 echo Cause frequente : un ancien emulateur occupe le port 8085 (netstat -ano ^| findstr :8085).
 pause
 exit /b 1
