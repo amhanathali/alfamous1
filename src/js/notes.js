@@ -14,11 +14,13 @@ let filtreNotes = 'toutes';
 let filCourant = null; // { note, reponses } du fil affiché
 
 // ---------- Outils ----------
-function puceLien(l) {
+// cliquable = false dans les listes : chaque ligne est déjà un lien (pas de lien dans un lien).
+function puceLien(l, cliquable = true) {
   if (!l) return '<span class="lien-cible">libre</span>';
-  if (l.type === 'verset') return `<a class="lien-cible" href="${lienRequete(l.cle)}">verset ${echapper(l.cle)}</a>`;
-  if (l.type === 'racine') return `<a class="lien-cible" href="${lienRequete(`r:${l.cle}`)}">racine <span class="ar" lang="ar">${echapper(l.cle)}</span></a>`;
-  return `<span class="lien-cible">lexique <span class="ar" lang="ar">${echapper(l.cle)}</span></span>`;
+  const balise = (href, html) => (cliquable && href ? `<a class="lien-cible" href="${href}">${html}</a>` : `<span class="lien-cible">${html}</span>`);
+  if (l.type === 'verset') return balise(lienRequete(l.cle), `verset ${echapper(l.cle)}`);
+  if (l.type === 'racine') return balise(lienRequete(`r:${l.cle}`), `racine <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
+  return balise(null, `lexique <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
 }
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 const titreAffiche = (n) => (n.masque ? 'Fil masqué par un modérateur' : n.titre || 'Sans titre');
@@ -70,7 +72,7 @@ async function vueMesNotes(contenu) {
         </div>
         <div class="liste-fils">${liste.length ? liste.map((n) => `<a class="fil-ligne" href="#/note/${n.id}">
             <div><div class="fil-titre">${echapper(n.masque ? 'Fil masqué par un modérateur' : n.titre || 'Sans titre')}</div>
-              <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée' : 'privée'}</span>${puceLien(n.lien)}
+              <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée' : 'privée'}</span>${puceLien(n.lien, false)}
                 <span class="extrait">${echapper(n.texte.slice(0, 90))}${n.texte.length > 90 ? '…' : ''}</span></div></div>
             <div class="fil-droite">modifiée le<b>${dateCourte(n.modifieLe)}</b>${n.publie ? pluriel(n.nbReponses, 'réponse') : ''}</div></a>`).join('')
           : '<p class="vide">Aucune note pour l\'instant.</p>'}</div>`;
@@ -242,7 +244,7 @@ async function vueForum(contenu, cle) {
         </div>
         <div class="liste-fils">${liste.map((n) => `<a class="fil-ligne${n.masque ? ' masque' : ''}" href="#/fil/${n.id}">
             <div><div class="fil-titre">${echapper(titreAffiche(n))}</div>
-              <div class="fil-meta"><span>${echapper(n.auteurNom)}</span>${puceLien(n.lien)}<span>publié le ${dateCourte(n.publieLe)}</span></div></div>
+              <div class="fil-meta"><span>${echapper(n.auteurNom)}</span>${puceLien(n.lien, false)}<span>publié le ${dateCourte(n.publieLe)}</span></div></div>
             <div class="fil-droite"><b>${n.nbReponses}</b>${n.nbReponses > 1 ? 'réponses' : 'réponse'}<br>activité ${dateCourte(n.activiteLe)}</div></a>`).join('')
           || '<p class="vide">Aucun fil pour l\'instant.</p>'}</div>`;
       contenu.querySelectorAll('[data-filtre-forum]').forEach((b) => b.addEventListener('click', () => { filtreForum = b.dataset.filtreForum; dessiner(); }));
