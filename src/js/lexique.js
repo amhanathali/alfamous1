@@ -92,7 +92,7 @@ async function vueListe(contenu) {
       const racine = estRacine(e.cle, racines);
       const extrait = e.derniere ? e.derniere.texte.replace(/\s+/g, ' ').slice(0, 160) : 'Définition masquée par un modérateur.';
       return `<a class="lex-ligne" href="${lienEntree(e.cle)}">
-        <span class="lex-cle" dir="auto"><span class="${estArabe(e.cle) ? 'ar' : ''}" lang="${estArabe(e.cle) ? 'ar' : 'fr'}">${echapper(e.cle)}</span>${racine ? '' : '<span class="etiquette">expression</span>'}</span>
+        <span class="lex-cle"><span class="${estArabe(e.cle) ? 'ar' : ''}" lang="${estArabe(e.cle) ? 'ar' : 'fr'}">${echapper(e.cle)}</span>${racine ? '' : '<span class="etiquette">expression</span>'}</span>
         <span class="lex-droite"><b>${e.definitions}</b> définition${e.definitions > 1 ? 's' : ''}${racine ? `<br>${pluriel(racines[e.cle].length, 'occurrence')}` : ''}</span>
         <span class="lex-extrait" dir="auto">${echapper(extrait)}</span></a>`;
     }).join('') || `<p class="vide">${entrees.length ? 'Aucune entrée ne correspond.' : 'Le lexique est vide pour l\'instant.'}</p>`;
