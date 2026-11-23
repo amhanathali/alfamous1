@@ -1,6 +1,11 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 3 : cadrage du lexique
+- Maquette cliquable `docs/maquettes/lexique.html` : liste du lexique, fiche d'une entrée (occurrences, définitions,
+  racines proches, forum), encadré « Lexique » dans les résultats, historique des recherches, sélection et copie de
+  versets ; 8 questions en attente. Versets et chiffres copiés de `donnees/` ; définitions fictives.
+
 ### Ajouté — phase 2 : limite de fréquence et niveaux
 - Limite de 20 publications par heure et par membre (commentaires, notes, réponses, signalements), vérifiée par les
   règles (`limites/{uid}`, écrit dans le même lot) ; message clair avec l'heure de reprise ; modérateurs et admin exemptés.
