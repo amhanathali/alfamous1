@@ -13,3 +13,5 @@
 | 2026-11-22 | Traduction Mountadana laissée de côté (absente de tanzil.net) | Choix de l'auteur |
 | 2026-11-23 | Les traductions tanzil.net sont des « commentaires traditionnels », affichés seulement pour la comparaison ; les commentaires d'Alfamous sont le contenu principal | Demande de l'auteur |
 | 2026-11-23 | Essai local avant tout déploiement : LANCER_ALFAMOUS1.bat (port 5050) ; émulateurs Firebase (Auth, Firestore) à partir de la phase 2 | Demande de l'auteur |
+| 2026-11-23 | Droits d'accès : niveaux 0 (visiteur) à 3 (admin), écriture dès le niveau 1 (courriel vérifié), sans validation ; modérateur = masquer, admin = supprimer ; détail dans docs/DROITS.md | Décision de l'auteur |
+| 2026-11-23 | Trois espaces reliés sans fusion : commentaires Alfamous (versets et lexique), Mes Notes (privées), forum ; une note publiée devient un fil du forum | Décision de l'auteur |
