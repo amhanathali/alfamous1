@@ -5,7 +5,8 @@ import {
   declinaisons, statistiquesRacines, repartitionParSourate,
 } from './recherche.js';
 import { NOMS_SOURATES } from './sourates.js';
-import { initCompte } from './compte.js';
+import { initCompte, surChangement } from './compte.js';
+import { initNotes, routeNotes, menuNotes } from './notes.js';
 import { initCommentaires, boutonCommentaires } from './commentaires.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
@@ -345,6 +346,13 @@ function message(html) { contenu.innerHTML = `<p class="message">${html}</p>`; }
 // ---------- Routage (#/q/…, #/stats) ----------
 async function router() {
   fiche.hidden = true;
+  menuNotes();
+  // Mes Notes et forum (#/notes, #/note/…, #/forum, #/fil/…)
+  if (/^#\/(notes|note\/|forum|fil\/)/.test(location.hash)) {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeNotes(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
   if (location.hash === '#/stats') { $('#requete').value = ''; $('#effacer').hidden = true; document.title = 'Statistiques — Alfamous'; return vueStats().catch(erreur); }
   const m = location.hash.match(/^#\/q\/(.*)$/);
   const q = m ? decodeURIComponent(m[1]).trim() : '';
@@ -417,7 +425,10 @@ async function initTraductions() {
 
 window.addEventListener('hashchange', router);
 initCommentaires(contenu);
+initNotes(contenu);
 initCompte();
+// Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/)/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

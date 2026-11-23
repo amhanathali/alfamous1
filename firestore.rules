@@ -133,5 +133,240 @@ service cloud.firestore {
         allow delete: if niveau() >= 2;
       }
     }
+
+    // ---------- Mes Notes et forum (docs/MODELE-DONNEES.md) ----------
+    // Une note privée (publie == false) n'est lue que par son auteur ; publiée, c'est un fil du forum lu par tous.
+    function lienValide(l) {
+      return l == null
+        || (l.keys().hasOnly(['type', 'cle']) && l.cle is string
+            && ((l.type == 'verset' && l.cle.matches('^[0-9]{1,3}:[0-9]{1,3}$'))
+              || ((l.type == 'racine' || l.type == 'lexique') && l.cle.size() >= 1 && l.cle.size() <= 200)));
+    }
+    function titreValide(t, requis) { return t is string && t.size() <= 140 && (!requis || t.size() >= 1); }
+    function texteNoteValide(t) { return t is string && t.size() >= 1 && t.size() <= 20000; }
+    function champsNote() {
+      return ['auteurUid', 'auteurNom', 'titre', 'texte', 'lien', 'publie', 'creeLe', 'modifieLe', 'publieLe',
+              'activiteLe', 'nbReponses', 'nbReponsesAutrui', 'nbVersions', 'masque'];
+    }
+    function champsReponse() {
+      return ['auteurUid', 'auteurNom', 'texte', 'creeLe', 'modifieLe', 'nbVersions', 'masque'];
+    }
+    // Signalement : un par membre, jamais sur son propre contenu.
+    function signalementValide(auteurDuContenu, uid) {
+      return niveau() >= 1 && uid == moi() && auteurDuContenu != moi()
+        && request.resource.data.keys().hasOnly(['motif', 'le'])
+        && request.resource.data.motif is string && request.resource.data.motif.size() <= 500
+        && request.resource.data.le == request.time;
+    }
+    function masqueValide(m) {
+      return m.keys().hasOnly(['par', 'parNom', 'le']) && m.par == moi() && m.parNom == monNom() && m.le == request.time;
+    }
+
+    match /notes/{id} {
+      function note() { return get(/databases/$(database)/documents/notes/$(id)).data; }
+      function noteApres() { return getAfter(/databases/$(database)/documents/notes/$(id)).data; }
+      function estAuteurNote() { return request.auth != null && note().auteurUid == request.auth.uid; }
+
+      allow read: if resource.data.publie == true
+        || (request.auth != null && resource.data.auteurUid == request.auth.uid);
+
+      // Créer une note (privée ou publiée tout de suite).
+      allow create: if niveau() >= 1
+        && monNom().size() > 0
+        && request.resource.data.keys().hasOnly(champsNote())
+        && request.resource.data.keys().hasAll(champsNote())
+        && request.resource.data.auteurUid == moi()
+        && request.resource.data.auteurNom == monNom()
+        && request.resource.data.publie is bool
+        && titreValide(request.resource.data.titre, request.resource.data.publie)
+        && texteNoteValide(request.resource.data.texte)
+        && lienValide(request.resource.data.lien)
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.modifieLe == request.time
+        && request.resource.data.activiteLe == request.time
+        && request.resource.data.publieLe == (request.resource.data.publie ? request.time : null)
+        && request.resource.data.nbReponses == 0
+        && request.resource.data.nbReponsesAutrui == 0
+        && request.resource.data.nbVersions == 1
+        && request.resource.data.masque == null;
+
+      function parAuteur() {
+        return niveau() >= 1 && resource.data.auteurUid == moi() && resource.data.masque == null;
+      }
+      function contenuValide() {
+        return titreValide(request.resource.data.titre, request.resource.data.publie == true)
+          && texteNoteValide(request.resource.data.texte)
+          && lienValide(request.resource.data.lien);
+      }
+      // Note privée : modification libre, sans historique.
+      function editionPrivee() {
+        return parAuteur() && resource.data.publie == false && request.resource.data.publie == false
+          && changes(['titre', 'texte', 'lien', 'modifieLe'])
+          && contenuValide() && request.resource.data.modifieLe == request.time;
+      }
+      // Publier : la note devient un fil (titre obligatoire).
+      function publication() {
+        return parAuteur() && resource.data.publie == false && request.resource.data.publie == true
+          && changes(['titre', 'texte', 'lien', 'modifieLe', 'publie', 'publieLe', 'activiteLe'])
+          && contenuValide()
+          && request.resource.data.modifieLe == request.time
+          && request.resource.data.publieLe == request.time
+          && request.resource.data.activiteLe == request.time;
+      }
+      // Fil publié : modification avec historique (versions/{n} écrit dans le même lot).
+      function editionPubliee() {
+        return parAuteur() && resource.data.publie == true && request.resource.data.publie == true
+          && changes(['titre', 'texte', 'lien', 'modifieLe', 'nbVersions'])
+          && contenuValide()
+          && request.resource.data.modifieLe == request.time
+          && request.resource.data.nbVersions == resource.data.nbVersions + 1
+          && existsAfter(/databases/$(database)/documents/notes/$(id)/versions/$(string(resource.data.nbVersions)));
+      }
+      // Dépublier : seulement si aucun autre membre n'a répondu.
+      function depublication() {
+        return parAuteur() && resource.data.publie == true && request.resource.data.publie == false
+          && resource.data.nbReponsesAutrui == 0
+          && changes(['publie', 'publieLe'])
+          && request.resource.data.publieLe == null;
+      }
+      // Nouvelle réponse : compteurs et activité mis à jour dans le même lot que reponses/{n+1}.
+      function compteurReponse() {
+        return niveau() >= 1 && resource.data.publie == true && resource.data.masque == null
+          && changes(['nbReponses', 'nbReponsesAutrui', 'activiteLe'])
+          && request.resource.data.nbReponses == resource.data.nbReponses + 1
+          && request.resource.data.nbReponsesAutrui == resource.data.nbReponsesAutrui + (resource.data.auteurUid == moi() ? 0 : 1)
+          && request.resource.data.activiteLe == request.time
+          && existsAfter(/databases/$(database)/documents/notes/$(id)/reponses/$(string(resource.data.nbReponses + 1)));
+      }
+      // Masquer un fil (niveau ≥ 2) : titre et texte mis à part dans prive/texte.
+      function masquageNote() {
+        return niveau() >= 2 && resource.data.publie == true && resource.data.masque == null
+          && changes(['masque', 'titre', 'texte'])
+          && request.resource.data.titre == '' && request.resource.data.texte == ''
+          && masqueValide(request.resource.data.masque)
+          && getAfter(/databases/$(database)/documents/notes/$(id)/prive/texte).data.titre == resource.data.titre
+          && getAfter(/databases/$(database)/documents/notes/$(id)/prive/texte).data.texte == resource.data.texte;
+      }
+      function demasquageNote() {
+        return niveau() >= 2 && resource.data.masque != null
+          && changes(['masque', 'titre', 'texte'])
+          && request.resource.data.masque == null
+          && request.resource.data.titre == get(/databases/$(database)/documents/notes/$(id)/prive/texte).data.titre
+          && request.resource.data.texte == get(/databases/$(database)/documents/notes/$(id)/prive/texte).data.texte
+          && !existsAfter(/databases/$(database)/documents/notes/$(id)/prive/texte);
+      }
+
+      allow update: if editionPrivee() || publication() || editionPubliee() || depublication()
+        || compteurReponse() || masquageNote() || demasquageNote();
+
+      // Supprimer : l'auteur, tant que la note est privée ; l'admin, toujours.
+      allow delete: if (niveau() >= 1 && resource.data.auteurUid == moi() && resource.data.publie == false)
+        || niveau() >= 3;
+
+      match /versions/{n} {
+        allow read: if (note().publie == true && note().masque == null) || estAuteurNote() || niveau() >= 2;
+        allow create: if niveau() >= 1
+          && note().auteurUid == moi() && note().publie == true && note().masque == null
+          && n == string(note().nbVersions)
+          && noteApres().nbVersions == note().nbVersions + 1
+          && request.resource.data.keys().hasOnly(['titre', 'texte', 'lien', 'le'])
+          && request.resource.data.titre == note().titre
+          && request.resource.data.texte == note().texte
+          && request.resource.data.lien == note().lien
+          && request.resource.data.le == note().modifieLe;
+        allow delete: if niveau() >= 3 || (estAuteurNote() && note().publie == false);
+      }
+
+      match /prive/{doc} {
+        allow read: if niveau() >= 2;
+        allow create: if niveau() >= 2 && doc == 'texte'
+          && note().masque == null && noteApres().masque != null
+          && request.resource.data.keys().hasOnly(['titre', 'texte'])
+          && request.resource.data.titre == note().titre
+          && request.resource.data.texte == note().texte;
+        allow delete: if (niveau() >= 2 && doc == 'texte' && noteApres().masque == null) || niveau() >= 3;
+      }
+
+      match /signalements/{uid} {
+        allow read: if niveau() >= 2;
+        allow create: if note().publie == true && signalementValide(note().auteurUid, uid);
+        allow delete: if niveau() >= 2;
+      }
+
+      // ---------- Réponses d'un fil : reponses/{n}, n = 1, 2, 3… ----------
+      match /reponses/{rid} {
+        function rep() { return get(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)).data; }
+        function repApres() { return getAfter(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)).data; }
+
+        allow read: if note().publie == true || estAuteurNote() || niveau() >= 2;
+
+        allow create: if niveau() >= 1
+          && monNom().size() > 0
+          && note().publie == true && note().masque == null
+          && rid == string(note().nbReponses + 1)
+          && noteApres().nbReponses == note().nbReponses + 1
+          && request.resource.data.keys().hasOnly(champsReponse())
+          && request.resource.data.keys().hasAll(champsReponse())
+          && request.resource.data.auteurUid == moi()
+          && request.resource.data.auteurNom == monNom()
+          && texteValide(request.resource.data.texte)
+          && request.resource.data.creeLe == request.time
+          && request.resource.data.modifieLe == null
+          && request.resource.data.nbVersions == 1
+          && request.resource.data.masque == null;
+
+        function editionReponse() {
+          return niveau() >= 1 && resource.data.auteurUid == moi() && resource.data.masque == null
+            && changes(['texte', 'modifieLe', 'nbVersions'])
+            && texteValide(request.resource.data.texte)
+            && request.resource.data.modifieLe == request.time
+            && request.resource.data.nbVersions == resource.data.nbVersions + 1
+            && existsAfter(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)/versions/$(string(resource.data.nbVersions)));
+        }
+        function masquageReponse() {
+          return niveau() >= 2 && resource.data.masque == null
+            && changes(['masque', 'texte'])
+            && request.resource.data.texte == ''
+            && masqueValide(request.resource.data.masque)
+            && getAfter(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)/prive/texte).data.texte == resource.data.texte;
+        }
+        function demasquageReponse() {
+          return niveau() >= 2 && resource.data.masque != null
+            && changes(['masque', 'texte'])
+            && request.resource.data.masque == null
+            && request.resource.data.texte == get(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)/prive/texte).data.texte
+            && !existsAfter(/databases/$(database)/documents/notes/$(id)/reponses/$(rid)/prive/texte);
+        }
+        allow update: if editionReponse() || masquageReponse() || demasquageReponse();
+
+        allow delete: if niveau() >= 3
+          || (estAuteurNote() && note().publie == false && resource.data.auteurUid == moi());
+
+        match /versions/{n} {
+          allow read: if (note().publie == true || estAuteurNote()) && (rep().masque == null || niveau() >= 2);
+          allow create: if niveau() >= 1
+            && rep().auteurUid == moi() && rep().masque == null
+            && n == string(rep().nbVersions)
+            && repApres().nbVersions == rep().nbVersions + 1
+            && request.resource.data.keys().hasOnly(['texte', 'le'])
+            && request.resource.data.texte == rep().texte
+            && request.resource.data.le == (rep().modifieLe != null ? rep().modifieLe : rep().creeLe);
+          allow delete: if niveau() >= 3 || (estAuteurNote() && note().publie == false);
+        }
+        match /prive/{doc} {
+          allow read: if niveau() >= 2;
+          allow create: if niveau() >= 2 && doc == 'texte'
+            && rep().masque == null && repApres().masque != null
+            && request.resource.data.keys().hasOnly(['texte'])
+            && request.resource.data.texte == rep().texte;
+          allow delete: if (niveau() >= 2 && doc == 'texte' && repApres().masque == null) || niveau() >= 3;
+        }
+        match /signalements/{uid} {
+          allow read: if niveau() >= 2;
+          allow create: if signalementValide(rep().auteurUid, uid);
+          allow delete: if niveau() >= 2;
+        }
+      }
+    }
   }
 }

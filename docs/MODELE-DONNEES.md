@@ -41,7 +41,39 @@ Lecture publique. Affichage : les plus récents en premier (`where type/cle`, `o
 - **Démasquer** (niveau ≥ 2) : remettre `texte` depuis `prive/texte`, `masque = null`, supprimer `prive/texte`.
 - **Supprimer définitivement** (niveau 3) : supprimer les sous-collections puis le document.
 
+## `notes/{id}` — Mes Notes et forum
+Une note est **privée** (`publie: false`, lue par son auteur seulement) ; « Publier » en fait un **fil du forum**
+(`publie: true`, lu par tous, visiteurs compris).
+
+| Champ | Type | Contenu |
+| --- | --- | --- |
+| `auteurUid`, `auteurNom` | texte | Compte et signature de l'auteur |
+| `titre` | texte | ≤ 140 caractères ; obligatoire pour publier ; vide si le fil est masqué |
+| `texte` | texte | 1 à 20 000 caractères ; vide si le fil est masqué |
+| `lien` | `{ type, cle }` \| null | `verset` (`112:1`), `racine` ou `lexique` (≤ 200 caractères), ou rien |
+| `publie` | booléen | Note privée ou fil publié |
+| `creeLe`, `modifieLe` | horodatage serveur | Création, dernière modification |
+| `publieLe` | horodatage \| null | Publication |
+| `activiteLe` | horodatage | Dernière activité (création, publication, réponse) : tri du forum |
+| `nbReponses`, `nbReponsesAutrui` | entier | Réponses (toutes / d'autres membres que l'auteur : bloque la dépublication) |
+| `nbVersions` | entier | Historique du fil publié |
+| `masque` | `{ par, parNom, le }` \| null | Masquage par un modérateur |
+
+Sous-collections : `versions/{n}` (fil publié : `{ titre, texte, lien, le }`), `prive/texte` (fil masqué :
+`{ titre, texte }`, niveaux 2–3), `signalements/{uid}`, et `reponses/{n}` (n = 1, 2, 3…).
+
+### `notes/{id}/reponses/{n}`
+`{ auteurUid, auteurNom, texte (≤ 4 000), creeLe, modifieLe, nbVersions, masque }`, avec `versions/`, `prive/texte`,
+`signalements/` comme les commentaires. Le numéro `n` vaut `nbReponses + 1` : la réponse et la mise à jour des
+compteurs du fil (`nbReponses`, `nbReponsesAutrui`, `activiteLe`) se font dans le même lot, vérifié par les règles.
+
+### Opérations
+- **Note privée** : création, modification, suppression libres par l'auteur.
+- **Publier** : `publie: true`, `publieLe`, `activiteLe` (titre obligatoire). **Dépublier** : seulement si
+  `nbReponsesAutrui == 0`.
+- **Modifier un fil publié** : `versions/{nbVersions}` + mise à jour, dans le même lot.
+- **Masquer / démasquer** (2+), **supprimer** un fil publié et ses réponses (3).
+
 ## À venir
 - Limite de fréquence (≈ 20 écritures par heure et par membre) : compteur par membre vérifié par les règles, ou Cloud Function.
-- `notes/{id}` (Mes Notes et forum : une note publiée devient un fil), réponses aux fils.
 - Import des 335 commentaires et 369 entrées du lexique (phase 4, par script admin).

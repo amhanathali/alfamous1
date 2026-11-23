@@ -45,8 +45,9 @@ function relayer(req, res) {
     headers: { ...req.headers, host: `127.0.0.1:${cible.port}` },
   }, (r) => { res.writeHead(r.statusCode, r.headers); r.pipe(res); });
   amont.on('error', () => {
-    if (!res.headersSent) res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });
-    res.end('Émulateur injoignable : lancer LANCER_EMULATEURS.bat');
+    // Réponse au format des API Google : le SDK la lit comme « unavailable » au lieu de planter.
+    if (!res.headersSent) res.writeHead(503, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: { code: 503, status: 'UNAVAILABLE', message: 'Émulateur injoignable : lancer LANCER_EMULATEURS.bat' } }));
   });
   req.pipe(amont);
   return true;

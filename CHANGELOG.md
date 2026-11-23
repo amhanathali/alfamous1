@@ -1,6 +1,16 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : Mes Notes et forum
+- Onglets **Lecture · Mes Notes · Forum** sous le titre.
+- Mes Notes (`#/notes`, `#/note/…`) : notes privées (titre facultatif, lien vers un verset, une racine ou une entrée du
+  lexique), publication au forum, dépublication tant qu'aucun autre membre n'a répondu, suppression des notes privées.
+- Forum (`#/forum`, `#/fil/…`) : fils par dernière activité, filtres, verset cité, réponses de la plus ancienne à la plus
+  récente ; modifier (historique), signaler, masquer, supprimer selon le niveau.
+- Sous les commentaires d'un verset : fils du forum sur ce verset, « Ouvrir une discussion », « Mes notes sur ce verset ».
+- Règles Firestore de la collection `notes` (et `reponses`) ; 12 tests (`tests/regles/notes.test.mjs`) ; index ;
+  notes et fils d'essai dans `npm run emulateurs:peupler`.
+
 ### Ajouté — phase 2 : écran des commentaires et comptes
 - Bouton sous chaque verset (à droite de ⌃ / ⌄) : nombre de commentaires, ouvre et ferme ceux de ce verset seulement ;
   les plus récents en premier (contributeur, date, texte), liste qui défile ; liens automatiques 2:255 et r:….

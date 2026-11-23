@@ -17,6 +17,34 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "notes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "auteurUid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "modifieLe",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "notes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "publie",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "activiteLe",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": []

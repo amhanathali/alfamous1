@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Crée dans les émulateurs un compte d'essai par niveau (docs/DROITS.md) et quelques commentaires
-// d'essai sur 112:1 et 112:2 : npm run emulateurs:peupler
+// Crée dans les émulateurs un compte d'essai par niveau (docs/DROITS.md), des commentaires d'essai
+// sur 112:1, et des notes et fils du forum d'essai : npm run emulateurs:peupler
 // À lancer pendant que « npm run emulateurs » tourne. Ne touche jamais un vrai projet :
 // le script refuse de tourner si l'émulateur n'est pas visé.
 //
@@ -60,3 +60,20 @@ await db.doc('commentaires/essai-2/versions/1').set({ texte: "[Texte d'essai] Pr
 await db.doc('commentaires/essai-3/prive/texte').set({ texte: "[Texte d'essai] Commentaire masqué par un modérateur." });
 await db.doc(`commentaires/essai-4/signalements/${uids[1]}`).set({ motif: 'Essai de signalement', le: jour(23) });
 console.log('Commentaires d\'essai prêts sur 112:1 (ouvrir http://localhost:5050/#/q/112).');
+
+// Notes et fils du forum d'essai (identifiants fixes).
+const note = (auteurUid, auteurNom, titre, texte, lien, publie, j, extra = {}) => ({
+  auteurUid, auteurNom, titre, texte, lien, publie, creeLe: jour(j), modifieLe: jour(j), publieLe: publie ? jour(j) : null,
+  activiteLe: jour(j), nbReponses: 0, nbReponsesAutrui: 0, nbVersions: 1, masque: null, ...extra,
+});
+const NOTES = {
+  'essai-n1': note(uids[1], 'Membre Essai', 'Premières remarques', "[Texte d'essai] Note privée du membre sur 112:1.", { type: 'verset', cle: '112:1' }, false, 20),
+  'essai-f1': note(uids[1], 'Membre Essai', 'Le mot « aḥad » dans 112:1', "[Texte d'essai] Fil publié par le membre. Renvois : 2:255, r:أحد.",
+    { type: 'verset', cle: '112:1' }, true, 18, { nbReponses: 2, nbReponsesAutrui: 1, activiteLe: jour(22) }),
+  'essai-f2': note(uids[3], 'Admin Essai', 'Méthode : lire par les occurrences', "[Texte d'essai] Fil libre, sans lien.", null, true, 10),
+};
+for (const [id, data] of Object.entries(NOTES)) await db.doc(`notes/${id}`).set(data);
+const rep = (auteurUid, auteurNom, texte, j) => ({ auteurUid, auteurNom, texte, creeLe: jour(j), modifieLe: null, nbVersions: 1, masque: null });
+await db.doc('notes/essai-f1/reponses/1').set(rep(uids[3], 'Admin Essai', "[Texte d'essai] Première réponse.", 19));
+await db.doc('notes/essai-f1/reponses/2').set(rep(uids[1], 'Membre Essai', "[Texte d'essai] Réponse de l'auteur du fil.", 22));
+console.log('Notes et fils d\'essai prêts (Mes Notes : membre@essai.local ; forum : http://localhost:5050/#/forum).');

@@ -6,6 +6,7 @@
 import { firebase, avecDelai } from './firebase.js';
 import { session, surChangement, demanderConnexion, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX } from './commentaires-format.js';
+import { ligneForum } from './notes.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
 const ICONE_BULLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>';
@@ -153,7 +154,9 @@ function dessiner(zone, liste) {
   zone.innerHTML = `<div class="com-entete"><h3>Commentaires Alfamous · ${liste.length}</h3>
       <span class="discret">${liste.length > 1 ? 'les plus récents en premier' : ''}${nbMasques ? ` · dont ${nbMasques} masqué${nbMasques > 1 ? 's' : ''}` : ''}</span></div>
     ${liste.length ? `<div class="com-liste">${items}</div>` : '<p class="aide">Aucun commentaire pour l\'instant.</p>'}
-    ${ecrire}`;
+    ${ecrire}
+    ${type === 'verset' ? '<div class="forum-verset"></div>' : ''}`;
+  if (type === 'verset') ligneForum(zone.querySelector('.forum-verset'), cle);
 }
 
 // ---------- Actions ----------
