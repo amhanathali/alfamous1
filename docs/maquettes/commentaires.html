@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — commentaires Alfamous (phase 2)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Alfamous1 — feuille de style. Thème clair par défaut, sombre selon le système ou le bouton. */
+:root {
+  --fond: #f7f4ee;
+  --surface: #ffffff;
+  --texte: #1f2328;
+  --discret: #5f6670;
+  --bordure: #e3ddd2;
+  --accent: #8a4b16;
+  --accent-doux: #f3e5d6;
+  --surligne: #fbe3a6;
+  --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='clair']) {
+    --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+    --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+    --ombre: none; color-scheme: dark;
+  }
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+  --ombre: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--fond); color: var(--texte);
+  font: 17px/1.55 var(--latin);
+}
+a { color: var(--lien); }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+
+/* ---------- En-tête ---------- */
+.entete { position: sticky; top: 0; z-index: 10; background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.entete-haut, .recherche, .options, main, .pied { max-width: 920px; margin: 0 auto; }
+.entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.entete-actions { display: flex; align-items: center; gap: 10px; }
+.choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
+select, input, button { font: inherit; color: inherit; }
+select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
+.bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
+
+.recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
+.recherche input {
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  border: 1px solid var(--bordure); background: var(--surface);
+}
+.recherche .effacer {
+  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.recherche .effacer:hover { color: var(--accent); }
+.options select { max-width: 280px; }
+.recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche button {
+  border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+:root[data-theme='sombre'] .recherche button { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .recherche button { color: #1d2024; } }
+.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.exemples a { margin: 0 3px; }
+
+/* ---------- Contenu ---------- */
+main { padding: 16px; min-height: 60vh; }
+.titre { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin: 8px 0 16px; }
+.titre h1 { margin: 0; font-size: 22px; }
+.titre .ar { font-size: 30px; }
+.resume { color: var(--discret); font-size: 15px; }
+.message { padding: 24px; text-align: center; color: var(--discret); }
+.erreur { color: #b42318; }
+
+.verset {
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre);
+}
+.verset-entete { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--discret); }
+.ref { font-weight: 600; color: var(--accent); text-decoration: none; background: var(--accent-doux); padding: 1px 8px; border-radius: 999px; }
+.verset .ar { font-size: 28px; line-height: 2.1; margin: 6px 0 4px; text-align: right; }
+.mot { cursor: pointer; border-radius: 4px; padding: 0 1px; }
+.mot:hover, .mot:focus { background: var(--accent-doux); outline: none; }
+.mot.surligne { background: var(--surligne); }
+.tr { font-style: italic; color: var(--discret); font-size: 15px; margin: 0; }
+.trad { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 16px; }
+.basmala { text-align: center; font-size: 28px; margin: 4px 0 16px; }
+
+.nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0; }
+.nav a { text-decoration: none; padding: 6px 12px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); }
+.plus { display: block; margin: 12px auto; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); cursor: pointer; }
+
+/* ---------- Racine ---------- */
+.racine-titre { font-size: 44px; line-height: 1.2; }
+.panneaux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 640px) { .panneaux { grid-template-columns: 1fr; } }
+.panneau { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 14px; }
+.panneau h2 { font-size: 15px; margin: 0 0 8px; color: var(--discret); font-weight: 600; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; }
+.puce {
+  font-family: var(--arabe); font-size: 20px; text-decoration: none; color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 0 10px; background: var(--fond);
+}
+.puce small { font-family: var(--latin); font-size: 12px; color: var(--discret); margin-inline-start: 4px; }
+.puce:hover { border-color: var(--accent); }
+.repartition { display: flex; align-items: flex-end; gap: 1px; height: 60px; margin-top: 4px; }
+.repartition a { flex: 1; background: var(--accent); opacity: .75; min-height: 1px; border-radius: 1px 1px 0 0; }
+.repartition a:hover { opacity: 1; }
+.repartition-legende { display: flex; justify-content: space-between; font-size: 12px; color: var(--discret); }
+
+/* ---------- Onglets, tableaux ---------- */
+.panneau { margin-bottom: 12px; }
+.onglets { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--bordure); margin: 8px 0 12px; }
+.onglets button, .lettres button, .tableau th button {
+  background: none; border: 0; cursor: pointer; color: var(--discret); font: inherit;
+}
+.onglets button { padding: 8px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.onglets button.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.onglets small { color: var(--discret); font-weight: 400; }
+.aide { color: var(--discret); font-size: 14px; margin: 0 0 8px; }
+.tableau { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.tableau th, .tableau td { padding: 6px 10px; border-bottom: 1px solid var(--bordure); text-align: left; }
+.tableau th { background: var(--fond); font-weight: 600; font-size: 13px; color: var(--discret); }
+.tableau th button { font-weight: 600; font-size: 13px; padding: 0; }
+.tableau th button.actif { color: var(--accent); }
+.tableau td .ar { font-size: 22px; text-decoration: none; }
+.tableau tr:last-child td { border-bottom: 0; }
+.lettres { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; direction: rtl; }
+.lettres button { font-family: var(--arabe); font-size: 20px; padding: 0 10px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); color: var(--texte); }
+.lettres button.actif { border-color: var(--accent); color: var(--accent); }
+.plus-terme { color: var(--discret); font-family: var(--latin); font-size: 18px; margin: 0 4px; }
+.lien-racine-titre { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.lien-racine { font-size: 22px; }
+.fiche-actions { margin: 8px 0 0; font-size: 14px; }
+.intro ul { padding-inline-start: 20px; color: var(--texte); }
+.intro li { margin: 4px 0; }
+code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
+
+/* ---------- Accueil ---------- */
+.intro { font-size: 17px; margin-bottom: 16px; }
+.grille-sourates { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.grille-sourates a {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px; text-decoration: none; color: var(--texte);
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; padding: 8px 10px; font-size: 14px;
+}
+.grille-sourates a:hover { border-color: var(--accent); }
+.grille-sourates .n { color: var(--accent); font-weight: 600; min-width: 2.2em; }
+.grille-sourates .ar { font-size: 18px; }
+
+/* ---------- Fiche d'un mot ---------- */
+.fiche-mot {
+  position: fixed; z-index: 20; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px)); background: var(--surface); color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 14px 16px 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+}
+.fiche-mot .ar { font-size: 34px; text-align: center; margin: 0; }
+.fiche-mot dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 15px; }
+.fiche-mot dt { color: var(--discret); }
+.fiche-mot dd { margin: 0; }
+.fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+
+.pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Versets voisins (bas de carte) */
+.voisins { display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.voisin {
+  display: inline-flex; align-items: center; gap: 4px; background: none; cursor: pointer;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px 2px 8px; font-size: 13px; color: var(--discret);
+}
+.voisin[data-voisin="1"] { padding: 2px 8px 2px 12px; }
+.voisin:hover, .voisin:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.voisin svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.voisin:disabled { opacity: .5; cursor: wait; }
+.verset.contexte { border-style: dashed; box-shadow: none; }
+@keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
+.verset.eclair { animation: eclair 1.2s ease-out; }
+
+.trad-source { display: block; font-size: 12px; color: var(--discret); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+
+
+/* ================= Maquette : bandeau de démonstration ================= */
+.demo { background: #2b2f36; color: #f2efe9; font-size: 14px; padding: 10px 16px; }
+.demo-in { max-width: 920px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.demo b { color: #e0a46c; }
+.demo .roles { display: flex; gap: 4px; flex-wrap: wrap; }
+.demo .roles button { background: transparent; color: #f2efe9; border: 1px solid #5a606a; border-radius: 999px; padding: 2px 10px; cursor: pointer; font-size: 13px; }
+.demo .roles button.actif { background: #e0a46c; border-color: #e0a46c; color: #1d2024; font-weight: 600; }
+.demo small { color: #b8bcc4; }
+.note-maquette { border: 1px dashed var(--accent); border-radius: 10px; padding: 8px 12px; font-size: 14px; color: var(--discret); margin: 0 0 14px; background: var(--surface); }
+.note-maquette b { color: var(--texte); }
+
+/* ================= Proposition : commentaires sous un verset ================= */
+.verset-pied { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.verset-pied .voisins { margin: 0; padding: 0; border: 0; grid-column: 2; }
+.verset-pied .bouton-com { grid-column: 3; justify-self: end; }
+.bouton-com {
+  display: inline-flex; align-items: center; gap: 6px; background: none; cursor: pointer; font-size: 13px;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px; color: var(--discret);
+}
+.bouton-com.a-des { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.bouton-com:hover { border-color: var(--accent); color: var(--accent); }
+.bouton-com svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
+.commentaires { margin-top: 12px; border-top: 1px solid var(--bordure); padding-top: 10px; }
+.com-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.com-entete h3 { margin: 0; font-size: 15px; }
+.com-entete .discret { font-size: 13px; color: var(--discret); }
+.com-liste { max-height: 460px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.signal { color: #b42318; font-size: 12px; }
+.com { display: grid; grid-template-columns: 34px 1fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bordure); }
+.com:last-of-type { border-bottom: 0; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.com-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.com-meta .auteur { color: var(--texte); font-weight: 600; font-size: 15px; }
+.com-meta .badge { font-size: 11px; border: 1px solid var(--bordure); border-radius: 999px; padding: 0 6px; }
+.com-texte { margin: 4px 0 0; white-space: pre-wrap; }
+.com-texte .ar { font-size: 20px; }
+.com-actions { display: flex; gap: 12px; margin-top: 4px; font-size: 13px; }
+.com-actions button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--discret); font: inherit; }
+.com-actions button:hover { color: var(--accent); text-decoration: underline; }
+.com-actions .danger:hover { color: #b42318; }
+.com.masque { opacity: .6; }
+.com.masque .com-texte:not(.placeholder) { text-decoration: line-through; text-decoration-color: var(--discret); }
+.bandeau-masque { font-size: 12px; color: var(--discret); background: var(--fond); border: 1px solid var(--bordure); border-radius: 6px; padding: 1px 8px; display: inline-block; margin-top: 4px; }
+.toi { font-size: 11px; background: var(--accent); color: var(--surface); border-radius: 999px; padding: 0 6px; }
+
+.ecrire { margin-top: 10px; background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px; }
+.ecrire textarea { width: 100%; min-height: 84px; resize: vertical; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 8px 10px; }
+.ecrire textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ecrire-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--discret); }
+.btn { border: 1px solid var(--bordure); background: var(--surface); border-radius: 8px; padding: 4px 14px; cursor: pointer; font: inherit; font-size: 14px; }
+.btn.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme='sombre'] .btn.principal { color: #1d2024; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.connexion { text-align: center; font-size: 14px; color: var(--discret); }
+.connexion .btn { margin: 6px 4px 0; }
+.forum-lien { margin-top: 10px; font-size: 14px; display: flex; gap: 6px 14px; flex-wrap: wrap; color: var(--discret); }
+
+/* Fenêtre (historique, confirmation) */
+.voile { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 50; }
+.fenetre { background: var(--surface); color: var(--texte); border-radius: 14px; padding: 16px 18px; width: min(560px, calc(100% - 24px)); box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+.fenetre h3 { margin: 0 0 8px; }
+.version { border-left: 3px solid var(--bordure); padding: 4px 10px; margin: 8px 0; font-size: 15px; }
+.version.actuelle { border-color: var(--accent); }
+.version small { color: var(--discret); display: block; }
+.fenetre-bas { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* Lexique */
+.lexique { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; box-shadow: var(--ombre); }
+.lexique .titre-lex { display: flex; align-items: baseline; gap: 12px; }
+.lexique .titre-lex .ar { font-size: 34px; }
+.placeholder { color: var(--discret); font-style: italic; }
+
+.questions { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-top: 20px; }
+.questions h2 { font-size: 17px; margin: 0 0 6px; }
+.questions li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="demo"><div class="demo-in">
+  <span><b>MAQUETTE</b> — rien n'est enregistré · voir comme :</span>
+  <div class="roles" id="roles">
+    <button data-n="0">0 · Visiteur</button>
+    <button data-n="1" class="actif">1 · Membre</button>
+    <button data-n="2">2 · Modérateur</button>
+    <button data-n="3">3 · Admin</button>
+  </div>
+  <small id="qui"></small>
+</div></div>
+
+<header class="entete">
+  <div class="entete-haut">
+    <a class="logo" href="#">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+    <div class="entete-actions">
+      <span id="compte" style="font-size:14px"></span>
+      <button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre">◐</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="note-maquette"><b>Version 2, avec les décisions du 23 nov.</b> Le bouton à droite de ⌃ / ⌄ ouvre et ferme les commentaires de ce verset seulement ;
+    les plus récents d'abord, la liste défile si elle est longue. Les commentaires sont des <b>textes d'essai</b>.
+    Changez de niveau dans le bandeau pour voir ce que chacun peut faire.</p>
+
+  <div class="titre"><h1>Sourate 112 <span class="ar" lang="ar">الإخلاص</span></h1><span class="resume">exemple de résultat</span></div>
+  <div id="versets"></div>
+
+  <h2 style="font-size:18px;margin:24px 0 8px">Même composant sur une entrée du lexique</h2>
+  <div class="lexique" id="lexique"></div>
+
+  <section class="questions">
+    <h2>Décisions de l'auteur (23 nov. 2026)</h2>
+    <ol>
+      <li>Commentaires sous le verset.</li>
+      <li>Fermés par défaut ; un seul bouton ouvre et ferme, et seulement pour son verset.</li>
+      <li>Les plus récents en premier : contributeur, date, puis le commentaire ; la liste défile si elle est longue.</li>
+      <li>Pas de réponse à un commentaire ; « Ouvrir une discussion » crée un fil du forum lié au verset.</li>
+      <li>Texte simple, liens automatiques vers les versets (2:255) et les racines (r:…), 4 000 caractères au plus.</li>
+      <li>Commentaire masqué : la mention « Commentaire masqué par un modérateur » reste visible pour tous ; le texte, seulement pour les modérateurs et l'admin.</li>
+      <li>Bouton « Signaler » pour les membres ; les modérateurs voient le nombre de signalements.</li>
+    </ol>
+  </section>
+</main>
+
+<div id="voile" class="voile" hidden><div class="fenetre" id="fenetre"></div></div>
+
+<script>
+const VERSETS = {"v1": {"ref": "112:1", "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ", "tr": "qul huwa allāhu aḥadun", "page": 604, "id": "v1", "n": 3}, "v2": {"ref": "112:2", "ar": "ٱللَّهُ ٱلصَّمَدُ", "tr": "allāhu aṣ-ṣamadu", "page": 604, "id": "v2", "n": 0}};
+const NOMS = { 1: 'Membre Essai', 2: 'Modo Essai', 3: 'Admin Essai' };
+let niveau = 1;
+const ouverts = new Set(); // tout fermé au départ ; chaque bouton n'ouvre que son verset
+const brouillons = {};
+const echap = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Commentaires d'essai (fictifs).
+const COMS = {
+  v1: [
+    { id: 'a', auteur: 'Amha Nathali', date: '2 nov. 2026', versions: [
+      { date: '2 nov. 2026', texte: "[Texte d'essai] Exemple de commentaire importé de l'ancienne application. Les renvois deviennent des liens : 2:255, r:أحد." }] },
+    { id: 'b', auteur: 'Membre Essai', date: '20 nov. 2026', versions: [
+      { date: '19 nov. 2026', texte: "[Texte d'essai] Première version de ce commentaire." },
+      { date: '20 nov. 2026', texte: "[Texte d'essai] Commentaire du membre connecté : il peut le modifier (les versions sont gardées), pas le supprimer." }] },
+    { id: 'c', auteur: 'Autre Membre', date: '21 nov. 2026', masque: { par: 'Modo Essai', date: '22 nov. 2026' }, versions: [
+      { date: '21 nov. 2026', texte: "[Texte d'essai] Commentaire masqué par un modérateur (réversible)." }] },
+    { id: 'd', auteur: 'Autre Membre', date: '22 nov. 2026', signalements: 1, versions: [
+      { date: '22 nov. 2026', texte: "[Texte d'essai] Commentaire signalé une fois : les modérateurs voient le compteur ⚑." }] },
+    { id: 'e', auteur: 'Amha Nathali', date: '23 nov. 2026', versions: [
+      { date: '23 nov. 2026', texte: "[Texte d'essai] Le plus récent s'affiche en haut. Quand la liste est longue, elle défile dans sa zone sans allonger la page.\n\nDeuxième paragraphe d'essai pour donner de la hauteur." }] },
+  ],
+  v2: [],
+  lex: [
+    { id: 'l1', auteur: 'Amha Nathali', date: '5 oct. 2026', versions: [
+      { date: '5 oct. 2026', texte: "[Texte d'essai] Commentaire sur l'entrée du lexique ; même fonctionnement que sous un verset (voir 112:2)." }] },
+  ],
+};
+
+// Liens automatiques : 2:255 → verset ; r:xxx → racine.
+function enrichir(t) {
+  return echap(t)
+    .replace(/\b(\d{1,3}:\d{1,3})\b/g, '<a href="#">$1</a>')
+    .replace(/r:([؀-ۿ]+)/g, '<a href="#" class="ar" lang="ar">$1</a>');
+}
+// Plus récents en premier ; un commentaire masqué reste à sa place (mention visible pour tous).
+const visibles = (cle) => [...COMS[cle]].reverse();
+
+function blocCommentaires(cle, cible) {
+  const liste = visibles(cle);
+  const nbMasques = COMS[cle].filter((c) => c.masque).length;
+  const coms = '<div class="com-liste">' + liste.map((c) => {
+    const actuelle = c.versions[c.versions.length - 1];
+    const moi = niveau === 1 && c.auteur === NOMS[1];
+    const acts = [];
+    if (c.versions.length > 1) acts.push(`<button data-act="historique" data-c="${c.id}" data-k="${cle}">Historique (${c.versions.length} versions)</button>`);
+    if (moi) acts.push(`<button data-act="modifier" data-c="${c.id}" data-k="${cle}">Modifier</button>`);
+    if (niveau >= 2) acts.push(c.masque
+      ? `<button data-act="demasquer" data-c="${c.id}" data-k="${cle}">Démasquer</button>`
+      : `<button data-act="masquer" data-c="${c.id}" data-k="${cle}">Masquer</button>`);
+    if (niveau >= 3) acts.push(`<button class="danger" data-act="supprimer" data-c="${c.id}" data-k="${cle}">Supprimer définitivement</button>`);
+    if (niveau === 1 && !moi && !c.masque) acts.push(`<button data-act="signaler" data-c="${c.id}" data-k="${cle}">${c.signale ? 'Signalé ✓' : 'Signaler'}</button>`);
+    if (niveau >= 2 && c.signalements) acts.push(`<span class="signal">⚑ ${c.signalements} signalement${c.signalements > 1 ? 's' : ''}</span>`);
+    const edition = c.enEdition
+      ? `<div class="ecrire"><textarea id="ed-${c.id}">${echap(actuelle.texte)}</textarea>
+          <div class="ecrire-bas"><span>L'ancienne version reste dans l'historique.</span>
+          <span><button class="btn" data-act="annuler" data-c="${c.id}" data-k="${cle}">Annuler</button>
+          <button class="btn principal" data-act="enregistrer" data-c="${c.id}" data-k="${cle}">Enregistrer</button></span></div></div>`
+      : `<p class="com-texte">${enrichir(actuelle.texte)}</p>`;
+    return `<div class="com${c.masque ? ' masque' : ''}">
+      <div class="avatar">${echap(c.auteur[0])}</div>
+      <div>
+        <div class="com-meta"><span class="auteur">${echap(c.auteur)}</span>${moi ? '<span class="toi">vous</span>' : ''}
+          <span>${c.date}</span>${c.versions.length > 1 ? '<span>· modifié</span>' : ''}</div>
+        ${c.masque && niveau < 2
+          ? '<p class="com-texte placeholder">Commentaire masqué par un modérateur.</p>'
+          : edition}
+        ${c.masque && niveau >= 2 ? `<span class="bandeau-masque">Masqué par ${c.masque.par} le ${c.masque.date} — les visiteurs et les membres ne voient que la mention « Commentaire masqué »</span>` : ''}
+        ${acts.length && !c.enEdition ? `<div class="com-actions">${acts.join('')}</div>` : ''}
+      </div></div>`;
+  }).join('') + '</div>';
+
+  const vide = liste.length ? '' : '<p class="aide" style="margin:6px 0">Aucun commentaire pour l\'instant.</p>';
+  const ecrire = niveau === 0
+    ? `<div class="ecrire connexion">Pour écrire un commentaire, connectez-vous avec un compte au courriel vérifié.<br>
+         <button class="btn principal">Se connecter</button><button class="btn">Créer un compte</button></div>`
+    : `<div class="ecrire">
+         <textarea id="nv-${cle}" placeholder="Votre commentaire sur ${cible}… (renvois possibles : 2:255, r:أحد)" maxlength="4000">${echap(brouillons[cle] || '')}</textarea>
+         <div class="ecrire-bas"><span>Publié tout de suite, signé « ${NOMS[niveau]} ». Vous pourrez le modifier, pas le supprimer.</span>
+         <span><span id="cpt-${cle}">${(brouillons[cle] || '').length}</span> / 4 000 &nbsp;
+         <button class="btn principal" data-act="publier" data-k="${cle}">Publier</button></span></div></div>`;
+  const forum = `<div class="forum-lien"><span>Forum : <a href="#">1 fil porte sur ${cible}</a></span>
+      ${niveau >= 1 ? `<a href="#">+ Ouvrir une discussion sur ${cible}</a>` : ''}</div>`;
+  return `<section class="commentaires">
+    <div class="com-entete"><h3>Commentaires Alfamous · ${liste.length}</h3>
+      <span class="discret">les plus récents en premier${nbMasques ? ` · dont ${nbMasques} masqué` : ''}</span></div>
+    ${coms}${vide}${ecrire}${forum}</section>`;
+}
+
+const ICONE_HAUT = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M6 15l6-6 6 6"/></svg>';
+const ICONE_BAS = '<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round"><path d="M6 9l6 6 6-6"/></svg>';
+const ICONE_BULLE = '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>';
+
+function carte(x) {
+  const n = visibles(x.id).length;
+  const ouvert = ouverts.has(x.id);
+  const libelle = ouvert ? 'Fermer' : n ? `${n} commentaire${n > 1 ? 's' : ''}` : 'Commenter';
+  return `<article class="verset">
+    <div class="verset-entete"><a class="ref" href="#">${x.ref}</a><span>al-Iḫlāṣ · page ${x.page}</span></div>
+    <p class="ar" lang="ar">${echap(x.ar)}</p>
+    <p class="tr">${echap(x.tr)}</p>
+    <div class="verset-pied">
+      <div class="voisins"><button class="voisin">${ICONE_HAUT}<span>précédent</span></button><button class="voisin" data-voisin="1"><span>suivant</span>${ICONE_BAS}</button></div>
+      <button class="bouton-com${n ? ' a-des' : ''}" data-act="basculer" data-k="${x.id}" aria-expanded="${ouvert}">${ICONE_BULLE}${libelle}</button>
+    </div>
+    ${ouvert ? blocCommentaires(x.id, x.ref) : ''}
+  </article>`;
+}
+
+function lexique() {
+  const n = visibles('lex').length;
+  const ouvert = ouverts.has('lex');
+  return `<div class="titre-lex"><span class="ar" lang="ar">صمد</span><span class="resume">entrée du lexique · racine</span></div>
+    <p class="placeholder">[définition tirée du lexique — non reproduite dans la maquette]</p>
+    <div style="display:flex;justify-content:flex-end"><button class="bouton-com${n ? ' a-des' : ''}" data-act="basculer" data-k="lex">${ICONE_BULLE}${ouvert ? 'Fermer' : `${n} commentaire${n > 1 ? 's' : ''}`}</button></div>
+    ${ouvert ? blocCommentaires('lex', 'cette entrée') : ''}`;
+}
+
+function rendre() {
+  document.getElementById('versets').innerHTML = Object.values(VERSETS).map(carte).join('');
+  document.getElementById('lexique').innerHTML = lexique();
+  document.getElementById('compte').innerHTML = niveau === 0
+    ? '<a href="#">Se connecter</a>'
+    : `${NOMS[niveau]} · <a href="#">Mes Notes</a> · <a href="#">Forum</a>`;
+  document.getElementById('qui').textContent = [
+    'Visiteur : lit tout ce qui est publié, n\'écrit pas.',
+    'Membre (courriel vérifié) : écrit, modifie ses commentaires, ne les supprime pas.',
+    'Modérateur : peut aussi masquer / démasquer.',
+    'Admin : peut aussi supprimer définitivement.'][niveau];
+  document.querySelectorAll('#roles button').forEach((b) => b.classList.toggle('actif', Number(b.dataset.n) === niveau));
+}
+
+function fenetre(html) { document.getElementById('fenetre').innerHTML = html; document.getElementById('voile').hidden = false; }
+function fermer() { document.getElementById('voile').hidden = true; }
+
+document.addEventListener('input', (e) => {
+  const m = e.target.id.match(/^nv-(.+)$/);
+  if (m) { brouillons[m[1]] = e.target.value; document.getElementById(`cpt-${m[1]}`).textContent = e.target.value.length; }
+});
+document.addEventListener('click', (e) => {
+  const r = e.target.closest('#roles button');
+  if (r) { niveau = Number(r.dataset.n); COMS.v1.forEach((c) => (c.enEdition = false)); rendre(); return; }
+  if (e.target.id === 'theme') {
+    const d = document.documentElement; d.dataset.theme = d.dataset.theme === 'sombre' ? 'clair' : 'sombre'; return;
+  }
+  if (e.target.id === 'voile' || e.target.dataset.fermer !== undefined) { fermer(); return; }
+  const b = e.target.closest('[data-act]');
+  if (!b) { if (e.target.closest('a[href="#"]')) e.preventDefault(); return; }
+  const { act, k, c } = b.dataset;
+  const com = k && c ? COMS[k].find((x) => x.id === c) : null;
+  switch (act) {
+    case 'basculer': ouverts.has(k) ? ouverts.delete(k) : ouverts.add(k); break;
+    case 'publier': {
+      const t = (brouillons[k] || '').trim(); if (!t) return;
+      COMS[k].push({ id: 'n' + Date.now(), auteur: NOMS[niveau], date: 'à l\'instant', versions: [{ date: 'à l\'instant', texte: t }] });
+      brouillons[k] = ''; break;
+    }
+    case 'modifier': com.enEdition = true; break;
+    case 'annuler': com.enEdition = false; break;
+    case 'enregistrer': {
+      const t = document.getElementById(`ed-${c}`).value.trim();
+      if (t) com.versions.push({ date: 'à l\'instant', texte: t });
+      com.enEdition = false; break;
+    }
+    case 'masquer': com.masque = { par: NOMS[niveau], date: 'à l\'instant' }; break;
+    case 'demasquer': delete com.masque; break;
+    case 'historique':
+      fenetre(`<h3>Historique du commentaire</h3>${[...com.versions].reverse().map((v, i) =>
+        `<div class="version${i === 0 ? ' actuelle' : ''}"><small>${v.date}${i === 0 ? ' · version affichée' : ''}</small>${enrichir(v.texte)}</div>`).join('')}
+        <div class="fenetre-bas"><button class="btn" data-fermer>Fermer</button></div>`);
+      return;
+    case 'supprimer':
+      fenetre(`<h3>Supprimer définitivement ?</h3><p>Le commentaire de <b>${echap(com.auteur)}</b> et tout son historique seront effacés. Cette action ne peut pas être annulée. <br><small style="color:var(--discret)">Pour le retirer de façon réversible, utilisez plutôt « Masquer ».</small></p>
+        <div class="fenetre-bas"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-act="confirmer-suppr" data-c="${c}" data-k="${k}" style="background:#b42318;border-color:#b42318;color:#fff">Supprimer</button></div>`);
+      return;
+    case 'confirmer-suppr': COMS[k] = COMS[k].filter((x) => x.id !== c); fermer(); break;
+    case 'signaler':
+      if (com.signale) return;
+      fenetre(`<h3>Signaler ce commentaire</h3><p>Le signalement va aux modérateurs, qui décident de le masquer ou non. L'auteur n'est pas prévenu.</p>
+        <div class="ecrire" style="margin:0"><textarea id="motif" placeholder="Motif (facultatif)" maxlength="500" style="min-height:60px"></textarea></div>
+        <div class="fenetre-bas"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-act="confirmer-signal" data-c="${c}" data-k="${k}">Signaler</button></div>`);
+      return;
+    case 'confirmer-signal': com.signale = true; com.signalements = (com.signalements || 0) + 1; fermer(); break;
+  }
+  rendre();
+});
+rendre();
+</script>
+</body>
+</html>

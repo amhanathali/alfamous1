@@ -5,6 +5,7 @@
 import { cpSync, rmSync, mkdirSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { MODULES_SDK, lireModuleSdk } from './lib/sdk-firebase.mjs';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(RACINE, 'dist');
@@ -23,6 +24,10 @@ const traductions = readdirSync(join(RACINE, 'donnees/traductions')).filter((f) 
 for (const f of traductions) cpSync(join(RACINE, 'donnees/traductions', f), join(D, 'traductions', f));
 // Liste des traductions réellement déployées, lue par l'application.
 writeFileSync(join(D, 'traductions/disponibles.json'), JSON.stringify(traductions.map((f) => f.replace(/\.txt$/, ''))) + '\n');
+
+// SDK Firebase (comptes, commentaires) servi par l'application.
+mkdirSync(join(DIST, 'vendor/firebase'), { recursive: true });
+for (const m of MODULES_SDK) writeFileSync(join(DIST, 'vendor/firebase', m), lireModuleSdk(RACINE, m));
 
 writeFileSync(join(DIST, 'version.json'), JSON.stringify({ construit: new Date().toISOString() }) + '\n');
 if (existsSync(join(DIST, 'import'))) throw new Error('import/ ne doit pas être publié');

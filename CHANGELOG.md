@@ -1,6 +1,53 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : limite de fréquence et niveaux
+- Limite de 20 publications par heure et par membre (commentaires, notes, réponses, signalements), vérifiée par les
+  règles (`limites/{uid}`, écrit dans le même lot) ; message clair avec l'heure de reprise ; modérateurs et admin exemptés.
+- `npm run niveau` : nommer modérateur (2) ou admin (3), bloquer (0), lister ; émulateurs ou `--projet essai|prod`
+  (confirmation pour la production) ; le niveau est relu au chargement de la page.
+- Tests : 6 tests de la limite (`tests/regles/limite.test.mjs`) ; tous les tests de création passent par le compteur.
+
+### Ajouté — phase 2 : Mes Notes et forum
+- `ESSAI_LOCAL.bat` : émulateurs, données d'essai, application et navigateur en un double-clic.
+- Onglets **Lecture · Mes Notes · Forum** sous le titre.
+- Mes Notes (`#/notes`, `#/note/…`) : notes privées (titre facultatif, lien vers un verset, une racine ou une entrée du
+  lexique), publication au forum, dépublication tant qu'aucun autre membre n'a répondu, suppression des notes privées.
+- Forum (`#/forum`, `#/fil/…`) : fils par dernière activité, filtres, verset cité, réponses de la plus ancienne à la plus
+  récente ; modifier (historique), signaler, masquer, supprimer selon le niveau.
+- Sous les commentaires d'un verset : fils du forum sur ce verset, « Ouvrir une discussion », « Mes notes sur ce verset ».
+- Règles Firestore de la collection `notes` (et `reponses`) ; 12 tests (`tests/regles/notes.test.mjs`) ; index ;
+  notes et fils d'essai dans `npm run emulateurs:peupler`.
+
+### Ajouté — phase 2 : écran des commentaires et comptes
+- Bouton sous chaque verset (à droite de ⌃ / ⌄) : nombre de commentaires, ouvre et ferme ceux de ce verset seulement ;
+  les plus récents en premier (contributeur, date, texte), liste qui défile ; liens automatiques 2:255 et r:….
+- Écrire (niveau 1), modifier le sien avec historique, signaler, masquer / démasquer (niveau 2), supprimer (niveau 3).
+- Comptes : connexion, création de compte (nom affiché = signature), vérification du courriel, mot de passe oublié,
+  déconnexion ; niveau lu dans le jeton.
+- `src/js/firebase.js` : émulateurs sur localhost, configuration de Hosting en ligne ; SDK Firebase 13.4.0 servi par
+  l'application (`vendor/firebase/`, copié depuis node_modules par `construire` et `servir`).
+- Serveur local : relais des appels vers les émulateurs (Auth, Firestore) par l'adresse de la page, pour les
+  navigateurs qui refusent qu'une page joigne un autre port.
+- `firestore.indexes.json` : index (type, cle, creeLe décroissant) pour la liste des commentaires.
+- `npm run emulateurs:peupler` crée aussi des commentaires d'essai sur 112:1.
+
+### Ajouté — phase 2 : commentaires (règles)
+- Collection `commentaires` (versets et lexique) ouverte dans `firestore.rules` : lecture publique ; écriture dès le
+  niveau 1 (courriel vérifié), signée du nom du compte, 4 000 caractères au plus ; modification par l'auteur avec
+  historique (`versions/`) ; masquage réversible par les modérateurs (texte mis à part dans `prive/texte`) ;
+  signalements (`signalements/{uid}`) ; suppression par l'admin.
+- 12 tests de règles (`tests/regles/commentaires.test.mjs`) ; modèle de données dans `docs/MODELE-DONNEES.md`.
+- Maquette v2 des commentaires avec les décisions de l'auteur ; « Signaler » ajouté à `docs/DROITS.md`.
+
+### Ajouté — phase 2 : émulateurs Firebase
+- `LANCER_EMULATEURS.bat` / `npm run emulateurs` : Auth, Firestore et Storage en local sur le projet fictif
+  `demo-alfamous1` (aucun accès au nuage), console http://localhost:4000, données d'essai gardées dans `.emulateurs/`.
+- `npm run emulateurs:peupler` : comptes d'essai des niveaux 0 à 3 (revendication `niveau`, docs/DROITS.md).
+- `npm run test:regles` : tests des règles avec les émulateurs (`tests/regles/`) ; premier test : tout est fermé
+  pour tous les niveaux.
+- Outils de développement : firebase-tools, firebase, firebase-admin, @firebase/rules-unit-testing.
+
 ### Ajouté
 - Lancement local rapide : double-clic sur `LANCER_ALFAMOUS1.bat` (http://localhost:5050), mode développement
   sans reconstruction (F5 suffit) ; `npm run servir:dist` pour essayer exactement ce qui sera déployé.

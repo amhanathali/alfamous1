@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — Mes Notes et forum (phase 2)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Alfamous1 — feuille de style. Thème clair par défaut, sombre selon le système ou le bouton. */
+:root {
+  --fond: #f7f4ee;
+  --surface: #ffffff;
+  --texte: #1f2328;
+  --discret: #5f6670;
+  --bordure: #e3ddd2;
+  --accent: #8a4b16;
+  --accent-doux: #f3e5d6;
+  --surligne: #fbe3a6;
+  --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='clair']) {
+    --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+    --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+    --ombre: none; color-scheme: dark;
+  }
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+  --ombre: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--fond); color: var(--texte);
+  font: 17px/1.55 var(--latin);
+}
+a { color: var(--lien); }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+
+/* ---------- En-tête ---------- */
+.entete { position: sticky; top: 0; z-index: 10; background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.entete-haut, .recherche, .options, main, .pied { max-width: 920px; margin: 0 auto; }
+.entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.entete-actions { display: flex; align-items: center; gap: 10px; }
+.choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
+select, input, button { font: inherit; color: inherit; }
+select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
+.bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
+
+.recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
+.recherche input {
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  border: 1px solid var(--bordure); background: var(--surface);
+}
+.recherche .effacer {
+  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.recherche .effacer:hover { color: var(--accent); }
+.options select { max-width: 280px; }
+.recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche button {
+  border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+:root[data-theme='sombre'] .recherche button { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .recherche button { color: #1d2024; } }
+.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.exemples a { margin: 0 3px; }
+
+/* ---------- Contenu ---------- */
+main { padding: 16px; min-height: 60vh; }
+.titre { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin: 8px 0 16px; }
+.titre h1 { margin: 0; font-size: 22px; }
+.titre .ar { font-size: 30px; }
+.resume { color: var(--discret); font-size: 15px; }
+.message { padding: 24px; text-align: center; color: var(--discret); }
+.erreur { color: #b42318; }
+
+.verset {
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre);
+}
+.verset-entete { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--discret); }
+.ref { font-weight: 600; color: var(--accent); text-decoration: none; background: var(--accent-doux); padding: 1px 8px; border-radius: 999px; }
+.verset .ar { font-size: 28px; line-height: 2.1; margin: 6px 0 4px; text-align: right; }
+.mot { cursor: pointer; border-radius: 4px; padding: 0 1px; }
+.mot:hover, .mot:focus { background: var(--accent-doux); outline: none; }
+.mot.surligne { background: var(--surligne); }
+.tr { font-style: italic; color: var(--discret); font-size: 15px; margin: 0; }
+.trad { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 16px; }
+.basmala { text-align: center; font-size: 28px; margin: 4px 0 16px; }
+
+.nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0; }
+.nav a { text-decoration: none; padding: 6px 12px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); }
+.plus { display: block; margin: 12px auto; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); cursor: pointer; }
+
+/* ---------- Racine ---------- */
+.racine-titre { font-size: 44px; line-height: 1.2; }
+.panneaux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 640px) { .panneaux { grid-template-columns: 1fr; } }
+.panneau { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 14px; }
+.panneau h2 { font-size: 15px; margin: 0 0 8px; color: var(--discret); font-weight: 600; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; }
+.puce {
+  font-family: var(--arabe); font-size: 20px; text-decoration: none; color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 0 10px; background: var(--fond);
+}
+.puce small { font-family: var(--latin); font-size: 12px; color: var(--discret); margin-inline-start: 4px; }
+.puce:hover { border-color: var(--accent); }
+.repartition { display: flex; align-items: flex-end; gap: 1px; height: 60px; margin-top: 4px; }
+.repartition a { flex: 1; background: var(--accent); opacity: .75; min-height: 1px; border-radius: 1px 1px 0 0; }
+.repartition a:hover { opacity: 1; }
+.repartition-legende { display: flex; justify-content: space-between; font-size: 12px; color: var(--discret); }
+
+/* ---------- Onglets, tableaux ---------- */
+.panneau { margin-bottom: 12px; }
+.onglets { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--bordure); margin: 8px 0 12px; }
+.onglets button, .lettres button, .tableau th button {
+  background: none; border: 0; cursor: pointer; color: var(--discret); font: inherit;
+}
+.onglets button { padding: 8px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.onglets button.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.onglets small { color: var(--discret); font-weight: 400; }
+.aide { color: var(--discret); font-size: 14px; margin: 0 0 8px; }
+.tableau { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.tableau th, .tableau td { padding: 6px 10px; border-bottom: 1px solid var(--bordure); text-align: left; }
+.tableau th { background: var(--fond); font-weight: 600; font-size: 13px; color: var(--discret); }
+.tableau th button { font-weight: 600; font-size: 13px; padding: 0; }
+.tableau th button.actif { color: var(--accent); }
+.tableau td .ar { font-size: 22px; text-decoration: none; }
+.tableau tr:last-child td { border-bottom: 0; }
+.lettres { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; direction: rtl; }
+.lettres button { font-family: var(--arabe); font-size: 20px; padding: 0 10px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); color: var(--texte); }
+.lettres button.actif { border-color: var(--accent); color: var(--accent); }
+.plus-terme { color: var(--discret); font-family: var(--latin); font-size: 18px; margin: 0 4px; }
+.lien-racine-titre { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.lien-racine { font-size: 22px; }
+.fiche-actions { margin: 8px 0 0; font-size: 14px; }
+.intro ul { padding-inline-start: 20px; color: var(--texte); }
+.intro li { margin: 4px 0; }
+code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
+
+/* ---------- Accueil ---------- */
+.intro { font-size: 17px; margin-bottom: 16px; }
+.grille-sourates { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.grille-sourates a {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px; text-decoration: none; color: var(--texte);
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; padding: 8px 10px; font-size: 14px;
+}
+.grille-sourates a:hover { border-color: var(--accent); }
+.grille-sourates .n { color: var(--accent); font-weight: 600; min-width: 2.2em; }
+.grille-sourates .ar { font-size: 18px; }
+
+/* ---------- Fiche d'un mot ---------- */
+.fiche-mot {
+  position: fixed; z-index: 20; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px)); background: var(--surface); color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 14px 16px 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+}
+.fiche-mot .ar { font-size: 34px; text-align: center; margin: 0; }
+.fiche-mot dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 15px; }
+.fiche-mot dt { color: var(--discret); }
+.fiche-mot dd { margin: 0; }
+.fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+
+.pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Versets voisins (bas de carte) */
+.voisins { display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.voisin {
+  display: inline-flex; align-items: center; gap: 4px; background: none; cursor: pointer;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px 2px 8px; font-size: 13px; color: var(--discret);
+}
+.voisin[data-voisin="1"] { padding: 2px 8px 2px 12px; }
+.voisin:hover, .voisin:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.voisin svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.voisin:disabled { opacity: .5; cursor: wait; }
+.verset.contexte { border-style: dashed; box-shadow: none; }
+@keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
+.verset.eclair { animation: eclair 1.2s ease-out; }
+
+.trad-source { display: block; font-size: 12px; color: var(--discret); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+
+/* ---------- Comptes (phase 2) ---------- */
+.compte { display: flex; align-items: center; gap: 8px; font-size: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.compte-nom { font-weight: 600; }
+.badge-niveau { font-size: 12px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 0 8px; }
+.lien-bouton.alerte { color: #b42318; }
+.fenetre {
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 18px 20px; width: min(520px, calc(100% - 24px));
+  background: var(--surface); color: var(--texte); box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+}
+.fenetre::backdrop { background: rgba(0, 0, 0, .35); }
+.fenetre h2 { margin: 0 0 10px; font-size: 20px; }
+.fenetre .fermer { position: absolute; top: 8px; right: 12px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+.fenetre label { display: block; font-size: 14px; color: var(--discret); margin: 8px 0; }
+.fenetre input, .fenetre textarea {
+  display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--bordure); background: var(--fond); color: var(--texte);
+}
+.fenetre-bas { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+.form-msg { color: #b42318; font-size: 14px; margin: 6px 0 0; min-height: 1em; }
+.btn { border: 1px solid var(--bordure); background: var(--surface); color: var(--texte); border-radius: 8px; padding: 5px 14px; cursor: pointer; font-size: 14px; }
+.btn.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme='sombre'] .btn.principal { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .btn.principal { color: #1d2024; } }
+.btn.danger-plein { background: #b42318; border-color: #b42318; color: #fff; font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: wait; }
+.version { border-left: 3px solid var(--bordure); padding: 4px 10px; margin: 8px 0; white-space: pre-wrap; }
+.version.actuelle { border-color: var(--accent); }
+.version small { color: var(--discret); display: block; }
+
+/* ---------- Commentaires sous le verset ---------- */
+.verset-pied { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.verset-pied .voisins { margin: 0; padding: 0; border: 0; grid-column: 2; }
+.verset-pied .bouton-com { grid-column: 3; justify-self: end; }
+@media (max-width: 520px) { .verset-pied { grid-template-columns: 1fr auto; } .verset-pied .voisins { grid-column: 1; justify-content: flex-start; } .verset-pied .bouton-com { grid-column: 2; } }
+.bouton-com {
+  display: inline-flex; align-items: center; gap: 6px; background: none; cursor: pointer; font-size: 13px; white-space: nowrap;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px; color: var(--discret);
+}
+.bouton-com.a-des { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.bouton-com:hover, .bouton-com:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.bouton-com svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
+.commentaires { margin-top: 12px; border-top: 1px solid var(--bordure); padding-top: 10px; }
+.com-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.com-entete h3 { margin: 0; font-size: 15px; }
+.com-entete .discret { font-size: 13px; color: var(--discret); }
+.com-liste { max-height: 460px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.com { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bordure); }
+.com:last-child { border-bottom: 0; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.com-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.com-meta .auteur { color: var(--texte); font-weight: 600; font-size: 15px; }
+.toi { font-size: 11px; background: var(--accent); color: var(--surface); border-radius: 999px; padding: 0 6px; }
+.com-texte { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.com-texte .ar { font-size: 20px; }
+.com-texte.placeholder { color: var(--discret); font-style: italic; }
+.com.masque { opacity: .65; }
+.com-texte.barre { text-decoration: line-through; text-decoration-color: var(--discret); }
+.bandeau-masque { font-size: 12px; color: var(--discret); background: var(--fond); border: 1px solid var(--bordure); border-radius: 6px; padding: 1px 8px; display: inline-block; margin-top: 4px; }
+.com-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; }
+.com-actions button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--discret); font: inherit; }
+.com-actions button:hover { color: var(--accent); text-decoration: underline; }
+.com-actions .danger:hover { color: #b42318; }
+.signal { color: #b42318; font-size: 12px; }
+.ecrire { margin-top: 10px; background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px; }
+.ecrire textarea { width: 100%; min-height: 84px; resize: vertical; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 8px 10px; }
+.ecrire textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ecrire-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--discret); }
+.ecrire.connexion { text-align: center; font-size: 14px; color: var(--discret); }
+.ecrire.connexion .btn { margin: 6px 4px 0; }
+
+
+/* ===== Maquette : bandeau ===== */
+.demo { background: #2b2f36; color: #f2efe9; font-size: 14px; padding: 10px 16px; }
+.demo-in { max-width: 920px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.demo b { color: #e0a46c; }
+.demo .roles { display: flex; gap: 4px; flex-wrap: wrap; }
+.demo .roles button { background: transparent; color: #f2efe9; border: 1px solid #5a606a; border-radius: 999px; padding: 2px 10px; cursor: pointer; font-size: 13px; }
+.demo .roles button.actif { background: #e0a46c; border-color: #e0a46c; color: #1d2024; font-weight: 600; }
+.demo small { color: #b8bcc4; }
+.note-maquette { border: 1px dashed var(--accent); border-radius: 10px; padding: 8px 12px; font-size: 14px; color: var(--discret); margin: 0 0 14px; background: var(--surface); }
+
+/* ===== Navigation ===== */
+.menu { display: flex; gap: 4px; max-width: 920px; margin: 10px auto 0; border-bottom: 1px solid var(--bordure); }
+.menu a { padding: 8px 14px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.menu .nb { font-size: 12px; background: var(--accent-doux); color: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 4px; }
+
+/* ===== Listes ===== */
+.barre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px; }
+.filtres button { border: 1px solid var(--bordure); background: var(--surface); color: var(--discret); border-radius: 999px; padding: 2px 12px; cursor: pointer; font-size: 13px; }
+.filtres button.actif { border-color: var(--accent); color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.liste-fils { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.fil-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 14px; border-bottom: 1px solid var(--bordure); text-decoration: none; color: inherit; cursor: pointer; }
+.fil-ligne:last-child { border-bottom: 0; }
+.fil-ligne:hover { background: var(--fond); }
+.fil-titre { font-weight: 600; font-size: 16px; }
+.fil-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
+.fil-droite { text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.fil-droite b { display: block; color: var(--texte); font-size: 15px; }
+.lien-cible { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; border: 1px solid var(--bordure); border-radius: 999px; padding: 0 8px; background: var(--fond); color: var(--texte); text-decoration: none; }
+.lien-cible .ar { font-size: 16px; }
+.etat { font-size: 11px; border-radius: 999px; padding: 0 7px; font-weight: 600; }
+.etat.prive { background: var(--fond); border: 1px solid var(--bordure); color: var(--discret); }
+.etat.publie { background: #e3f1e6; color: #1f6b35; }
+:root[data-theme='sombre'] .etat.publie { background: #1f3b27; color: #9fd9ae; }
+.vide { padding: 24px; text-align: center; color: var(--discret); }
+
+/* ===== Éditeur de note ===== */
+.editeur { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; box-shadow: var(--ombre); }
+.editeur label { display: block; font-size: 14px; color: var(--discret); margin: 10px 0 4px; }
+.editeur input[type=text], .editeur textarea, .editeur select { width: 100%; font-size: 16px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--fond); color: var(--texte); }
+.editeur textarea { min-height: 160px; resize: vertical; font: inherit; }
+.ligne-lien { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 8px; }
+@media (max-width: 560px) { .ligne-lien { grid-template-columns: 1fr; } }
+.editeur-bas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; }
+.editeur-bas .gauche, .editeur-bas .droite { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.aide-pub { font-size: 13px; color: var(--discret); margin: 8px 0 0; }
+
+/* ===== Fil ===== */
+.fil-tete { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.fil-tete h1 { font-size: 22px; margin: 4px 0 6px; }
+.message-fil { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--bordure); }
+.message-fil:last-child { border-bottom: 0; }
+.reponses { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 4px 16px 12px; }
+.reponses h2 { font-size: 15px; margin: 10px 0 0; }
+.retour { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+.verset-cite { background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 6px 10px; margin: 8px 0; }
+.verset-cite .ar { font-size: 22px; text-align: right; margin: 0; }
+.verset-cite small { color: var(--discret); }
+
+/* Section forum sous les commentaires d'un verset */
+.forum-verset { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--discret); }
+.mes-notes-verset { font-size: 13px; }
+
+.questions { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-top: 20px; }
+.questions h2 { font-size: 17px; margin: 0 0 6px; }
+.questions li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<div class="demo"><div class="demo-in">
+  <span><b>MAQUETTE</b> — rien n'est enregistré · voir comme :</span>
+  <div class="roles" id="roles">
+    <button data-n="0">0 · Visiteur</button>
+    <button data-n="1" class="actif">1 · Membre</button>
+    <button data-n="2">2 · Modérateur</button>
+    <button data-n="3">3 · Admin</button>
+  </div>
+  <small id="qui"></small>
+</div></div>
+
+<header class="entete">
+  <div class="entete-haut">
+    <a class="logo" href="#verset">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+    <div class="entete-actions"><span id="compte" class="compte"></span><button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre">◐</button></div>
+  </div>
+  <nav class="menu" id="menu"></nav>
+</header>
+
+<main id="vue"></main>
+
+<div class="questions-hote" style="max-width:920px;margin:0 auto;padding:0 16px 24px">
+  <section class="questions">
+    <h2>Questions avant de coder</h2>
+    <ol>
+      <li><b>Accès</b> : deux onglets sous la recherche, « Mes Notes » (membres) et « Forum » (tous). D'accord ?</li>
+      <li><b>Titre</b> : facultatif pour une note privée, obligatoire pour publier au forum (proposé) ?</li>
+      <li><b>Ordre des réponses dans un fil</b> : du plus ancien au plus récent, comme une conversation (proposé), ou l'inverse comme les commentaires ?</li>
+      <li><b>Ordre de la liste du forum</b> : par dernière activité (proposé) ou par date de publication ?</li>
+      <li><b>Sous le verset</b> : « Forum : n fils sur 112:1 · Ouvrir une discussion », et pour le membre « Mes notes : n » (visible de lui seul). D'accord ?</li>
+      <li><b>« Ouvrir une discussion »</b> ouvre l'éditeur déjà lié au verset ; on peut l'enregistrer en privé ou publier tout de suite (proposé) ?</li>
+      <li><b>Réponses</b> : texte simple, modifiables par leur auteur avec historique, signalables et masquables comme les commentaires ?</li>
+      <li><b>Dépublier</b> : le fil redevient une note privée (seulement s'il n'a aucune réponse d'autrui). D'accord ?</li>
+    </ol>
+  </section>
+</div>
+
+<div id="voile" class="voile" hidden style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:grid;place-items:center;z-index:50"><div class="fenetre" id="fenetre" style="position:static;display:block"></div></div>
+
+<script>
+{
+const VERSET = {"ref": "112:1", "ar": "قُلْ هُوَ ٱللَّهُ أَحَدٌ", "tr": "qul huwa allāhu aḥadun", "page": 604};
+const NOMS = { 1: 'Membre Essai', 2: 'Modo Essai', 3: 'Admin Essai' };
+let niveau = 1;
+const $ = (s) => document.querySelector(s);
+const echap = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const enrichir = (t) => echap(t).replace(/\b(\d{1,3}:\d{1,3})\b/g, '<a href="#verset">$1</a>').replace(/r:([؀-ۿ]+)/g, '<a href="#verset" class="ar" lang="ar">$1</a>');
+const initiale = (n) => n.trim()[0].toUpperCase();
+
+// Données fictives : notes (privées ou publiées = fils) et réponses.
+let id = 10;
+const NOTES = [
+  { id: 1, auteur: 'Membre Essai', titre: 'Premières remarques sur 112:1', texte: "[Texte d'essai] Note privée liée au verset 112:1. Elle n'est visible que par son auteur.", lien: { type: 'verset', cle: '112:1' }, publie: false, date: '20 nov. 2026', maj: '22 nov. 2026', reponses: [] },
+  { id: 2, auteur: 'Membre Essai', titre: '', texte: "[Texte d'essai] Note privée sans titre ni lien : un simple brouillon.", lien: null, publie: false, date: '23 nov. 2026', maj: '23 nov. 2026', reponses: [] },
+  { id: 3, auteur: 'Membre Essai', titre: 'Le mot « aḥad » dans 112:1', texte: "[Texte d'essai] Fil publié par le membre, lié au verset 112:1. Renvois automatiques : 2:255, r:أحد.", lien: { type: 'verset', cle: '112:1' }, publie: true, date: '18 nov. 2026', maj: '22 nov. 2026', reponses: [
+    { id: 31, auteur: 'Amha Nathali', texte: "[Texte d'essai] Première réponse (la plus ancienne en haut).", date: '19 nov. 2026' },
+    { id: 32, auteur: 'Autre Membre', texte: "[Texte d'essai] Réponse masquée par un modérateur.", date: '21 nov. 2026', masque: { par: 'Modo Essai', le: '21 nov. 2026' } },
+    { id: 33, auteur: 'Modo Essai', texte: "[Texte d'essai] Dernière réponse.", date: '22 nov. 2026', signalements: 1 },
+  ] },
+  { id: 4, auteur: 'Amha Nathali', titre: 'Racine أحد : premières occurrences', texte: "[Texte d'essai] Fil lié à une racine.", lien: { type: 'racine', cle: 'أحد' }, publie: true, date: '15 nov. 2026', maj: '20 nov. 2026', reponses: [
+    { id: 41, auteur: 'Membre Essai', texte: "[Texte d'essai] Réponse du membre connecté.", date: '20 nov. 2026', versions: 2 },
+  ] },
+  { id: 5, auteur: 'Autre Membre', titre: 'Méthode : lire par les occurrences', texte: "[Texte d'essai] Fil libre, sans lien.", lien: null, publie: true, date: '10 nov. 2026', maj: '10 nov. 2026', reponses: [] },
+];
+const moi = () => NOMS[niveau];
+const miennes = () => NOTES.filter((n) => n.auteur === moi());
+const fils = () => NOTES.filter((n) => n.publie);
+const reponsesAutrui = (n) => n.reponses.filter((r) => r.auteur !== n.auteur).length;
+
+function puceLien(l) {
+  if (!l) return '<span class="lien-cible">libre</span>';
+  if (l.type === 'verset') return `<a class="lien-cible" href="#verset">verset ${l.cle}</a>`;
+  if (l.type === 'racine') return `<a class="lien-cible" href="#verset">racine <span class="ar" lang="ar">${l.cle}</span></a>`;
+  return `<a class="lien-cible" href="#verset">lexique <span class="ar" lang="ar">${l.cle}</span></a>`;
+}
+
+// ---------- Vues ----------
+let vue = 'verset', filtreForum = 'tous', filtreNotes = 'toutes', ouverte = null, edition = null, ouvertVerset = true;
+
+function menu() {
+  const nbNotes = niveau >= 1 ? miennes().length : 0;
+  $('#menu').innerHTML = `<a href="#verset" class="${vue === 'verset' ? 'actif' : ''}">Lecture</a>
+    ${niveau >= 1 ? `<a href="#notes" class="${vue === 'notes' || vue === 'editeur' ? 'actif' : ''}">Mes Notes<span class="nb">${nbNotes}</span></a>` : ''}
+    <a href="#forum" class="${vue === 'forum' || vue === 'fil' ? 'actif' : ''}">Forum<span class="nb">${fils().length}</span></a>`;
+}
+
+function vueVerset() {
+  const surVerset = fils().filter((n) => n.lien?.type === 'verset' && n.lien.cle === VERSET.ref);
+  const mesNotesVerset = niveau >= 1 ? miennes().filter((n) => !n.publie && n.lien?.cle === VERSET.ref).length : 0;
+  return `<p class="note-maquette"><b>Sous le verset</b>, après les commentaires : les fils du forum qui portent sur ce verset, et pour le membre connecté ses propres notes privées sur ce verset.</p>
+  <article class="verset">
+    <div class="verset-entete"><a class="ref" href="#verset">${VERSET.ref}</a><span>al-Iḫlāṣ · page ${VERSET.page}</span></div>
+    <p class="ar" lang="ar">${echap(VERSET.ar)}</p>
+    <p class="tr">${echap(VERSET.tr)}</p>
+    <div class="verset-pied"><span></span><span></span><button class="bouton-com a-des" data-act="basculer"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>${ouvertVerset ? 'Fermer' : '3 commentaires'}</button></div>
+    ${ouvertVerset ? `<section class="commentaires">
+      <div class="com-entete"><h3>Commentaires Alfamous · 3</h3><span class="discret">les plus récents en premier</span></div>
+      <p class="aide">[… les commentaires, comme dans la maquette précédente …]</p>
+      <div class="forum-verset">
+        <span>Forum : ${surVerset.length ? `<a href="#forum" data-filtre-cle="${VERSET.ref}">${surVerset.length} fil${surVerset.length > 1 ? 's' : ''} sur ${VERSET.ref}</a>` : `aucun fil sur ${VERSET.ref}`}</span>
+        ${niveau >= 1 ? `<button class="lien-bouton" data-act="discussion">+ Ouvrir une discussion sur ${VERSET.ref}</button>` : ''}
+        ${mesNotesVerset ? `<a class="mes-notes-verset" href="#notes">Mes notes sur ce verset : ${mesNotesVerset}</a>` : ''}
+      </div></section>` : ''}
+  </article>`;
+}
+
+function vueNotes() {
+  if (niveau < 1) return '<p class="vide">Mes Notes est réservé aux membres connectés.</p>';
+  let liste = miennes();
+  if (filtreNotes === 'privees') liste = liste.filter((n) => !n.publie);
+  if (filtreNotes === 'publiees') liste = liste.filter((n) => n.publie);
+  return `<p class="note-maquette"><b>Mes Notes</b> : visibles de vous seul tant qu'elles ne sont pas publiées. Une note publiée devient un fil du forum, lisible par tous.</p>
+  <div class="barre-outils">
+    <div class="filtres">${[['toutes', 'Toutes'], ['privees', 'Privées'], ['publiees', 'Publiées au forum']].map(([k, l]) => `<button data-filtre-notes="${k}" class="${filtreNotes === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
+    <button class="btn principal" data-act="nouvelle">+ Nouvelle note</button>
+  </div>
+  <div class="liste-fils">${liste.length ? liste.map((n) => `<div class="fil-ligne" data-ouvrir-note="${n.id}">
+      <div><div class="fil-titre">${echap(n.titre || 'Sans titre')}</div>
+        <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée' : 'privée'}</span>${puceLien(n.lien)}<span>${echap(n.texte.slice(0, 70))}…</span></div></div>
+      <div class="fil-droite">modifiée le<b>${n.maj}</b>${n.publie ? `${n.reponses.length} réponse${n.reponses.length > 1 ? 's' : ''}` : ''}</div>
+    </div>`).join('') : '<p class="vide">Aucune note.</p>'}</div>`;
+}
+
+function vueEditeur() {
+  const n = edition;
+  const l = n.lien || { type: 'aucun', cle: '' };
+  const peutDepublier = n.publie && reponsesAutrui(n) === 0;
+  return `<a class="retour" href="#notes">← Mes Notes</a>
+  <div class="editeur">
+    <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée au forum' : 'privée'}</span>${n.date ? `<span>créée le ${n.date}</span>` : '<span>nouvelle note</span>'}</div>
+    <label>Titre ${n.publie ? '(obligatoire pour un fil)' : '(facultatif tant que la note est privée)'}</label>
+    <input type="text" id="ed-titre" value="${echap(n.titre)}" maxlength="140" placeholder="Ex. : Le mot « aḥad » dans 112:1">
+    <label>Porte sur</label>
+    <div class="ligne-lien">
+      <select id="ed-type">${[['aucun', 'Rien (note libre)'], ['verset', 'Un verset'], ['racine', 'Une racine'], ['lexique', 'Une entrée du lexique']].map(([k, t]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
+      <input type="text" id="ed-cle" value="${echap(l.cle)}" placeholder="112:1 · أحد · expression du lexique" ${l.type === 'aucun' ? 'disabled' : ''}>
+    </div>
+    <label>Texte</label>
+    <textarea id="ed-texte" maxlength="20000" placeholder="Votre note… (renvois possibles : 2:255, r:أحد)">${echap(n.texte)}</textarea>
+    <div class="editeur-bas">
+      <div class="gauche">
+        ${!n.publie ? `<button class="btn" data-act="supprimer-note" ${n.date ? '' : 'disabled'}>Supprimer</button>` : ''}
+        ${n.publie ? `<button class="btn" data-act="depublier" ${peutDepublier ? '' : 'disabled title="Impossible : le fil a des réponses d\'autres membres"'}>Dépublier</button>` : ''}
+      </div>
+      <div class="droite">
+        <button class="btn" data-act="enregistrer">Enregistrer</button>
+        ${!n.publie ? '<button class="btn principal" data-act="publier">Publier au forum</button>' : `<a href="#fil" data-ouvrir-fil="${n.id}">Voir le fil</a>`}
+      </div>
+    </div>
+    <p class="aide-pub">${n.publie
+      ? (peutDepublier ? 'Dépublier : le fil redevient une note privée (possible tant qu\'aucun autre membre n\'y a répondu).' : 'Ce fil a des réponses d\'autres membres : vous pouvez le modifier, pas le dépublier ni le supprimer.')
+      : 'Publier : la note devient un fil du forum, lisible par tous et signé de votre nom. Vous pourrez la modifier, et la dépublier tant que personne n\'a répondu.'}</p>
+    <p class="form-msg" id="ed-msg"></p>
+  </div>`;
+}
+
+function vueForum() {
+  let liste = fils().slice();
+  if (filtreForum === 'verset') liste = liste.filter((n) => n.lien?.type === 'verset');
+  if (filtreForum === 'racine') liste = liste.filter((n) => n.lien?.type === 'racine' || n.lien?.type === 'lexique');
+  if (filtreForum === 'libre') liste = liste.filter((n) => !n.lien);
+  return `<p class="note-maquette"><b>Forum</b> : lisible par tous, y compris les visiteurs. Tri par dernière activité.</p>
+  <div class="barre-outils">
+    <div class="filtres">${[['tous', 'Tous'], ['verset', 'Sur un verset'], ['racine', 'Racine ou lexique'], ['libre', 'Libres']].map(([k, l]) => `<button data-filtre-forum="${k}" class="${filtreForum === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
+    ${niveau >= 1 ? '<button class="btn principal" data-act="nouvelle">+ Nouveau fil</button>' : '<span class="aide" style="margin:0">Connectez-vous pour publier ou répondre.</span>'}
+  </div>
+  <div class="liste-fils">${liste.map((n) => `<div class="fil-ligne" data-ouvrir-fil="${n.id}">
+      <div><div class="fil-titre">${echap(n.titre)}</div>
+        <div class="fil-meta"><span>${echap(n.auteur)}</span>${puceLien(n.lien)}<span>publié le ${n.date}</span></div></div>
+      <div class="fil-droite"><b>${n.reponses.length}</b>réponse${n.reponses.length > 1 ? 's' : ''}<br>activité ${n.maj}</div>
+    </div>`).join('') || '<p class="vide">Aucun fil.</p>'}</div>`;
+}
+
+function message(m, estTete, fil) {
+  const mien = niveau >= 1 && m.auteur === moi();
+  const acts = [];
+  if (!estTete && m.versions > 1) acts.push('<button>Historique (2 versions)</button>');
+  if (mien && !m.masque) acts.push(estTete ? `<button data-act="editer-fil" data-id="${fil.id}">Modifier</button>` : '<button>Modifier</button>');
+  if (niveau === 1 && !mien && !m.masque) acts.push('<button data-act="signaler">Signaler</button>');
+  if (niveau >= 2 && !estTete) acts.push(m.masque ? `<button data-act="demasquer" data-r="${m.id}">Démasquer</button>` : `<button data-act="masquer" data-r="${m.id}">Masquer</button>`);
+  if (niveau >= 2 && estTete) acts.push('<button>Masquer le fil</button>');
+  if (niveau >= 3) acts.push('<button class="danger">Supprimer définitivement</button>');
+  if (niveau >= 2 && m.signalements) acts.push(`<span class="signal">⚑ ${m.signalements} signalement</span>`);
+  const corps = m.masque && niveau < 2 ? '<p class="com-texte placeholder">Message masqué par un modérateur.</p>'
+    : `<p class="com-texte${m.masque ? ' barre' : ''}">${enrichir(m.texte)}</p>${m.masque ? `<span class="bandeau-masque">Masqué par ${m.masque.par} le ${m.masque.le}</span>` : ''}`;
+  return `<div class="message-fil${m.masque ? ' com masque' : ''}" style="${m.masque ? 'opacity:.65' : ''}">
+    <div class="avatar">${initiale(m.auteur)}</div>
+    <div><div class="com-meta"><span class="auteur">${echap(m.auteur)}</span>${mien ? '<span class="toi">vous</span>' : ''}<span>${m.date}</span>${m.versions > 1 ? '<span>· modifié</span>' : ''}</div>
+    ${corps}${acts.length ? `<div class="com-actions">${acts.join('')}</div>` : ''}</div></div>`;
+}
+
+function vueFil() {
+  const n = ouverte;
+  const cite = n.lien?.type === 'verset' && n.lien.cle === VERSET.ref
+    ? `<div class="verset-cite"><small>${VERSET.ref}</small><p class="ar" lang="ar">${echap(VERSET.ar)}</p></div>` : '';
+  return `<a class="retour" href="#forum">← Forum</a>
+  <div class="fil-tete">
+    <div class="fil-meta">${puceLien(n.lien)}<span>publié le ${n.date}</span></div>
+    <h1>${echap(n.titre)}</h1>${cite}
+    ${message({ ...n, id: 'tete' }, true, n)}
+  </div>
+  <div class="reponses">
+    <h2>Réponses · ${n.reponses.length} <span class="aide" style="font-weight:400">— du plus ancien au plus récent</span></h2>
+    <div class="com-liste" style="max-height:none">${n.reponses.map((r) => message(r, false, n)).join('') || '<p class="aide">Aucune réponse pour l\'instant.</p>'}</div>
+    ${niveau >= 1 ? `<form class="ecrire" data-repondre><textarea placeholder="Votre réponse… (renvois possibles : 2:255, r:أحد)" maxlength="4000" id="rep"></textarea>
+      <div class="ecrire-bas"><span>Publiée tout de suite, signée « ${moi()} ».</span><button class="btn principal">Répondre</button></div></form>`
+      : `<div class="ecrire connexion">Pour répondre, connectez-vous avec un compte au courriel vérifié.<br><button class="btn principal">Se connecter</button></div>`}
+  </div>`;
+}
+
+function rendre() {
+  menu();
+  $('#compte').innerHTML = niveau === 0 ? '<a href="#">Se connecter</a>' : `<span class="compte-nom">${moi()}</span>${niveau >= 2 ? `<span class="badge-niveau">${['', '', 'modérateur', 'admin'][niveau]}</span>` : ''}<a href="#">Se déconnecter</a>`;
+  $('#qui').textContent = ['Visiteur : lit le forum, pas de Mes Notes.', 'Membre : Mes Notes, publier, répondre.', 'Modérateur : peut aussi masquer.', 'Admin : peut aussi supprimer.'][niveau];
+  document.querySelectorAll('#roles button').forEach((b) => b.classList.toggle('actif', Number(b.dataset.n) === niveau));
+  const v = { verset: vueVerset, notes: vueNotes, editeur: vueEditeur, forum: vueForum, fil: vueFil }[vue] || vueVerset;
+  $('#vue').innerHTML = v();
+}
+
+function aller(h) {
+  const nom = (h || '#verset').slice(1);
+  if (nom === 'fil' && !ouverte) ouverte = fils()[0];
+  if (nom === 'editeur' && !edition) return aller('#notes');
+  if (nom === 'notes' && niveau < 1) vue = 'forum'; else vue = ['verset', 'notes', 'editeur', 'forum', 'fil'].includes(nom) ? nom : 'verset';
+  rendre(); window.scrollTo(0, 0);
+}
+window.addEventListener('hashchange', () => aller(location.hash));
+
+function fenetre(html) { $('#fenetre').innerHTML = html; $('#voile').hidden = false; }
+function fermer() { $('#voile').hidden = true; }
+function lireEditeur() {
+  const type = $('#ed-type').value;
+  edition.titre = $('#ed-titre').value.trim();
+  edition.texte = $('#ed-texte').value;
+  edition.lien = type === 'aucun' ? null : { type, cle: $('#ed-cle').value.trim() };
+}
+
+document.addEventListener('change', (e) => { if (e.target.id === 'ed-type') { $('#ed-cle').disabled = e.target.value === 'aucun'; } });
+document.addEventListener('submit', (e) => {
+  if (e.target.matches('[data-repondre]')) {
+    e.preventDefault();
+    const t = $('#rep').value.trim(); if (!t) return;
+    ouverte.reponses.push({ id: ++id, auteur: moi(), texte: t, date: 'à l\'instant' }); ouverte.maj = 'à l\'instant'; rendre();
+  }
+});
+document.addEventListener('click', (e) => {
+  const r = e.target.closest('#roles button');
+  if (r) { niveau = Number(r.dataset.n); if (niveau < 1 && (vue === 'notes' || vue === 'editeur')) vue = 'forum'; rendre(); return; }
+  if (e.target.id === 'theme') { const d = document.documentElement; d.dataset.theme = d.dataset.theme === 'sombre' ? 'clair' : 'sombre'; return; }
+  if (e.target.id === 'voile' || e.target.closest('[data-fermer]')) { fermer(); return; }
+  const f = e.target.closest('[data-filtre-forum]'); if (f) { filtreForum = f.dataset.filtreForum; rendre(); return; }
+  const fn = e.target.closest('[data-filtre-notes]'); if (fn) { filtreNotes = fn.dataset.filtreNotes; rendre(); return; }
+  if (e.target.closest('[data-filtre-cle]')) { filtreForum = 'verset'; }
+  const of = e.target.closest('[data-ouvrir-fil]'); if (of) { e.preventDefault(); ouverte = NOTES.find((n) => n.id == of.dataset.ouvrirFil); location.hash = '#fil'; aller('#fil'); return; }
+  const on = e.target.closest('[data-ouvrir-note]'); if (on) { edition = NOTES.find((n) => n.id == on.dataset.ouvrirNote); location.hash = '#editeur'; aller('#editeur'); return; }
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  switch (b.dataset.act) {
+    case 'basculer': ouvertVerset = !ouvertVerset; break;
+    case 'nouvelle': edition = { id: ++id, auteur: moi(), titre: '', texte: '', lien: null, publie: false, date: '', maj: 'à l\'instant', reponses: [] }; location.hash = '#editeur'; return aller('#editeur');
+    case 'discussion': edition = { id: ++id, auteur: moi(), titre: '', texte: '', lien: { type: 'verset', cle: VERSET.ref }, publie: false, date: '', maj: 'à l\'instant', reponses: [] }; location.hash = '#editeur'; return aller('#editeur');
+    case 'editer-fil': edition = ouverte; location.hash = '#editeur'; return aller('#editeur');
+    case 'enregistrer':
+      lireEditeur(); if (!NOTES.includes(edition)) { edition.date = 'à l\'instant'; NOTES.unshift(edition); }
+      edition.maj = 'à l\'instant'; $('#ed-msg').style.color = 'var(--discret)'; rendre(); $('#ed-msg').textContent = 'Enregistré.'; return;
+    case 'publier':
+      lireEditeur();
+      if (!edition.titre) { $('#ed-msg').textContent = 'Un titre est nécessaire pour publier au forum.'; return; }
+      if (!NOTES.includes(edition)) { edition.date = 'à l\'instant'; NOTES.unshift(edition); }
+      edition.publie = true; edition.maj = 'à l\'instant'; ouverte = edition; location.hash = '#fil'; return aller('#fil');
+    case 'depublier': edition.publie = false; rendre(); $('#ed-msg').style.color = 'var(--discret)'; $('#ed-msg').textContent = 'Le fil est redevenu une note privée.'; return;
+    case 'supprimer-note':
+      fenetre(`<h2>Supprimer cette note ?</h2><p>La note privée est effacée définitivement.</p><div class="fenetre-bas"><button class="btn" data-fermer>Annuler</button><button class="btn danger-plein" data-act="confirmer-suppr">Supprimer</button></div>`); return;
+    case 'confirmer-suppr': NOTES.splice(NOTES.indexOf(edition), 1); edition = null; fermer(); location.hash = '#notes'; return aller('#notes');
+    case 'masquer': { const m = ouverte.reponses.find((x) => x.id == b.dataset.r); m.masque = { par: moi(), le: 'à l\'instant' }; break; }
+    case 'demasquer': { const m = ouverte.reponses.find((x) => x.id == b.dataset.r); delete m.masque; break; }
+    case 'signaler': fenetre('<h2>Signaler</h2><p>Comme pour les commentaires : motif facultatif, transmis aux modérateurs.</p><div class="fenetre-bas"><button class="btn" data-fermer>Fermer</button></div>'); return;
+  }
+  rendre();
+});
+aller(location.hash);
+}
+</script>
+</body>
+</html>
