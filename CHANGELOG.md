@@ -1,6 +1,20 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 4 : import des commentaires de l'ancienne application
+- `npm run importer` (`scripts/importer.mjs`) : lit les exports CSV de Versets1 et Lexique1 (dossier `import/`, hors Git)
+  et écrit les commentaires dans `commentaires/` (types `verset` et `lexique`). À blanc par défaut (rapport
+  `import/rapport-import.txt` et fiche de contrôle `import/controle-import.csv` avec un lien par commentaire) ;
+  `--ecrire`, `--verifier` (Firestore relu et comparé au classeur), `--purger` (seulement les documents importés) ;
+  émulateurs, `--projet essai` ou `--projet prod` (confirmation PROD).
+- Décisions de l'auteur appliquées : seuls les commentaires d'Amha Nathali et d'Afrukh Ifereles ; signatures
+  harmonisées ; clés du lexique sans voyelles (clés confondues regroupées et listées) ; date du 1er janvier 2024
+  (midi, Montréal) pour les commentaires sans date, marquée `import.dateEstimee` ; commentaires d'Amha Nathali reliés
+  à son compte (gmpcdz@gmail.com) ; comptes des anciens membres non importés.
+- Identifiants stables (`imp-v-…`, `imp-l-…`) : relancer l'import remplace sans doublon. Champ `import`
+  (source, clé d'origine, ordre, date brute, date estimée, date de l'import), toléré par les règles.
+- 7 tests (`tests/import.test.mjs`).
+
 ### Corrigé — outils
 - Dépendances des Cloud Functions installées par `npm ci` (ESSAI_LOCAL.bat, deployerAlfamous1.bat, `npm run emulateurs`) :
   `npm install` récrivait `functions/package.json` et `package-lock.json` sur le PC, ce qui bloquait ensuite

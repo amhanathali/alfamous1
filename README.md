@@ -63,6 +63,17 @@ service gardée **hors du dépôt** : `set GOOGLE_APPLICATION_CREDENTIALS=C:\che
 En ligne, la configuration Firebase vient de Hosting (`/__/firebase/init.json`) : le site d'essai écrit dans
 `alfamous-essai`, la production dans `alfamous-atelier`. Le SDK Firebase est servi par l'application (`vendor/firebase/`).
 
+## Importer les commentaires de l'ancienne application (phase 4)
+1. Exporter du classeur Lexique-Coran les onglets **Versets1** et **Lexique1** (Fichier › Télécharger › CSV) et les poser
+   dans `import/` (jamais dans Git) : « Lexique-Coran - Versets1.csv », « Lexique-Coran - Lexique1.csv ».
+2. `npm run importer` : à blanc ; lire `import/rapport-import.txt` (chiffres, signatures, clés regroupées, écarts).
+3. Essai local : `npm run importer -- --ecrire` avec les émulateurs lancés.
+4. Site d'essai : `set GOOGLE_APPLICATION_CREDENTIALS=C:\Users\gmpcd\cles\alfamous-essai.json`, puis
+   `npm run importer -- --projet essai --ecrire` et `npm run importer -- --projet essai --verifier` ;
+   contrôler quelques lignes de `import/controle-import.csv` (lien direct vers chaque commentaire).
+5. Recommencer : `--purger` retire seulement les commentaires importés. Production : `--projet prod` (confirmation PROD),
+   le jour de la bascule, avec l'accord de l'auteur.
+
 ## Déployer (sur le PC)
 **Double-cliquer sur deployerAlfamous1.bat** (site d'essai), ou `deployerAlfamous1.bat prod` (production, confirmation
 « PROD » demandée). Arrêter d'abord les émulateurs d'ESSAI_LOCAL.bat (les tests des règles en lancent d'autres).
