@@ -17,11 +17,7 @@ const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DOSSIER = '.emulateurs';
 mkdirSync(join(RACINE, DOSSIER), { recursive: true });
 
-const args = [
-  'firebase', 'emulators:start',
-  '--project', 'demo-alfamous1',
-  '--only', 'auth,firestore,storage',
-  '--import', DOSSIER, '--export-on-exit', DOSSIER,
-];
-const proc = spawn('npx', args, { cwd: RACINE, stdio: 'inherit', shell: process.platform === 'win32' });
+// Commande en une seule chaîne (arguments fixes, sans saisie de l'utilisateur) : pas d'avertissement DEP0190.
+const commande = `npx firebase emulators:start --project demo-alfamous1 --only auth,firestore,storage --import ${DOSSIER} --export-on-exit ${DOSSIER}`;
+const proc = spawn(commande, { cwd: RACINE, stdio: 'inherit', shell: true });
 proc.on('exit', (code) => process.exit(code ?? 0));
