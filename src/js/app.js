@@ -12,6 +12,7 @@ import { initCommentaires, boutonCommentaires } from './commentaires.js';
 import { routeLexique, initLexique, encadreLexique, clesLexique } from './lexique.js';
 import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
+import { routeMembres, initMembres } from './membres.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -361,6 +362,12 @@ async function router() {
     try { await routeNotes(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
+  // Membres (#/membres, admins seulement)
+  if (location.hash === '#/membres') {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeMembres(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
   // Lexique (#/lexique, #/lexique/<clé>)
   if (/^#\/lexique(\/|$)/.test(location.hash)) {
     $('#requete').value = ''; $('#effacer').hidden = true;
@@ -442,11 +449,12 @@ window.addEventListener('hashchange', router);
 initCommentaires(contenu);
 initNotes(contenu);
 initLexique();
+initMembres(contenu);
 initHistorique({ lexique: clesLexique });
 initSelection({ traduction: () => traductionActive });
 initCompte();
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
-surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$)/.test(location.hash)) router(); });
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$)/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

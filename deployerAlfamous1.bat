@@ -7,7 +7,7 @@ REM   0. code a jour : branche main, git pull --ff-only (jamais de fusion), npm 
 REM   1. tests (npm test) et tests des regles Firestore (npm run test:regles)
 REM      -> arreter d abord les emulateurs d ESSAI_LOCAL.bat (ports 9099, 8085, 9199 occupes sinon)
 REM   2. construction de dist/ (npm run construire)
-REM   3. mise en ligne : site (Hosting) + regles et index Firestore
+REM   3. mise en ligne : site (Hosting), regles et index Firestore, Cloud Functions (onglet Membres)
 REM Les regles Storage ne sont pas deployees (Storage pas utilise par l application pour l instant).
 cd /d "%~dp0"
 if "%~1"=="suite" goto suite
@@ -19,6 +19,7 @@ REM puis la nouvelle version est relancee pour la suite.
   git checkout main || goto echec_git
   git pull --ff-only || goto echec_git
   call npm install --no-audit --no-fund
+  call npm install --prefix functions --no-audit --no-fund
   call "%~f0" suite %1
   exit /b
 )
@@ -51,8 +52,8 @@ echo [2/3] Construction de dist/...
 call npm run construire || goto echec
 
 echo.
-echo [3/3] Mise en ligne sur %CIBLE% (site + regles et index Firestore)...
-call npx firebase deploy --only hosting,firestore --project %CIBLE% || goto echec_deploiement
+echo [3/3] Mise en ligne sur %CIBLE% (site, regles et index Firestore, Cloud Functions)...
+call npx firebase deploy --only hosting,firestore,functions --project %CIBLE% || goto echec_deploiement
 
 echo.
 echo Deploiement termine : %SITE%

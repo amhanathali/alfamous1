@@ -1,9 +1,16 @@
 # Journal des changements
 
 ## [Non publié]
-### Ajouté — cadrage de l'onglet Membres (admin)
-- Maquette `docs/maquettes/membres.html` : liste des inscrits, filtres, changement de niveau avec confirmation,
-  journal des changements ; 6 questions en attente.
+### Ajouté — onglet Membres (admins)
+- Onglet **Membres** (`#/membres`, visible des seuls admins) : inscrits (nom, courriel, vérifié, inscription, dernière
+  connexion, commentaires et définitions, fils et réponses du forum), recherche et filtres, niveau changé avec
+  confirmation (jamais le sien), journal des changements. Maquette : `docs/maquettes/membres.html`.
+- Premières **Cloud Functions** (`functions/`, Node 22, Montréal) : `membres` et `changerNiveau`, réservées aux admins ;
+  blocage = sessions fermées ; journal dans `journalNiveaux` (fermé aux clients). 5 tests des fonctions pures
+  (`tests/membres.test.mjs`) ; 1 test de règles (journal fermé).
+- Émulateur Cloud Functions en local (port 5001, relayé par `servir.mjs`) ; `deployerAlfamous1.bat` déploie aussi les
+  fonctions ; index `reponses.auteurUid` (groupe de collections).
+- Messages en français pour « connexion par courriel non activée » et pour les erreurs des Cloud Functions.
 
 ### Ajouté — outils
 - `deployerAlfamous1.bat` : mise à jour du code (main), tests, tests des règles, construction, puis déploiement du site

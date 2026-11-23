@@ -1,0 +1,13 @@
+{
+  "name": "alfamous1-functions",
+  "private": true,
+  "description": "Cloud Functions d'Alfamous1 (région northamerica-northeast1) : gestion des niveaux des membres",
+  "license": "GPL-3.0-only",
+  "type": "module",
+  "main": "index.js",
+  "engines": { "node": "22" },
+  "dependencies": {
+    "firebase-admin": "^14.5.1",
+    "firebase-functions": "^7.4.0"
+  }
+}

@@ -34,6 +34,18 @@
   "storage": {
     "rules": "storage.rules"
   },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "*.log"
+      ]
+    }
+  ],
   "emulators": {
     "singleProjectMode": true,
     "auth": {
@@ -46,6 +58,10 @@
     },
     "storage": {
       "port": 9199,
+      "host": "127.0.0.1"
+    },
+    "functions": {
+      "port": 5001,
       "host": "127.0.0.1"
     },
     "hosting": {

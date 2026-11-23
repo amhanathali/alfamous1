@@ -5,7 +5,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-export const MODULES_SDK = ['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js'];
+export const MODULES_SDK = ['firebase-app.js', 'firebase-auth.js', 'firebase-firestore.js', 'firebase-functions.js'];
 
 export function lireModuleSdk(racine, nom) {
   if (!MODULES_SDK.includes(nom)) return null;

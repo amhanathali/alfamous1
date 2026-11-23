@@ -36,6 +36,7 @@ function resoudre(chemin) {
 const EMULATEURS = [
   { prefixes: ['/google.firestore.v1.Firestore/', '/v1/projects/', '/v1beta1/projects/'], port: 8085 },
   { prefixes: ['/identitytoolkit.googleapis.com/', '/securetoken.googleapis.com/', '/emulator/'], port: 9099 },
+  { prefixes: ['/demo-alfamous1/'], port: 5001 }, // Cloud Functions (onglet Membres)
 ];
 function relayer(req, res) {
   const cible = EMULATEURS.find((e) => e.prefixes.some((p) => req.url.startsWith(p)));
