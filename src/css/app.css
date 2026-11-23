@@ -311,3 +311,60 @@ a.btn { text-decoration: none; display: inline-block; }
 .com-actions a { color: var(--discret); font-size: 13px; }
 .forum-verset { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--discret); }
 .forum-verset:empty { display: none; }
+
+/* ---------- Lexique (phase 3) ---------- */
+.filtre-lexique { flex: 1; min-width: 220px; font-size: 16px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); }
+.liste-lex { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.lex-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 14px; border-bottom: 1px solid var(--bordure); color: inherit; text-decoration: none; align-items: center; }
+.lex-ligne:last-child { border-bottom: 0; }
+.lex-ligne:hover { background: var(--fond); }
+.lex-cle { font-size: 17px; font-weight: 600; text-align: start; }
+.lex-cle .ar { font-size: 24px; font-weight: 400; }
+.lex-extrait { font-size: 14px; color: var(--discret); grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lex-droite { grid-row: 1 / span 2; grid-column: 2; text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.lex-droite b { color: var(--texte); font-size: 15px; }
+.etiquette { font-size: 11px; font-weight: 400; border-radius: 999px; padding: 0 7px; border: 1px solid var(--bordure); color: var(--discret); background: var(--fond); margin-inline-start: 6px; vertical-align: middle; }
+.entree-tete, .bloc { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.entree-haut { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.entree-cle { margin: 0; font-size: 32px; line-height: 1.3; }
+.entree-cle .ar { font-size: 48px; font-weight: 400; }
+.entree-haut .aide { margin: 0; }
+.chiffres { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 4px; font-size: 15px; }
+.chiffres b { font-size: 18px; }
+.liens-entree { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin-top: 6px; }
+.liens-entree:empty { display: none; }
+.rappel { font-size: 13px; color: var(--discret); margin: 10px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); }
+.bloc > .commentaires { margin-top: 0; border-top: 0; padding-top: 0; }
+.bloc > h2 { font-size: 16px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bloc > h2 small { font-weight: 400; color: var(--discret); font-size: 13px; }
+.proches-opt { font-size: 14px; color: var(--discret); display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.puce.avec-lex { border-color: var(--accent); background: var(--accent-doux); }
+.pt { color: var(--accent); }
+.legende { font-size: 12px; color: var(--discret); margin: 8px 0 0; }
+.encadre-lex { background: var(--accent-doux); border: 1px solid var(--accent); border-radius: 12px; padding: 8px 14px; margin: 0 0 12px; font-size: 15px; }
+.lex-fiche { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; }
+
+/* ---------- Historique sous le champ de recherche (phase 3) ---------- */
+.historique { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 15px; max-height: 60vh; overflow-y: auto; }
+.historique h4 { margin: 6px 12px 2px; font-size: 12px; color: var(--discret); font-weight: 600; display: flex; justify-content: space-between; }
+.historique h4 button { background: none; border: 0; color: var(--discret); font: inherit; cursor: pointer; text-decoration: underline; }
+.historique a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 4px 12px; color: var(--texte); text-decoration: none; }
+.historique a:hover, .historique a.actif { background: var(--accent-doux); }
+.historique a small { color: var(--discret); white-space: nowrap; }
+.historique .police-ar { font-family: var(--arabe); font-size: 19px; }
+.historique a > span { unicode-bidi: isolate; }
+
+/* ---------- Sélection et copie de versets (phase 3) ---------- */
+.verset-infos { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.choisir { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+.verset.choisi { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.barre-copie { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--surface); border-top: 2px solid var(--accent); box-shadow: 0 -4px 16px rgba(0, 0, 0, .08); padding: 8px 16px; }
+.barre-copie-in { max-width: 920px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.barre-copie small { color: var(--discret); }
+.barre-copie .droite { display: flex; gap: 6px; flex-wrap: wrap; }
+body:has(.barre-copie:not([hidden])) .pied { padding-bottom: 90px; }
+.options-copie { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.options-copie label { margin: 4px 0; }
+.fenetre .options-copie input { display: inline; width: auto; margin: 0 4px 0 0; }
+@media (max-width: 520px) { .options-copie { grid-template-columns: 1fr; } }
+.apercu-copie { background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; white-space: pre-wrap; font: 14px/1.6 var(--latin); max-height: 300px; overflow: auto; margin: 8px 0 0; }

@@ -16,9 +16,10 @@ Le niveau 1 est déduit du courriel vérifié. Les niveaux 2 et 3 (et 0 pour blo
 | Action | 0 | 1 | 2 | 3 |
 | --- | --- | --- | --- | --- |
 | Lire le Coran, les commentaires Alfamous, le lexique, les fils publiés | ✓ | ✓ | ✓ | ✓ |
-| Écrire un commentaire sur un verset ou une entrée du lexique (publié tout de suite, sans validation) | — | ✓ | ✓ | ✓ |
+| Écrire un commentaire sur un verset, ou une définition du lexique (publié tout de suite, sans validation) ; créer une entrée du lexique (sa première définition) | — | ✓ | ✓ | ✓ |
 | Modifier ses propres commentaires (historique conservé) | — | ✓ | ✓ | ✓ |
 | Mes Notes : créer, modifier, supprimer ses notes privées | — | ✓ | ✓ | ✓ |
+| Historique de ses recherches synchronisé entre ses machines (privé : personne d'autre ne le lit) | compte connecté | ✓ | ✓ | ✓ |
 | Publier une note dans le forum ; répondre à un fil publié | — | ✓ | ✓ | ✓ |
 | Dépublier son fil (seulement s'il n'a encore aucune réponse d'autrui) | — | ✓ | ✓ | ✓ |
 | Signaler un commentaire aux modérateurs (une fois, pas le sien) | — | ✓ | ✓ | ✓ |

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Crée dans les émulateurs un compte d'essai par niveau (docs/DROITS.md), des commentaires d'essai
-// sur 112:1, et des notes et fils du forum d'essai : npm run emulateurs:peupler
+// sur 112:1, des définitions du lexique d'essai, et des notes et fils du forum d'essai : npm run emulateurs:peupler
 // À lancer pendant que « npm run emulateurs » tourne. Ne touche jamais un vrai projet :
 // le script refuse de tourner si l'émulateur n'est pas visé.
 //
@@ -60,6 +60,17 @@ await db.doc('commentaires/essai-2/versions/1').set({ texte: "[Texte d'essai] Pr
 await db.doc('commentaires/essai-3/prive/texte').set({ texte: "[Texte d'essai] Commentaire masqué par un modérateur." });
 await db.doc(`commentaires/essai-4/signalements/${uids[1]}`).set({ motif: 'Essai de signalement', le: jour(23) });
 console.log('Commentaires d\'essai prêts sur 112:1 (ouvrir http://localhost:5050/#/q/112).');
+
+// Définitions du lexique d'essai (commentaires de type « lexique », textes fictifs).
+const def = (cle, auteurUid, auteurNom, texte, j, extra = {}) => com(cle, auteurUid, auteurNom, texte, j, { type: 'lexique', ...extra });
+const LEXIQUE = {
+  'essai-l1': def('بشر', null, 'Amha Nathali', "[Texte d'essai] Définition importée (sans compte). Renvois : 2:155, r:بشر.", 12),
+  'essai-l2': def('بشر', uids[1], 'Membre Essai', "[Texte d'essai] Définition du membre, la plus récente.", 23),
+  'essai-l3': def('أرض', uids[3], 'Admin Essai', "[Texte d'essai] Définition d'une autre racine.", 15),
+  'essai-l4': def('صلاة الجمعة', uids[1], 'Membre Essai', "[Texte d'essai] Une expression (pas une racine).", 16),
+};
+for (const [id, data] of Object.entries(LEXIQUE)) await db.doc(`commentaires/${id}`).set(data);
+console.log('Lexique d\'essai prêt : 3 entrées, 4 définitions (http://localhost:5050/#/lexique).');
 
 // Notes et fils du forum d'essai (identifiants fixes).
 const note = (auteurUid, auteurNom, titre, texte, lien, publie, j, extra = {}) => ({

@@ -21,7 +21,7 @@ function puceLien(l, cliquable = true) {
   const balise = (href, html) => (cliquable && href ? `<a class="lien-cible" href="${href}">${html}</a>` : `<span class="lien-cible">${html}</span>`);
   if (l.type === 'verset') return balise(lienRequete(l.cle), `verset ${echapper(l.cle)}`);
   if (l.type === 'racine') return balise(lienRequete(`r:${l.cle}`), `racine <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
-  return balise(null, `lexique <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
+  return balise(`#/lexique/${encodeURIComponent(l.cle)}`, `lexique <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
 }
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
 const titreAffiche = (n) => (n.masque ? 'Fil masqué par un modérateur' : n.titre || 'Sans titre');
@@ -32,7 +32,8 @@ export function menuNotes() {
   if (!zone) return;
   const h = location.hash;
   const actif = (re) => (re.test(h) ? ' actif' : '');
-  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil)/.test(h) ? '' : 'actif'}">Lecture</a>
+  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique)/.test(h) ? '' : 'actif'}">Lecture</a>
+    <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
     ${session.utilisateur && session.niveau >= 1 ? `<a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}">Mes Notes</a>` : ''}
     <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>`;
 }
@@ -467,21 +468,22 @@ async function supprimerReponse(id, rid) {
 }
 
 // ---------- Sous le verset : fils du forum et notes de l'utilisateur ----------
-export async function ligneForum(zone, cle) {
+export async function ligneForum(zone, cle, type = 'verset') {
   if (!zone) return;
-  const libre = !/^\d{1,3}:\d{1,3}$/.test(cle);
-  if (libre) return;
+  if (type === 'verset' && !/^\d{1,3}:\d{1,3}$/.test(cle)) return;
+  const quoi = type === 'verset' ? cle : `« ${echapper(cle)} »`;
+  const surQuoi = type === 'verset' ? 'ce verset' : 'cette entrée';
   try {
     const { db, F } = await firebase();
     const col = F.collection(db, 'notes');
-    const nbFils = (await avecDelai(F.getCountFromServer(F.query(col, F.where('publie', '==', true), F.where('lien.type', '==', 'verset'), F.where('lien.cle', '==', cle))))).data().count;
+    const nbFils = (await avecDelai(F.getCountFromServer(F.query(col, F.where('publie', '==', true), F.where('lien.type', '==', type), F.where('lien.cle', '==', cle))))).data().count;
     let nbMiennes = 0;
     if (session.utilisateur && session.niveau >= 1) {
       nbMiennes = (await F.getCountFromServer(F.query(col, F.where('auteurUid', '==', session.utilisateur.uid), F.where('publie', '==', false), F.where('lien.cle', '==', cle))).catch(() => null))?.data().count || 0;
     }
-    zone.innerHTML = `<span>Forum : ${nbFils ? `<a href="#/forum?cle=${encodeURIComponent(cle)}">${pluriel(nbFils, 'fil')} sur ${cle}</a>` : `aucun fil sur ${cle}`}</span>
-      ${session.niveau >= 1 ? `<a href="#/note/nouvelle?type=verset&cle=${encodeURIComponent(cle)}">+ Ouvrir une discussion sur ${cle}</a>` : ''}
-      ${nbMiennes ? `<a class="mes-notes-verset" href="#/notes">Mes notes sur ce verset : ${nbMiennes}</a>` : ''}`;
+    zone.innerHTML = `<span>Forum : ${nbFils ? `<a href="#/forum?cle=${encodeURIComponent(cle)}">${pluriel(nbFils, 'fil')} sur ${quoi}</a>` : `aucun fil sur ${quoi}`}</span>
+      ${session.niveau >= 1 ? `<a href="#/note/nouvelle?type=${type}&cle=${encodeURIComponent(cle)}">+ Ouvrir une discussion sur ${quoi}</a>` : ''}
+      ${nbMiennes ? `<a class="mes-notes-verset" href="#/notes">Mes notes sur ${surQuoi} : ${nbMiennes}</a>` : ''}`;
   } catch { zone.innerHTML = ''; }
 }
 
