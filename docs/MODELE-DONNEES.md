@@ -104,6 +104,10 @@ Chaque publication d'un membre (commentaire, note, réponse, signalement) écrit
 `n + 1` dans la fenêtre (20 au plus), ou nouvelle fenêtre (`n = 1`) une heure après `debut`. Lu par son seul titulaire.
 Modérateurs et admin exemptés.
 
-## À venir
-- Import des 335 commentaires et 369 entrées du lexique (phase 4, par script admin) ; les clés du lexique passent par
-  `normaliserCle` à l'import.
+## Commentaires importés (phase 4)
+Écrits par `npm run importer` (script admin, hors règles) dans `commentaires/`, avec la même forme que ceux du site,
+plus un champ `import` : `{ source: 'Lexique-Coran', origine, ordre, dateBrute, dateEstimee, le }` (`origine` = verset
+`s:v` ou clé du lexique telle qu'écrite dans le classeur, avec voyelles). Identifiants stables : `imp-v-<s>-<v>-<ordre>`
+et `imp-l-<empreinte de la clé d'origine>-<ordre>`. `creeLe` = date de la signature (heure de Montréal), ou 1er janvier
+2024 si elle manque (`dateEstimee: true`). `auteurUid` = compte de l'auteur pour Amha Nathali, sinon null.
+Le champ `import` n'est jamais modifié : les règles (modification, masquage) ne contrôlent que les champs changés.
