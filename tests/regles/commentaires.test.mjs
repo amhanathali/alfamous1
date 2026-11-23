@@ -3,8 +3,11 @@ import { test, before, after, beforeEach } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
 import {
-  doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, Timestamp,
+  doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, Timestamp, setLogLevel,
 } from 'firebase/firestore';
+
+// Les refus attendus (PERMISSION_DENIED) ne sont pas affichés : seul le verdict des tests compte.
+setLogLevel('silent');
 
 let env;
 before(async () => {
@@ -107,8 +110,12 @@ test('l\'auteur modifie son commentaire ; l\'ancienne version est gardée', asyn
   await semer('commentaires/c1', existant());
   await assertSucceeds(lotModifier(db('membre'), 'c1', existant(), 'Version 2'));
   await assertSucceeds(getDoc(doc(db(), 'commentaires/c1/versions/1')));
-  const apres = (await env.withSecurityRulesDisabled((c) => getDoc(doc(c.firestore(), 'commentaires/c1')))).data();
+  // withSecurityRulesDisabled ne renvoie pas le résultat du rappel : on le récupère à l'intérieur.
+  let apres;
+  await env.withSecurityRulesDisabled(async (c) => { apres = (await getDoc(doc(c.firestore(), 'commentaires/c1'))).data(); });
+  if (apres.nbVersions !== 2 || apres.texte !== 'Version 2') throw new Error('modification non enregistrée');
   await assertSucceeds(lotModifier(db('membre'), 'c1', apres, 'Version 3'));
+  await assertSucceeds(getDoc(doc(db(), 'commentaires/c1/versions/2')));
 });
 
 test('modification refusée sans version, par un autre, ou en réécrivant l\'historique', async () => {

@@ -4,7 +4,9 @@
 import { test, before, after } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertFails } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, setLogLevel } from 'firebase/firestore';
+
+setLogLevel('silent');
 import { ref, getBytes, uploadString } from 'firebase/storage';
 
 let env;
