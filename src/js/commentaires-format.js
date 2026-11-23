@@ -23,6 +23,10 @@ export const initiale = (nom) => (String(nom || '?').trim()[0] || '?').toUpperCa
 // Message lisible pour une erreur Firebase.
 export function messageErreur(e) {
   const code = e?.code || '';
+  // Cloud Functions : le message du serveur est déjà en français (« Réservé aux admins. »…).
+  if (code.startsWith('functions/') && code !== 'functions/internal' && code !== 'functions/unavailable') {
+    return String(e.message || '').replace(/\s*\[\d+\]$/, '') || 'Erreur inconnue.';
+  }
   const M = {
     'permission-denied': 'Action refusée : vos droits ne le permettent pas.',
     unavailable: 'Service injoignable. En local, lancez LANCER_EMULATEURS.bat.',
@@ -32,6 +36,10 @@ export function messageErreur(e) {
     'auth/weak-password': 'Mot de passe trop court (6 caractères au moins).',
     'auth/too-many-requests': 'Trop d\'essais : réessayez dans quelques minutes.',
     'auth/network-request-failed': 'Connexion impossible. En local, lancez LANCER_EMULATEURS.bat.',
+    'auth/configuration-not-found': 'Connexion par courriel non activée sur ce projet (console Firebase › Authentication).',
+    'auth/operation-not-allowed': 'Connexion par courriel non activée sur ce projet (console Firebase › Authentication).',
+    'functions/internal': 'Erreur du serveur (Cloud Functions). Réessayez plus tard.',
+    'functions/unavailable': 'Service injoignable. En local, lancez LANCER_EMULATEURS.bat.',
   };
   return M[code] || e?.message || 'Erreur inconnue.';
 }

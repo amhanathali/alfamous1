@@ -92,6 +92,12 @@ d'autre, modérateurs et admin compris. Le navigateur garde une copie locale ; �
 (après 1,5 s), copie locale et document sont fusionnés dans une transaction (`fusionnerHistoriques`). Les visiteurs ont
 seulement la copie locale. Pas de limite de fréquence (document privé, réécrit sur place).
 
+## `journalNiveaux/{id}` — changements de niveau
+`{ le, parUid, parNom, cibleUid, cibleNom, cibleCourriel, avant, apres }`, écrit par la Cloud Function
+`changerNiveau` ; lu par la Cloud Function `membres` (50 derniers). Fermé à tous les clients (règles par défaut).
+La liste des comptes (Firebase Auth) n'est lisible que par la Cloud Function `membres`, réservée aux admins.
+Index : `reponses.auteurUid` en portée « groupe de collections » (nombre de réponses par membre).
+
 ## `limites/{uid}` — limite de fréquence
 `{ debut, n, dernier }` : début de la fenêtre d'une heure, nombre de publications, dernière publication.
 Chaque publication d'un membre (commentaire, note, réponse, signalement) écrit ce document dans le même lot :

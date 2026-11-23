@@ -42,3 +42,11 @@ test('Storage fermé : personne ne lit ni n\'écrit', async () => {
     await assertFails(uploadString(ref(st, 'x.txt'), 'essai'), `${nom} : écriture`);
   }
 });
+
+test('Firestore : journalNiveaux fermé à tous, admin compris (lu et écrit par les Cloud Functions seulement)', async () => {
+  for (const [nom, ctx] of Object.entries(profils())) {
+    const db = ctx.firestore();
+    await assertFails(getDoc(doc(db, 'journalNiveaux/x')), `${nom} : lecture`);
+    await assertFails(setDoc(doc(db, 'journalNiveaux/x'), { avant: 1, apres: 3 }), `${nom} : écriture`);
+  }
+});

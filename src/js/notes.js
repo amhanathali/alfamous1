@@ -32,10 +32,11 @@ export function menuNotes() {
   if (!zone) return;
   const h = location.hash;
   const actif = (re) => (re.test(h) ? ' actif' : '');
-  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique)/.test(h) ? '' : 'actif'}">Lecture</a>
+  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres)/.test(h) ? '' : 'actif'}">Lecture</a>
     <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
     ${session.utilisateur && session.niveau >= 1 ? `<a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}">Mes Notes</a>` : ''}
-    <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>`;
+    <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>
+    ${session.niveau >= 3 ? `<a href="#/membres" class="${actif(/^#\/membres/).trim()}">Membres</a>` : ''}`;
 }
 
 // ---------- Routage ----------

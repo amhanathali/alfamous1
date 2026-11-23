@@ -1,4 +1,4 @@
-// Accès à Firebase (Auth, Firestore), chargé seulement quand on en a besoin.
+// Accès à Firebase (Auth, Firestore, Cloud Functions), chargé seulement quand on en a besoin.
 //
 // - En local (localhost) : émulateurs, projet fictif demo-alfamous1 (rien ne part vers le nuage).
 //   Lancer LANCER_EMULATEURS.bat avant d'essayer les comptes et les commentaires.
@@ -8,6 +8,7 @@
 
 export const LOCAL = ['localhost', '127.0.0.1'].includes(location.hostname);
 const SDK = '../vendor/firebase';
+const REGION = 'northamerica-northeast1'; // Cloud Functions (functions/index.js)
 let pret = null;
 
 export function firebase() {
@@ -16,8 +17,9 @@ export function firebase() {
 }
 
 async function initialiser() {
-  const [{ initializeApp }, A, F] = await Promise.all([
+  const [{ initializeApp }, A, F, Fn] = await Promise.all([
     import(`${SDK}/firebase-app.js`), import(`${SDK}/firebase-auth.js`), import(`${SDK}/firebase-firestore.js`),
+    import(`${SDK}/firebase-functions.js`),
   ]);
   const config = LOCAL
     ? { projectId: 'demo-alfamous1', apiKey: 'cle-demo', authDomain: 'localhost' }
@@ -25,12 +27,14 @@ async function initialiser() {
   const app = initializeApp(config);
   const auth = A.getAuth(app);
   const db = F.getFirestore(app);
+  const fonctions = Fn.getFunctions(app, REGION);
   if (LOCAL) {
     // Émulateurs joints par l'adresse de la page : scripts/servir.mjs relaie vers 9099 (Auth) et 8085 (Firestore).
     A.connectAuthEmulator(auth, location.origin, { disableWarnings: true });
     F.connectFirestoreEmulator(db, location.hostname, Number(location.port) || 80);
+    Fn.connectFunctionsEmulator(fonctions, location.hostname, Number(location.port) || 80); // relais vers 5001
   }
-  return { auth, db, A, F };
+  return { auth, db, A, F, fonctions, Fn };
 }
 
 // Promesse limitée dans le temps (émulateurs éteints : Firestore réessaie longtemps sans répondre).

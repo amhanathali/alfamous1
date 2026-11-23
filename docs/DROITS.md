@@ -24,7 +24,7 @@ Le niveau 1 est déduit du courriel vérifié. Les niveaux 2 et 3 (et 0 pour blo
 | Dépublier son fil (seulement s'il n'a encore aucune réponse d'autrui) | — | ✓ | ✓ | ✓ |
 | Signaler un commentaire aux modérateurs (une fois, pas le sien) | — | ✓ | ✓ | ✓ |
 | Masquer un contenu d'autrui (réversible) | — | — | ✓ | ✓ |
-| Supprimer définitivement ; changer le niveau d'un membre | — | — | — | ✓ |
+| Supprimer définitivement ; changer le niveau d'un membre (onglet « Membres », pas le sien) | — | — | — | ✓ |
 
 ## Règles complémentaires
 - Pas de validation par un modérateur : le contenu est publié tout de suite ; le modérateur masque, l'admin supprime.
@@ -39,3 +39,13 @@ Le niveau 1 est déduit du courriel vérifié. Les niveaux 2 et 3 (et 0 pour blo
 
 ## Import des membres de l'ancienne application
 Ancien niveau 0 ou 1 → 1 ; 2 → 2 ; 3 → 3 (l'ancien 0 désignait un membre inscrit, le nouveau 0 un visiteur).
+
+## Changer un niveau
+- **Onglet « Membres »** (admins seulement, `#/membres`) : liste des inscrits (courriel vérifié, dates, nombre de
+  commentaires et de définitions, de fils et réponses du forum) ; niveau changé par un menu, avec confirmation.
+  Passe par les Cloud Functions `membres` et `changerNiveau` (région de Montréal), qui vérifient que l'appelant est
+  admin. Un admin ne change jamais son propre niveau (il reste toujours au moins un admin). Chaque changement est
+  inscrit dans `journalNiveaux` (fermé aux clients), affiché sous la liste.
+- Bloquer (0) : la personne garde son compte et lit tout, mais n'écrit plus rien ; ses sessions sont fermées.
+  Ses contenus déjà publiés restent (à masquer à part).
+- En secours, sur le PC : `npm run niveau -- courriel 2 --projet essai` (clé de compte de service hors du dépôt).
