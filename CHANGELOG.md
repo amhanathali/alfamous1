@@ -2,6 +2,7 @@
 
 ## [Non publié]
 ### Ajouté — phase 2 : Mes Notes et forum
+- `ESSAI_LOCAL.bat` : émulateurs, données d'essai, application et navigateur en un double-clic.
 - Onglets **Lecture · Mes Notes · Forum** sous le titre.
 - Mes Notes (`#/notes`, `#/note/…`) : notes privées (titre facultatif, lien vers un verset, une racine ou une entrée du
   lexique), publication au forum, dépublication tant qu'aucun autre membre n'a répondu, suppression des notes privées.
