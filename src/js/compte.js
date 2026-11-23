@@ -132,8 +132,11 @@ export async function initCompte() {
   });
   try {
     const { auth, A } = await firebase();
+    // Au premier chargement, jeton rafraîchi : un niveau changé par l'admin est pris en compte en rechargeant la page.
+    let premier = true;
     A.onIdTokenChanged(auth, async (u) => {
-      await lireJeton(u).catch(() => lireJeton(null));
+      await lireJeton(u, premier && !!u).catch(() => lireJeton(null));
+      if (u) premier = false;
       session.pret = true; dessinerEntete(); prevenir();
     });
   } catch (e) {

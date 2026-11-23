@@ -2,6 +2,7 @@
 import { test, before, after, beforeEach } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
+import { lotAvecLimite } from './limite.mjs';
 import {
   doc, getDoc, getDocs, collection, setDoc, updateDoc, deleteDoc, writeBatch, serverTimestamp, Timestamp, setLogLevel,
 } from 'firebase/firestore';
@@ -39,6 +40,8 @@ const existant = (extra = {}) => ({
   type: 'verset', cle: '112:1', auteurUid: 'membre', auteurNom: 'Membre Essai', texte: 'Texte d\'essai',
   creeLe: T0, modifieLe: null, nbVersions: 1, masque: null, ...extra,
 });
+// Création « comme le client » : avec le compteur de la limite de fréquence.
+const creer = (p, chemin, data) => { const d = db(p); return lotAvecLimite(d, p ? PROFILS[p].uid : null, (b) => b.set(doc(d, chemin), data)); };
 const semer = (chemin, data) => env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), chemin), data));
 const nouveau = (extra = {}) => ({
   type: 'verset', cle: '112:1', auteurUid: 'membre', auteurNom: 'Membre Essai', texte: 'Nouveau commentaire',
@@ -76,13 +79,13 @@ test('lecture publique des commentaires (visiteur compris)', async () => {
 
 // ---------- Écriture ----------
 test('niveau 1 écrit un commentaire valide (verset et lexique)', async () => {
-  await assertSucceeds(setDoc(doc(db('membre'), 'commentaires/n1'), nouveau()));
-  await assertSucceeds(setDoc(doc(db('membre'), 'commentaires/n2'), nouveau({ type: 'lexique', cle: 'صمد' })));
+  await assertSucceeds(creer('membre', 'commentaires/n1', nouveau()));
+  await assertSucceeds(creer('membre', 'commentaires/n2', nouveau({ type: 'lexique', cle: 'صمد' })));
 });
 
 test('visiteur et courriel non vérifié ne peuvent pas écrire', async () => {
-  await assertFails(setDoc(doc(db(), 'commentaires/n1'), nouveau()));
-  await assertFails(setDoc(doc(db('nonVerifie'), 'commentaires/n1'), nouveau({ auteurUid: 'nv', auteurNom: 'Non Vérifié' })));
+  await assertFails(creer(null, 'commentaires/n1', nouveau()));
+  await assertFails(creer('nonVerifie', 'commentaires/n1', nouveau({ auteurUid: 'nv', auteurNom: 'Non Vérifié' })));
 });
 
 test('commentaire refusé s\'il est mal formé', async () => {
@@ -100,9 +103,9 @@ test('commentaire refusé s\'il est mal formé', async () => {
     'champ en trop': nouveau({ niveau: 3 }),
   };
   for (const [nom, data] of Object.entries(cas)) {
-    await assertFails(setDoc(doc(d, `commentaires/${nom.length}`), data), nom);
+    await assertFails(creer('membre', `commentaires/${nom.length}`, data), nom);
   }
-  await assertSucceeds(setDoc(doc(d, 'commentaires/limite'), nouveau({ texte: 'x'.repeat(4000) })));
+  await assertSucceeds(creer('membre', 'commentaires/limite', nouveau({ texte: 'x'.repeat(4000) })));
 });
 
 // ---------- Modification ----------
@@ -173,12 +176,12 @@ test('masquage refusé si l\'original n\'est pas mis de côté à l\'identique',
 test('signaler : un membre, une fois, pas son propre commentaire ; lu par les modérateurs', async () => {
   await semer('commentaires/c1', existant());
   const chemin = 'commentaires/c1/signalements/autre';
-  await assertFails(setDoc(doc(db(), chemin), { motif: '', le: serverTimestamp() }));
-  await assertFails(setDoc(doc(db('membre'), 'commentaires/c1/signalements/membre'), { motif: '', le: serverTimestamp() }));
-  await assertFails(setDoc(doc(db('autre'), 'commentaires/c1/signalements/membre'), { motif: '', le: serverTimestamp() }));
-  await assertFails(setDoc(doc(db('autre'), chemin), { motif: 'x'.repeat(501), le: serverTimestamp() }));
-  await assertSucceeds(setDoc(doc(db('autre'), chemin), { motif: 'Hors sujet', le: serverTimestamp() }));
-  await assertFails(setDoc(doc(db('autre'), chemin), { motif: 'Encore', le: serverTimestamp() }));
+  await assertFails(creer(null, chemin, { motif: '', le: serverTimestamp() }));
+  await assertFails(creer('membre', 'commentaires/c1/signalements/membre', { motif: '', le: serverTimestamp() }));
+  await assertFails(creer('autre', 'commentaires/c1/signalements/membre', { motif: '', le: serverTimestamp() }));
+  await assertFails(creer('autre', chemin, { motif: 'x'.repeat(501), le: serverTimestamp() }));
+  await assertSucceeds(creer('autre', chemin, { motif: 'Hors sujet', le: serverTimestamp() }));
+  await assertFails(creer('autre', chemin, { motif: 'Encore', le: serverTimestamp() }));
   await assertFails(getDocs(collection(db('membre'), 'commentaires/c1/signalements')));
   await assertSucceeds(getDocs(collection(db('modo'), 'commentaires/c1/signalements')));
 });
@@ -196,5 +199,5 @@ test('suppression définitive : admin seulement', async () => {
 // ---------- Rien d'autre n'est ouvert ----------
 test('les autres collections restent fermées', async () => {
   await assertFails(getDoc(doc(db('admin'), 'membres/x')));
-  await assertFails(setDoc(doc(db('admin'), 'notes/x'), { texte: 'x' }));
+  await assertFails(creer('admin', 'notes/x', { texte: 'x' }));
 });

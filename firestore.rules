@@ -30,6 +30,34 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // ---------- Limite de fréquence (docs/DROITS.md) ----------
+    // 20 publications par heure et par membre (commentaires, notes, réponses, signalements) ;
+    // modérateurs et admin exemptés. Chaque publication met à jour limites/{uid} dans le même lot.
+    function limiteOk() {
+      return niveau() >= 2
+        || getAfter(/databases/$(database)/documents/limites/$(request.auth.uid)).data.dernier == request.time;
+    }
+    match /limites/{uid} {
+      function nouvelleFenetre() {
+        return request.resource.data.keys().hasOnly(['debut', 'n', 'dernier'])
+          && request.resource.data.debut == request.time
+          && request.resource.data.n == 1
+          && request.resource.data.dernier == request.time;
+      }
+      function memeFenetre() {
+        return request.resource.data.keys().hasOnly(['debut', 'n', 'dernier'])
+          && resource.data.debut > request.time - duration.value(1, 'h')
+          && request.resource.data.debut == resource.data.debut
+          && request.resource.data.n == resource.data.n + 1
+          && request.resource.data.n <= 20
+          && request.resource.data.dernier == request.time;
+      }
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create: if niveau() >= 1 && uid == moi() && nouvelleFenetre();
+      allow update: if niveau() >= 1 && uid == moi()
+        && ((resource.data.debut <= request.time - duration.value(1, 'h') && nouvelleFenetre()) || memeFenetre());
+    }
+
     // ---------- Commentaires Alfamous (versets et lexique) ----------
     match /commentaires/{id} {
       // Lecture publique. Un commentaire masqué a un texte vide : l'original est dans prive/texte.
@@ -49,7 +77,8 @@ service cloud.firestore {
         && request.resource.data.creeLe == request.time
         && request.resource.data.modifieLe == null
         && request.resource.data.nbVersions == 1
-        && request.resource.data.masque == null;
+        && request.resource.data.masque == null
+        && limiteOk();
 
       // Modifier son commentaire (s'il n'est pas masqué) ; l'ancienne version est écrite
       // dans le même lot (versions/{n}), sinon refus.
@@ -129,7 +158,8 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(['motif', 'le'])
           && request.resource.data.motif is string
           && request.resource.data.motif.size() <= 500
-          && request.resource.data.le == request.time;
+          && request.resource.data.le == request.time
+          && limiteOk();
         allow delete: if niveau() >= 2;
       }
     }
@@ -156,7 +186,8 @@ service cloud.firestore {
       return niveau() >= 1 && uid == moi() && auteurDuContenu != moi()
         && request.resource.data.keys().hasOnly(['motif', 'le'])
         && request.resource.data.motif is string && request.resource.data.motif.size() <= 500
-        && request.resource.data.le == request.time;
+        && request.resource.data.le == request.time
+        && limiteOk();
     }
     function masqueValide(m) {
       return m.keys().hasOnly(['par', 'parNom', 'le']) && m.par == moi() && m.parNom == monNom() && m.le == request.time;
@@ -188,7 +219,8 @@ service cloud.firestore {
         && request.resource.data.nbReponses == 0
         && request.resource.data.nbReponsesAutrui == 0
         && request.resource.data.nbVersions == 1
-        && request.resource.data.masque == null;
+        && request.resource.data.masque == null
+        && limiteOk();
 
       function parAuteur() {
         return niveau() >= 1 && resource.data.auteurUid == moi() && resource.data.masque == null;
@@ -313,7 +345,8 @@ service cloud.firestore {
           && request.resource.data.creeLe == request.time
           && request.resource.data.modifieLe == null
           && request.resource.data.nbVersions == 1
-          && request.resource.data.masque == null;
+          && request.resource.data.masque == null
+          && limiteOk();
 
         function editionReponse() {
           return niveau() >= 1 && resource.data.auteurUid == moi() && resource.data.masque == null

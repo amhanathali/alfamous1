@@ -43,6 +43,15 @@ Les données d'essai sont gardées dans `.emulateurs/` (non versionné) ; suppri
 
 Prérequis : Java 21 (déjà installé sur le PC).
 
+### Nommer un modérateur ou un admin
+```bat
+npm run niveau -- modo@essai.local 2          &REM émulateurs
+npm run niveau -- --liste                      &REM comptes de niveau 0, 2 ou 3
+npm run niveau -- nom@exemple.com 2 --projet essai
+```
+Niveaux : 0 bloqué, 1 membre (par défaut), 2 modérateur, 3 admin. Pour `--projet essai` ou `prod`, une clé de compte de
+service gardée **hors du dépôt** : `set GOOGLE_APPLICATION_CREDENTIALS=C:\chemin\cle.json`. La production demande de taper OUI.
+
 ### Essayer les comptes et les commentaires en local
 **Le plus simple : double-cliquer sur ESSAI_LOCAL.bat** (émulateurs, données d'essai, application et navigateur en une fois).
 Étape par étape :

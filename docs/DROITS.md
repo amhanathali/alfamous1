@@ -8,8 +8,9 @@
 | 2 | Modérateur | Attribué par un admin |
 | 3 | Admin | Attribué par un admin |
 
-Le niveau est une revendication (*custom claim*) Firebase Auth posée par une Cloud Function ; les règles
-Firestore lisent `request.auth.token.niveau` et le client ne peut jamais le modifier.
+Le niveau 1 est déduit du courriel vérifié. Les niveaux 2 et 3 (et 0 pour bloquer un compte) sont une revendication
+(*custom claim*) Firebase Auth posée côté serveur par `npm run niveau` (voir le README) ; les règles Firestore lisent
+`request.auth.token.niveau` et le client ne peut jamais le modifier.
 
 ## Grille
 | Action | 0 | 1 | 2 | 3 |
@@ -29,7 +30,8 @@ Firestore lisent `request.auth.token.niveau` et le client ne peut jamais le modi
 - Un commentaire masqué reste à sa place : tout le monde voit la mention « Commentaire masqué par un modérateur » ;
   seuls les modérateurs et l'admin en lisent le texte. Les modérateurs voient le nombre de signalements.
 - Un auteur ne supprime pas son contenu publié (d'autres ont pu y répondre) ; il peut le modifier.
-- Limite de fréquence contre les robots : environ 20 écritures par heure et par membre.
+- Limite de fréquence contre les robots : 20 publications par heure et par membre (commentaires, notes, réponses,
+  signalements ; les modifications ne comptent pas) ; modérateurs et admin exemptés. Vérifiée par les règles (`limites/{uid}`).
 - Une note et un fil de discussion sont le même objet : privé dans « Mes Notes », public après « Publier ».
 - Commentaires Alfamous, lexique et forum sont reliés (un fil peut porter sur un verset, une racine ou une
   expression du lexique, ou rester libre) mais ne sont pas fusionnés.

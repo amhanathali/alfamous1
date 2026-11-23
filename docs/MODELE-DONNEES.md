@@ -74,6 +74,11 @@ compteurs du fil (`nbReponses`, `nbReponsesAutrui`, `activiteLe`) se font dans l
 - **Modifier un fil publié** : `versions/{nbVersions}` + mise à jour, dans le même lot.
 - **Masquer / démasquer** (2+), **supprimer** un fil publié et ses réponses (3).
 
+## `limites/{uid}` — limite de fréquence
+`{ debut, n, dernier }` : début de la fenêtre d'une heure, nombre de publications, dernière publication.
+Chaque publication d'un membre (commentaire, note, réponse, signalement) écrit ce document dans le même lot :
+`n + 1` dans la fenêtre (20 au plus), ou nouvelle fenêtre (`n = 1`) une heure après `debut`. Lu par son seul titulaire.
+Modérateurs et admin exemptés.
+
 ## À venir
-- Limite de fréquence (≈ 20 écritures par heure et par membre) : compteur par membre vérifié par les règles, ou Cloud Function.
 - Import des 335 commentaires et 369 entrées du lexique (phase 4, par script admin).

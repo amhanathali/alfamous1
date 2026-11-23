@@ -5,6 +5,7 @@
 import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX } from './commentaires-format.js';
+import { ajouterLimite } from './limite.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
 const NOTE_MAX = 20000;
@@ -158,11 +159,15 @@ async function vueEditeur(contenu, id, params) {
         const err = verifier(d, publier);
         if (err) { msg.textContent = err; return; }
         if (!n.id) {
-          const ref = await avecDelai(F.addDoc(F.collection(db, 'notes'), {
+          const ref = F.doc(F.collection(db, 'notes'));
+          const lot = F.writeBatch(db);
+          lot.set(ref, {
             auteurUid: session.utilisateur.uid, auteurNom: session.nom, ...d, publie: publier,
             creeLe: ts, modifieLe: ts, activiteLe: ts, publieLe: publier ? ts : null,
             nbReponses: 0, nbReponsesAutrui: 0, nbVersions: 1, masque: null,
-          }));
+          });
+          await ajouterLimite(lot, db, F, session);
+          await avecDelai(lot.commit());
           location.hash = publier ? `#/fil/${ref.id}` : `#/note/${ref.id}`;
           return;
         }
@@ -359,6 +364,7 @@ async function repondre(contenu, form) {
       lot.update(F.doc(db, `notes/${id}`), {
         nbReponses: F.increment(1), nbReponsesAutrui: F.increment(note.auteurUid === session.utilisateur.uid ? 0 : 1), activiteLe: F.serverTimestamp(),
       });
+      await ajouterLimite(lot, db, F, session);
       await avecDelai(lot.commit());
       await vueFil(contenu, id);
       return;
@@ -513,7 +519,10 @@ export function initNotes(contenu) {
     const { db, F } = await firebase();
     const { base } = chemins(f.dataset.signalFil);
     try {
-      await avecDelai(F.setDoc(F.doc(db, `${base}/signalements/${session.utilisateur.uid}`), { motif: f.motif.value.trim(), le: F.serverTimestamp() }));
+      const lot = F.writeBatch(db);
+      lot.set(F.doc(db, `${base}/signalements/${session.utilisateur.uid}`), { motif: f.motif.value.trim(), le: F.serverTimestamp() });
+      await ajouterLimite(lot, db, F, session);
+      await avecDelai(lot.commit());
       ouvrirFenetre('<h2>Merci</h2><p>Le signalement a été transmis aux modérateurs.</p><div class="fenetre-bas"><button type="button" class="btn" data-fermer>Fermer</button></div>');
     } catch (err) {
       f.querySelector('.form-msg').textContent = err?.code === 'permission-denied' ? 'Vous avez déjà signalé ce message.' : messageErreur(err);

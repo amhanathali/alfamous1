@@ -2,6 +2,7 @@
 import { test, before, after, beforeEach } from 'node:test';
 import { readFileSync } from 'node:fs';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
+import { lotAvecLimite } from './limite.mjs';
 import {
   doc, getDoc, getDocs, collection, query, where, orderBy, setDoc, updateDoc, deleteDoc, writeBatch,
   serverTimestamp, Timestamp, increment, setLogLevel,
@@ -32,6 +33,8 @@ const db = (p) => {
   return env.authenticatedContext(uid, jeton).firestore();
 };
 const T0 = Timestamp.fromDate(new Date('2026-11-01T12:00:00Z'));
+// Création « comme le client » : avec le compteur de la limite de fréquence.
+const creer = (p, chemin, data) => { const d = db(p); return lotAvecLimite(d, p ? PROFILS[p].uid : null, (b) => b.set(doc(d, chemin), data)); };
 const semer = (chemin, data) => env.withSecurityRulesDisabled((c) => setDoc(doc(c.firestore(), chemin), data));
 async function lire(chemin) {
   let d;
@@ -58,16 +61,16 @@ const nouvelle = (extra = {}) => {
 
 // Lots du client.
 function lotRepondre(d, idNote, note, p, texte = 'Ma réponse') {
-  const b = writeBatch(d);
   const n = note.nbReponses + 1;
-  b.set(doc(d, `notes/${idNote}/reponses/${n}`), {
-    auteurUid: PROFILS[p].uid, auteurNom: PROFILS[p].name, texte,
-    creeLe: serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null,
+  return lotAvecLimite(d, PROFILS[p].uid, (b) => {
+    b.set(doc(d, `notes/${idNote}/reponses/${n}`), {
+      auteurUid: PROFILS[p].uid, auteurNom: PROFILS[p].name, texte,
+      creeLe: serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null,
+    });
+    b.update(doc(d, `notes/${idNote}`), {
+      nbReponses: increment(1), nbReponsesAutrui: increment(note.auteurUid === PROFILS[p].uid ? 0 : 1), activiteLe: serverTimestamp(),
+    });
   });
-  b.update(doc(d, `notes/${idNote}`), {
-    nbReponses: increment(1), nbReponsesAutrui: increment(note.auteurUid === PROFILS[p].uid ? 0 : 1), activiteLe: serverTimestamp(),
-  });
-  return b.commit();
 }
 function lotModifierFil(d, idNote, note, champs) {
   const b = writeBatch(d);
@@ -103,16 +106,16 @@ test('requêtes : forum (publiés) pour tous, Mes Notes pour l\'auteur', async (
 // ---------- Création ----------
 test('créer une note privée ou un fil publié (titre obligatoire pour publier)', async () => {
   const d = db('membre');
-  await assertSucceeds(setDoc(doc(d, 'notes/a'), nouvelle()));
-  await assertSucceeds(setDoc(doc(d, 'notes/b'), nouvelle({ publie: true, titre: 'Mon fil', lien: { type: 'verset', cle: '2:255' } })));
-  await assertSucceeds(setDoc(doc(d, 'notes/c'), nouvelle({ lien: { type: 'racine', cle: 'أحد' } })));
-  await assertFails(setDoc(doc(d, 'notes/d'), nouvelle({ publie: true, titre: '' })), 'publier sans titre');
-  await assertFails(setDoc(doc(d, 'notes/e'), nouvelle({ texte: '' })), 'texte vide');
-  await assertFails(setDoc(doc(d, 'notes/f'), nouvelle({ lien: { type: 'verset', cle: 'deux' } })), 'lien invalide');
-  await assertFails(setDoc(doc(d, 'notes/g'), nouvelle({ auteurNom: 'Amha Nathali' })), 'autre nom');
-  await assertFails(setDoc(doc(d, 'notes/h'), nouvelle({ nbReponses: 3 })), 'compteur faux');
-  await assertFails(setDoc(doc(db(), 'notes/i'), nouvelle()), 'visiteur');
-  await assertFails(setDoc(doc(db('nonVerifie'), 'notes/j'), nouvelle({ auteurUid: 'nv', auteurNom: 'Non Vérifié' })), 'non vérifié');
+  await assertSucceeds(creer('membre', 'notes/a', nouvelle()));
+  await assertSucceeds(creer('membre', 'notes/b', nouvelle({ publie: true, titre: 'Mon fil', lien: { type: 'verset', cle: '2:255' } })));
+  await assertSucceeds(creer('membre', 'notes/c', nouvelle({ lien: { type: 'racine', cle: 'أحد' } })));
+  await assertFails(creer('membre', 'notes/d', nouvelle({ publie: true, titre: '' })), 'publier sans titre');
+  await assertFails(creer('membre', 'notes/e', nouvelle({ texte: '' })), 'texte vide');
+  await assertFails(creer('membre', 'notes/f', nouvelle({ lien: { type: 'verset', cle: 'deux' } })), 'lien invalide');
+  await assertFails(creer('membre', 'notes/g', nouvelle({ auteurNom: 'Amha Nathali' })), 'autre nom');
+  await assertFails(creer('membre', 'notes/h', nouvelle({ nbReponses: 3 })), 'compteur faux');
+  await assertFails(creer(null, 'notes/i', nouvelle()), 'visiteur');
+  await assertFails(creer('nonVerifie', 'notes/j', nouvelle({ auteurUid: 'nv', auteurNom: 'Non Vérifié' })), 'non vérifié');
 });
 
 // ---------- Modification, publication, dépublication ----------
@@ -165,10 +168,10 @@ test('réponses refusées : visiteur, note privée, numéro faux, compteur gonfl
   await assertFails(lotRepondre(db('autre'), 'p', existante(), 'autre'), 'note privée');
   // Mauvais numéro de réponse.
   const d = db('autre');
-  const b = writeBatch(d);
-  b.set(doc(d, 'notes/f/reponses/5'), { auteurUid: 'autre', auteurNom: 'Autre Membre', texte: 'x', creeLe: serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null });
-  b.update(doc(d, 'notes/f'), { nbReponses: increment(1), nbReponsesAutrui: increment(1), activiteLe: serverTimestamp() });
-  await assertFails(b.commit(), 'numéro faux');
+  await assertFails(lotAvecLimite(d, 'autre', (b) => {
+    b.set(doc(d, 'notes/f/reponses/5'), { auteurUid: 'autre', auteurNom: 'Autre Membre', texte: 'x', creeLe: serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null });
+    b.update(doc(d, 'notes/f'), { nbReponses: increment(1), nbReponsesAutrui: increment(1), activiteLe: serverTimestamp() });
+  }), 'numéro faux');
   // Compteur sans réponse.
   await assertFails(updateDoc(doc(d, 'notes/f'), { nbReponses: increment(1), nbReponsesAutrui: increment(1), activiteLe: serverTimestamp() }), 'compteur seul');
 });
@@ -215,10 +218,10 @@ test('masquer une réponse ; signaler un fil et une réponse', async () => {
   await assertFails(getDoc(doc(db('membre'), 'notes/f/reponses/1/prive/texte')));
 
   const sig = { motif: '', le: serverTimestamp() };
-  await assertSucceeds(setDoc(doc(db('autre'), 'notes/f/signalements/autre'), sig));
-  await assertFails(setDoc(doc(db('membre'), 'notes/f/signalements/membre'), sig), 'son propre fil');
-  await assertSucceeds(setDoc(doc(db('membre'), 'notes/f/reponses/1/signalements/membre'), sig));
-  await assertFails(setDoc(doc(db('autre'), 'notes/f/reponses/1/signalements/autre'), sig), 'sa propre réponse');
+  await assertSucceeds(creer('autre', 'notes/f/signalements/autre', sig));
+  await assertFails(creer('membre', 'notes/f/signalements/membre', sig), 'son propre fil');
+  await assertSucceeds(creer('membre', 'notes/f/reponses/1/signalements/membre', sig));
+  await assertFails(creer('autre', 'notes/f/reponses/1/signalements/autre', sig), 'sa propre réponse');
   await assertFails(getDocs(collection(db('membre'), 'notes/f/signalements')));
   await assertSucceeds(getDocs(collection(db('modo'), 'notes/f/signalements')));
 });

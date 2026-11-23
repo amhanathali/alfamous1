@@ -7,6 +7,7 @@ import { firebase, avecDelai } from './firebase.js';
 import { session, surChangement, demanderConnexion, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX } from './commentaires-format.js';
 import { ligneForum } from './notes.js';
+import { ajouterLimite } from './limite.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
 const ICONE_BULLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>';
@@ -172,11 +173,14 @@ async function publier(form) {
   bouton.disabled = true; msg.textContent = '';
   try {
     const { db, F } = await firebase();
-    await avecDelai(F.addDoc(F.collection(db, 'commentaires'), {
+    const lot = F.writeBatch(db);
+    lot.set(F.doc(F.collection(db, 'commentaires')), {
       type: zone.dataset.comType, cle: zone.dataset.comCle,
       auteurUid: session.utilisateur.uid, auteurNom: session.nom, texte,
       creeLe: F.serverTimestamp(), modifieLe: null, nbVersions: 1, masque: null,
-    }));
+    });
+    await ajouterLimite(lot, db, F, session);
+    await avecDelai(lot.commit());
     brouillons.delete(`${zone.dataset.comType}|${zone.dataset.comCle}`);
     await charger(zone);
   } catch (e) { msg.textContent = messageErreur(e); bouton.disabled = false; }
@@ -270,8 +274,11 @@ async function signaler(form) {
   const msg = form.querySelector('.form-msg');
   try {
     const { db, F } = await firebase();
-    await avecDelai(F.setDoc(F.doc(db, `commentaires/${form.dataset.comSignal}/signalements/${session.utilisateur.uid}`),
-      { motif: form.motif.value.trim(), le: F.serverTimestamp() }));
+    const lot = F.writeBatch(db);
+    lot.set(F.doc(db, `commentaires/${form.dataset.comSignal}/signalements/${session.utilisateur.uid}`),
+      { motif: form.motif.value.trim(), le: F.serverTimestamp() });
+    await ajouterLimite(lot, db, F, session);
+    await avecDelai(lot.commit());
     ouvrirFenetre('<h2>Merci</h2><p>Le signalement a été transmis aux modérateurs.</p><div class="fenetre-bas"><button type="button" class="btn" data-fermer>Fermer</button></div>');
   } catch (e) {
     // Un deuxième signalement du même membre est refusé par les règles.

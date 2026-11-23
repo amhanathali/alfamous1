@@ -1,6 +1,13 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : limite de fréquence et niveaux
+- Limite de 20 publications par heure et par membre (commentaires, notes, réponses, signalements), vérifiée par les
+  règles (`limites/{uid}`, écrit dans le même lot) ; message clair avec l'heure de reprise ; modérateurs et admin exemptés.
+- `npm run niveau` : nommer modérateur (2) ou admin (3), bloquer (0), lister ; émulateurs ou `--projet essai|prod`
+  (confirmation pour la production) ; le niveau est relu au chargement de la page.
+- Tests : 6 tests de la limite (`tests/regles/limite.test.mjs`) ; tous les tests de création passent par le compteur.
+
 ### Ajouté — phase 2 : Mes Notes et forum
 - `ESSAI_LOCAL.bat` : émulateurs, données d'essai, application et navigateur en un double-clic.
 - Onglets **Lecture · Mes Notes · Forum** sous le titre.
