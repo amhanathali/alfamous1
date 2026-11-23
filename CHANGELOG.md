@@ -1,6 +1,10 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — cadrage de l'onglet Membres (admin)
+- Maquette `docs/maquettes/membres.html` : liste des inscrits, filtres, changement de niveau avec confirmation,
+  journal des changements ; 6 questions en attente.
+
 ### Ajouté — outils
 - `deployerAlfamous1.bat` : mise à jour du code (main), tests, tests des règles, construction, puis déploiement du site
   et des règles et index Firestore (essai par défaut ; `prod` avec confirmation).
