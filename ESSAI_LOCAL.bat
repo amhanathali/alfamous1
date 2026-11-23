@@ -15,7 +15,7 @@ REM puis la nouvelle version est relancee pour la suite.
   echo [0/3] Mise a jour du code et des outils...
   git pull --ff-only || echo ATTENTION : mise a jour impossible, modifications locales ? On continue avec la version presente.
   call npm install --no-audit --no-fund
-  call npm install --prefix functions --no-audit --no-fund
+  call npm ci --prefix functions --no-audit --no-fund
   call "%~f0" suite
   exit /b
 )
