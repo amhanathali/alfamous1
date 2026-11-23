@@ -10,14 +10,17 @@ const VERSETS = [
   ['2', '300', '…', 'Verset inexistant\n@Amha'],
   ['3', '1', '…', 'Texte non signé'],
   ['3', '2', '…', '@Amha - 07/11/2026 14:17:35'],
+  ['3', '3', '…', 'Avis d\'un visiteur\n@Anonyme - 2024-10-19 10:48:20\n-----------\nValidé par:\n@Amha - 2024-10-19 11:30:31'],
+  ['5', '1', '…', '-\n@Amha'],
 ];
 const LEXIQUE = [
   ['Clé', 'Texte'],
   ['بَشَر', 'Définition A\n@amha nathali - 2024-10-06, 2:09:02 PM'],
   ['بشر', 'Définition B\n@Afrukh Ifereles - 2025-07-01 08:00:00'],
   ['أَرْض', 'Tradition\n@CSC-Tradition'],
+  ['todo', 'test ecrit sur lexique\n@Amha'],
 ];
-const SOURATES = { 1: 7, 2: 286, 3: 200 };
+const SOURATES = { 1: 7, 2: 286, 3: 200, 5: 120 };
 
 const prepare = (uid = {}) => preparerImport([...extraireVersets(VERSETS), ...extraireLexique(LEXIQUE)],
   { nbVersetsParSourate: SOURATES, uidParAuteur: uid });
@@ -49,6 +52,10 @@ test('seuls les auteurs retenus sont importés ; écarts motivés', () => {
   assert.equal(raisons['verset 3:1 n° 1'], 'auteur non retenu'); // non signé → Anonyme, non retenu
   assert.equal(raisons['verset 3:2 n° 1'], 'signature sans texte');
   assert.equal(raisons['lexique أَرْض n° 1'], 'auteur non retenu');
+  assert.equal(raisons['verset 3:3 n° 1'], 'auteur non retenu');
+  assert.match(raisons['verset 3:3 n° 2'], /Validé par/);
+  assert.equal(raisons['verset 5:1 n° 1'], 'entrée de test');
+  assert.equal(raisons['lexique todo n° 1'], 'entrée de test');
 });
 
 test('documents : forme des commentaires du site, date estimée en 2024, compte relié', () => {

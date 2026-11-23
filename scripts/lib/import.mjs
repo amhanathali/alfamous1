@@ -8,7 +8,10 @@
 //   - clés du lexique sans voyelles (normaliserCle) : les clés qui se confondent sont regroupées ;
 //   - commentaires sans date : date de 2024 (1er janvier 2024, midi, heure de Montréal), marquée « estimée » ;
 //   - les commentaires d'Amha Nathali sont reliés à son compte (il peut les modifier) ;
-//   - les comptes des anciens membres ne sont pas importés.
+//   - les comptes des anciens membres ne sont pas importés ;
+//   - blocs non signés suivis d'une signature seule : écartés (pas d'attribution déduite) ;
+//   - commentaires « Validé par » : ni le commentaire validé (anonyme ou d'un autre membre), ni la mention ;
+//   - essais écartés : entrées de test listées dans ESSAIS (lexique « todo », verset 5:1 « - »).
 import { createHash } from 'node:crypto';
 import { decouperCommentaires } from './commentaires.mjs';
 import { normaliserCle, CLE_MAX } from '../../src/js/lexique-outils.js';
@@ -21,6 +24,10 @@ export const TEXTE_MAX = 4000; // limite d'un commentaire écrit depuis le site 
 export const ALIAS_AUTEURS = { 'amha': 'Amha Nathali', 'amha nathali': 'Amha Nathali', 'anonyme': 'Anonyme' };
 // Auteurs dont les commentaires sont importés (noms après harmonisation).
 export const AUTEURS_RETENUS = ['Amha Nathali', 'Afrukh Ifereles'];
+
+// Entrées de test de l'ancienne application (décision de l'auteur, 23 nov. 2026).
+export const ESSAIS = [{ type: 'lexique', origine: 'todo' }, { type: 'verset', origine: '5:1', texte: '-' }];
+const VALIDE_PAR = /^\s*valid[ée] par\s*:?\s*$/i;
 
 const cleAuteur = (a) => String(a ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
 
@@ -103,6 +110,10 @@ export function preparerImport(bruts, { nbVersetsParSourate = null, uidParAuteur
     if (!sig.retenu) { ecarter('auteur non retenu'); continue; }
     if (c.vide || !c.texte.trim()) { ecarter('signature sans texte'); continue; }
     if (/^CSC-Tradition$/i.test(c.auteur || '')) { ecarter('CSC-Tradition'); continue; }
+    if (VALIDE_PAR.test(c.texte)) { ecarter('mention « Validé par » (validation d\'un autre commentaire)'); continue; }
+    if (ESSAIS.some((e) => e.type === c.type && e.origine === c.origine && (e.texte === undefined || e.texte === c.texte.trim()))) {
+      ecarter('entrée de test'); continue;
+    }
 
     if (c.type === 'verset') {
       const [s, v] = c.cle.split(':').map(Number);

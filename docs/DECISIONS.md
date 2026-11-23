@@ -31,3 +31,4 @@
 | 2026-11-23 | Commentaires importés sans date : 1er janvier 2024 (midi, Montréal), marqués « date estimée » dans le champ `import` | Décision de l'auteur (une date de 2024) ; la marque garde la trace de l'estimation |
 | 2026-11-23 | Commentaires importés d'Amha Nathali reliés à son compte (il peut les modifier) ; les autres sans compte (figés) | Décision de l'auteur |
 | 2026-11-23 | Comptes des anciens membres non importés : un courriel les invite à ouvrir un nouveau compte | Décision de l'auteur ; leurs anciens mots de passe ont été lisibles publiquement |
+| 2026-11-23 | Import : ni les commentaires « Validé par » (le commentaire validé, anonyme ou d'un autre membre, ni la mention), ni les blocs non signés suivis d'une signature seule (pas d'attribution déduite), ni les essais (lexique « todo », verset 5:1 « - ») | Décisions de l'auteur sur l'import à blanc |

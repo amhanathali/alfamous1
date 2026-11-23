@@ -10,7 +10,9 @@
 - Décisions de l'auteur appliquées : seuls les commentaires d'Amha Nathali et d'Afrukh Ifereles ; signatures
   harmonisées ; clés du lexique sans voyelles (clés confondues regroupées et listées) ; date du 1er janvier 2024
   (midi, Montréal) pour les commentaires sans date, marquée `import.dateEstimee` ; commentaires d'Amha Nathali reliés
-  à son compte (gmpcdz@gmail.com) ; comptes des anciens membres non importés.
+  à son compte (gmpcdz@gmail.com) ; comptes des anciens membres non importés ; ni les commentaires « Validé par »
+  (commentaire validé et mention), ni les blocs non signés suivis d'une signature seule, ni les essais (lexique
+  « todo », verset 5:1 « - »). Classeur du 22 nov. : 673 commentaires (320 de versets, 353 définitions sur 345 entrées).
 - Identifiants stables (`imp-v-…`, `imp-l-…`) : relancer l'import remplace sans doublon. Champ `import`
   (source, clé d'origine, ordre, date brute, date estimée, date de l'import), toléré par les règles.
 - 7 tests (`tests/import.test.mjs`).
