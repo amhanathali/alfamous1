@@ -19,7 +19,7 @@ REM puis la nouvelle version est relancee pour la suite.
   git checkout main || goto echec_git
   git pull --ff-only || goto echec_git
   call npm install --no-audit --no-fund
-  call npm install --prefix functions --no-audit --no-fund
+  call npm ci --prefix functions --no-audit --no-fund
   call "%~f0" suite %1
   exit /b
 )

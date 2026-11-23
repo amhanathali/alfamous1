@@ -1,6 +1,11 @@
 # Journal des changements
 
 ## [Non publié]
+### Corrigé — outils
+- Dépendances des Cloud Functions installées par `npm ci` (ESSAI_LOCAL.bat, deployerAlfamous1.bat, `npm run emulateurs`) :
+  `npm install` récrivait `functions/package.json` et `package-lock.json` sur le PC, ce qui bloquait ensuite
+  `git checkout main` dans deployerAlfamous1.bat.
+
 ### Ajouté — onglet Membres (admins)
 - Onglet **Membres** (`#/membres`, visible des seuls admins) : inscrits (nom, courriel, vérifié, inscription, dernière
   connexion, commentaires et définitions, fils et réponses du forum), recherche et filtres, niveau changé avec

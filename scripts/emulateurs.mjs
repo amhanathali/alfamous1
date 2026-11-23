@@ -17,9 +17,10 @@ const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DOSSIER = '.emulateurs';
 mkdirSync(join(RACINE, DOSSIER), { recursive: true });
 // Cloud Functions (onglet Membres) : leurs dépendances sont installées à part, dans functions/.
+// npm ci (et non npm install) : installe exactement package-lock.json sans jamais modifier les fichiers du dépôt.
 if (!existsSync(join(RACINE, 'functions', 'node_modules'))) {
   console.log('Première fois : installation des dépendances des Cloud Functions (functions/)...');
-  execSync('npm install --prefix functions --no-audit --no-fund', { cwd: RACINE, stdio: 'inherit' });
+  execSync('npm ci --prefix functions --no-audit --no-fund', { cwd: RACINE, stdio: 'inherit' });
 }
 
 // Commande en une seule chaîne (arguments fixes, sans saisie de l'utilisateur) : pas d'avertissement DEP0190.
