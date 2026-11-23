@@ -4,7 +4,10 @@
 //                              Une modification du code se voit en rechargeant la page (F5), sans reconstruire.
 //   npm run servir -- --dist → sert dist/ (exactement ce qui sera déployé ; lancer « npm run construire » avant).
 // Adresse : http://localhost:5050 (autre port : set PORT=5051 avant la commande).
-import { createServer } from 'node:http';
+// Les appels aux émulateurs Firebase (Auth 9099, Firestore 8085) sont relayés par ce serveur :
+// la page n'a qu'une adresse à joindre (certains navigateurs, dont celui intégré à Claude,
+// refusent qu'une page joigne un autre port de la machine).
+import { createServer, request } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, dirname, extname, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,7 +32,28 @@ function resoudre(chemin) {
   return join(RACINE, 'src', chemin);
 }
 
+// ---------- Relais vers les émulateurs ----------
+const EMULATEURS = [
+  { prefixes: ['/google.firestore.v1.Firestore/', '/v1/projects/', '/v1beta1/projects/'], port: 8085 },
+  { prefixes: ['/identitytoolkit.googleapis.com/', '/securetoken.googleapis.com/', '/emulator/'], port: 9099 },
+];
+function relayer(req, res) {
+  const cible = EMULATEURS.find((e) => e.prefixes.some((p) => req.url.startsWith(p)));
+  if (!cible) return false;
+  const amont = request({
+    host: '127.0.0.1', port: cible.port, method: req.method, path: req.url,
+    headers: { ...req.headers, host: `127.0.0.1:${cible.port}` },
+  }, (r) => { res.writeHead(r.statusCode, r.headers); r.pipe(res); });
+  amont.on('error', () => {
+    if (!res.headersSent) res.writeHead(502, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Émulateur injoignable : lancer LANCER_EMULATEURS.bat');
+  });
+  req.pipe(amont);
+  return true;
+}
+
 createServer(async (req, res) => {
+  if (relayer(req, res)) return;
   const chemin = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname)).split(sep).join('/');
   try {
     // En développement, la liste des commentaires traditionnels présents est calculée à la volée.

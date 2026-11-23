@@ -9,6 +9,8 @@
   déconnexion ; niveau lu dans le jeton.
 - `src/js/firebase.js` : émulateurs sur localhost, configuration de Hosting en ligne ; SDK Firebase 13.4.0 servi par
   l'application (`vendor/firebase/`, copié depuis node_modules par `construire` et `servir`).
+- Serveur local : relais des appels vers les émulateurs (Auth, Firestore) par l'adresse de la page, pour les
+  navigateurs qui refusent qu'une page joigne un autre port.
 - `firestore.indexes.json` : index (type, cle, creeLe décroissant) pour la liste des commentaires.
 - `npm run emulateurs:peupler` crée aussi des commentaires d'essai sur 112:1.
 

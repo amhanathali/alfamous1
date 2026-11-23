@@ -26,8 +26,9 @@ async function initialiser() {
   const auth = A.getAuth(app);
   const db = F.getFirestore(app);
   if (LOCAL) {
-    A.connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-    F.connectFirestoreEmulator(db, '127.0.0.1', 8085);
+    // Émulateurs joints par l'adresse de la page : scripts/servir.mjs relaie vers 9099 (Auth) et 8085 (Firestore).
+    A.connectAuthEmulator(auth, location.origin, { disableWarnings: true });
+    F.connectFirestoreEmulator(db, location.hostname, Number(location.port) || 80);
   }
   return { auth, db, A, F };
 }
