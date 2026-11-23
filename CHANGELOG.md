@@ -2,6 +2,14 @@
 
 ## [Non publié]
 ### Ajouté
+- Lancement local rapide : double-clic sur `LANCER_ALFAMOUS1.bat` (http://localhost:5050), mode développement
+  sans reconstruction (F5 suffit) ; `npm run servir:dist` pour essayer exactement ce qui sera déployé.
+- Croix pour effacer le champ de recherche (aussi : touche Échap).
+### Modifié
+- Les « traductions » sont présentées comme des **commentaires traditionnels**, cités seulement pour la comparaison
+  (« Comparer avec … », mention « (tradition) » sous chaque verset).
+
+### Ajouté
 - Bas de chaque verset : boutons ⌃ / ⌄ (centrés) pour afficher le verset précédent ou suivant juste
   au-dessus ou au-dessous, sans quitter les résultats (passage d'une sourate à l'autre géré).
 - Aide quand « Mots contigus » ne donne aucun résultat (nombre de versets sans l'option, bouton pour la décocher).
