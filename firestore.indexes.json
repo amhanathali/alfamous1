@@ -1,0 +1,23 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "commentaires",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "type",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "cle",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "creeLe",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

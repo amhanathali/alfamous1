@@ -1,6 +1,17 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — phase 2 : écran des commentaires et comptes
+- Bouton sous chaque verset (à droite de ⌃ / ⌄) : nombre de commentaires, ouvre et ferme ceux de ce verset seulement ;
+  les plus récents en premier (contributeur, date, texte), liste qui défile ; liens automatiques 2:255 et r:….
+- Écrire (niveau 1), modifier le sien avec historique, signaler, masquer / démasquer (niveau 2), supprimer (niveau 3).
+- Comptes : connexion, création de compte (nom affiché = signature), vérification du courriel, mot de passe oublié,
+  déconnexion ; niveau lu dans le jeton.
+- `src/js/firebase.js` : émulateurs sur localhost, configuration de Hosting en ligne ; SDK Firebase 13.4.0 servi par
+  l'application (`vendor/firebase/`, copié depuis node_modules par `construire` et `servir`).
+- `firestore.indexes.json` : index (type, cle, creeLe décroissant) pour la liste des commentaires.
+- `npm run emulateurs:peupler` crée aussi des commentaires d'essai sur 112:1.
+
 ### Ajouté — phase 2 : commentaires (règles)
 - Collection `commentaires` (versets et lexique) ouverte dans `firestore.rules` : lecture publique ; écriture dès le
   niveau 1 (courriel vérifié), signée du nom du compte, 4 000 caractères au plus ; modification par l'auteur avec

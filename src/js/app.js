@@ -1,10 +1,12 @@
-// Alfamous1 — interface de lecture et de recherche (sans connexion).
+// Alfamous1 — interface de lecture et de recherche ; comptes et commentaires (phase 2).
 import * as D from './donnees.js';
 import {
   analyserRequete, chercherMots, chercherRacines, amisRacine, trierAmis,
   declinaisons, statistiquesRacines, repartitionParSourate,
 } from './recherche.js';
 import { NOMS_SOURATES } from './sourates.js';
+import { initCompte } from './compte.js';
+import { initCommentaires, boutonCommentaires } from './commentaires.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -94,7 +96,7 @@ function carteVerset(s, x, motsVerset, resultat, contexte = false) {
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
     ${trad ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${tradHtml}</p>` : ''}
-    ${nbVersets.length ? boutonsVoisins(s, x.v) : ''}
+    <div class="verset-pied">${nbVersets.length ? boutonsVoisins(s, x.v) : '<span></span>'}${boutonCommentaires(`${s}:${x.v}`)}</div>
   </article>`;
 }
 
@@ -414,6 +416,8 @@ async function initTraductions() {
 }
 
 window.addEventListener('hashchange', router);
+initCommentaires(contenu);
+initCompte();
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

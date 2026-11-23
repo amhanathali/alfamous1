@@ -8,6 +8,7 @@ import { createServer } from 'node:http';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, dirname, extname, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { lireModuleSdk } from './lib/sdk-firebase.mjs';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const modeDist = process.argv.includes('--dist');
@@ -36,6 +37,15 @@ createServer(async (req, res) => {
       const ids = (await readdir(join(RACINE, 'donnees/traductions'))).filter((f) => f.endsWith('.txt')).map((f) => f.slice(0, -4));
       res.writeHead(200, { 'Content-Type': TYPES['.json'], 'Cache-Control': 'no-store' });
       res.end(JSON.stringify(ids));
+      return;
+    }
+    // SDK Firebase (mode développement) : lu dans node_modules, adresse gstatic remplacée.
+    const sdk = !modeDist && chemin.match(/^\/vendor\/firebase\/([\w-]+\.js)$/);
+    if (sdk) {
+      const code = lireModuleSdk(RACINE, sdk[1]);
+      if (!code) { res.writeHead(404).end('introuvable'); return; }
+      res.writeHead(200, { 'Content-Type': TYPES['.js'], 'Cache-Control': 'no-store' });
+      res.end(code);
       return;
     }
     const fichier = resoudre(chemin.endsWith('/') ? `${chemin}index.html` : chemin);

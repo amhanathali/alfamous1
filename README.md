@@ -40,6 +40,15 @@ Les données d'essai sont gardées dans `.emulateurs/` (non versionné) ; suppri
 
 Prérequis : Java 21 (déjà installé sur le PC).
 
+### Essayer les comptes et les commentaires en local
+1. Fenêtre 1 : **LANCER_EMULATEURS.bat** (laisser ouverte).
+2. Fenêtre 2 : `npm run emulateurs:peupler` (comptes d'essai + commentaires d'essai sur 112:1).
+3. **LANCER_ALFAMOUS1.bat**, puis http://localhost:5050/#/q/112 : bouton « commentaires » sous chaque verset,
+   « Se connecter » en haut à droite. Sur localhost, l'application utilise toujours les émulateurs.
+
+En ligne, la configuration Firebase vient de Hosting (`/__/firebase/init.json`) : le site d'essai écrit dans
+`alfamous-essai`, la production dans `alfamous-atelier`. Le SDK Firebase est servi par l'application (`vendor/firebase/`).
+
 ## Déployer (sur le PC)
 ```bat
 npm test
