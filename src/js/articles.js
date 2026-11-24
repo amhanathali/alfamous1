@@ -79,7 +79,7 @@ async function vueListe(contenu, params) {
   const ligne = (a) => {
     const image = a.image && /^https?:/.test(a.image) ? `<img src="${echapper(a.image)}" alt="" loading="lazy">` : '';
     return `<a class="art-ligne" href="${adresse(a)}">
-      <span class="vignette">${image || echapper((a.titre || '?').trim()[0] || '?')}</span>
+      <span class="vignette">${image || echapper((String(a.titre || '').match(/\p{L}/u) || ['?'])[0])}</span>
       <span class="art-centre"><span class="art-titre">${echapper(a.titre || 'Sans titre')}</span>
         ${a.resume ? `<span class="art-resume">${echapper(a.resume)}</span>` : ''}
         <span class="art-meta">${puceFamille(a.famille)}${(a.libelles || []).map((l) => `<span class="libelle">${echapper(l)}</span>`).join('')}${puceEtat(a)}</span></span>
@@ -295,10 +295,11 @@ async function vueEditeur(contenu, id) {
     form.libelles.value = (t.libelles || []).join(', ');
     form.resume.value = t.resume || '';
     form.image.value = t.image || '';
-    zone.innerHTML = assainir(t.corps || '');
+    zone.innerHTML = assainir(t.corps || '') || '<p><br></p>';
     zoneHtml.value = t.corps || '';
     lierVersets(zone);
   };
+  document.execCommand('defaultParagraphSeparator', false, 'p'); // Entrée crée un <p>, pas un <div>
   remplir(travail);
   form.slug.value = a?.slug || (jamaisPublie ? slugifier(travail.titre) : '');
   if (a?.slug) slugTouche = true;
@@ -343,14 +344,17 @@ async function vueEditeur(contenu, id) {
   let selection = null;
   const memoriser = () => { const s = getSelection(); if (s.rangeCount && zone.contains(s.anchorNode)) selection = s.getRangeAt(0).cloneRange(); };
   zone.addEventListener('keyup', memoriser); zone.addEventListener('mouseup', memoriser); zone.addEventListener('blur', memoriser);
+  // Les blocs (verset, tableau, encadré, image, fichier importé) vont APRÈS le paragraphe du curseur :
+  // execCommand('insertHTML') de Chrome fusionne le premier bloc avec la ligne et y recopie des styles calculés.
   const inserer = (html) => {
     const propre = assainir(html);
     if (mode === 'html') { zoneHtml.setRangeText(propre, zoneHtml.selectionStart, zoneHtml.selectionEnd, 'end'); sauverLocal(); return; }
-    zone.focus();
-    const s = getSelection();
-    if (selection) { s.removeAllRanges(); s.addRange(selection); }
-    if (!s.rangeCount || !zone.contains(s.anchorNode)) { zone.insertAdjacentHTML('beforeend', propre); }
-    else document.execCommand('insertHTML', false, propre);
+    let bloc = selection?.startContainer;
+    if (bloc && zone.contains(bloc) && bloc !== zone) { while (bloc.parentNode !== zone) bloc = bloc.parentNode; } else bloc = null;
+    const fragment = document.createRange().createContextualFragment(propre);
+    const dernier = fragment.lastChild;
+    if (bloc) bloc.after(fragment); else zone.append(fragment);
+    if (dernier) { const r = document.createRange(); r.selectNodeContents(dernier); r.collapse(false); selection = r; }
     lierVersets(zone); sauverLocal();
   };
   // Collage : HTML assaini (les styles de Word ou d'une page web ne passent pas)
@@ -358,7 +362,7 @@ async function vueEditeur(contenu, id) {
     const html = e.clipboardData?.getData('text/html');
     if (!html) return;
     e.preventDefault();
-    document.execCommand('insertHTML', false, assainir(html));
+    memoriser(); inserer(html);
   });
 
   // Barre d'outils
@@ -441,7 +445,7 @@ async function vueEditeur(contenu, id) {
         const remplacer = fen.querySelector('[name="mode-import"]:checked').value === 'remplacer';
         const garder = fen.querySelector('[name="garder"]').checked;
         fermerFenetre();
-        if (remplacer) { zone.innerHTML = propre; zoneHtml.value = propre; lierVersets(zone); } else inserer(propre);
+        if (remplacer) { zone.innerHTML = propre || '<p><br></p>'; zoneHtml.value = propre; lierVersets(zone); } else inserer(propre);
         sauverLocal();
         if (garder) {
           try { const r = await envoyer(f, 'fichiers'); travail.contexte.fichiers.push({ chemin: r.chemin, nom: r.nom, type: r.type, taille: r.taille }); dessinerContexte(); sauverLocal(); }
@@ -651,7 +655,13 @@ async function vueEditeur(contenu, id) {
     }
     occupe(true);
     try {
-      if (act === 'enregistrer') { await enregistrer(); msg.style.color = 'var(--discret)'; msg.textContent = 'Brouillon enregistré (privé).'; }
+      if (act === 'enregistrer') {
+        const nouveau = !a?.creeLe && !id;
+        await enregistrer();
+        // Premier enregistrement : l'éditeur est redessiné avec les boutons d'un article existant (version, historique).
+        if (nouveau) { await vueEditeur(contenu, a.id); contenu.querySelector('.editeur-article .form-msg').textContent = 'Brouillon enregistré (privé).'; return; }
+        msg.style.color = 'var(--discret)'; msg.textContent = 'Brouillon enregistré (privé).';
+      }
       if (act === 'version') { const n = await enregistrerVersion(); msg.style.color = 'var(--discret)'; msg.textContent = `Version ${n} enregistrée.`; }
     } catch (err) { msg.textContent = messageErreur(err); } finally { occupe(false); }
   });
