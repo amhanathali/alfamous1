@@ -115,12 +115,13 @@ test('Lecture : liste publique filtrée sur statut == publie ; liste complète r
 });
 
 // ---------- Création ----------
-test('Créer : niveau ≥ 2 (courriel vérifié), brouillon signé de son nom, avec atelier/brouillon dans le lot', async () => {
-  const lot = (p, data = nouveau(p), at = atelier(p)) => {
-    const d = db(p); const b = writeBatch(d);
-    b.set(doc(d, 'articles/a1'), data);
-    b.set(doc(d, 'articles/a1/atelier/brouillon'), at);
-    return b.commit();
+// Créer = deux requêtes : l'article, puis atelier/brouillon. Dans un même lot, les deux règles réunies dépassent la
+// limite de 1 000 expressions évaluées par requête de Firestore (constaté le 24 nov. sur l'émulateur).
+test('Créer : niveau ≥ 2 (courriel vérifié), brouillon signé de son nom, puis atelier/brouillon', async () => {
+  const lot = async (p, data = nouveau(p), at = atelier(p)) => {
+    const d = db(p);
+    await setDoc(doc(d, 'articles/a1'), data);
+    await setDoc(doc(d, 'articles/a1/atelier/brouillon'), at);
   };
   await assertFails(lot('membre', nouveau('membre')), 'membre');
   await assertFails(lot('modoNonVerifie', nouveau('modoNonVerifie')), 'courriel non vérifié');
@@ -133,16 +134,8 @@ test('Créer : niveau ≥ 2 (courriel vérifié), brouillon signé de son nom, a
   await assertFails(lot('modo', nouveau('modo', { libelles: Array(11).fill('x') })), '11 libellés');
   await assertFails(lot('modo', { ...nouveau('modo'), import: { source: 'Blogger' } }), 'champ import réservé au script');
   await assertSucceeds(lot('modo'));
+  await env.clearFirestore();
   await assertSucceeds(lot('admin', nouveau('admin'), atelier('admin')));
-});
-
-// Diagnostic (24 nov.) : le lot « article + atelier » échouait ; ces deux tests isolent chaque écriture.
-test('Créer (diagnostic) : article seul, sans atelier', async () => {
-  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d1'), nouveau('modo')));
-});
-test('Créer (diagnostic) : article puis atelier, en deux requêtes', async () => {
-  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d2'), nouveau('modo')));
-  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d2/atelier/brouillon'), atelier('modo')));
 });
 
 // ---------- Atelier (version de travail) ----------

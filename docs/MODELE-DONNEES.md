@@ -123,8 +123,10 @@ de Blogger, écrit par le script). `statut` : `brouillon` (jamais publié) · `p
 `critiques`, `identite`, `reflexions`. Limites : titre 200, résumé 500, 10 libellés, corps 300 000 caractères,
 300 versets. Lecture : tous si publié, rédacteurs sinon (les listes publiques filtrent `statut == 'publie'`).
 
-Opérations (toujours en un seul lot) :
-- **Créer** (niveau ≥ 2) : brouillon sans adresse, `nbVersions` 0, + `atelier/brouillon`.
+Opérations (en un seul lot, sauf la création) :
+- **Créer** (niveau ≥ 2) : brouillon sans adresse, `nbVersions` 0, **puis** `atelier/brouillon` dans une seconde
+  requête (dans un même lot, les deux règles dépassent la limite de 1 000 expressions par requête de Firestore ;
+  l'éditeur recrée l'atelier s'il manque).
 - **Brouillon jamais publié** : contenu du document public modifiable par son auteur (liste des rédacteurs).
 - **Enregistrer une version** : `versions/{n}` (`publiee: false`) + `nbVersions + 1`.
 - **Première publication** : contenu + `statut: 'publie'`, `slug`, `publieLe` + `versions/{n}` (`publiee: true`,

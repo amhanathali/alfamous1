@@ -14,6 +14,9 @@
   cités) et 8 tests (`tests/articles.test.mjs`) ; 15 tests des règles (`tests/regles/articles.test.mjs`, à lancer sur
   le PC avec `npm run test:regles`).
 - Sauvegarde Blogger examinée (`docs/ARTICLES.md` § 6) ; fiche `import/articles/controle-familles.csv` (hors Git).
+- Création d'un article en deux requêtes (article, puis `atelier/brouillon`) : réunies dans un lot, les deux règles
+  dépassaient la limite de 1 000 expressions par requête (tests sur le PC, 24 nov.). Comparaisons d'ensembles et
+  garde-fou `resource != null` dans les règles des articles.
 
 ### Ajouté — onglet Articles : cadrage (rien de codé)
 - `docs/ARTICLES.md` : modèle de données (`articles`, brouillon privé `atelier/brouillon`, `versions`, `slugs`,
