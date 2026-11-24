@@ -136,6 +136,15 @@ test('Créer : niveau ≥ 2 (courriel vérifié), brouillon signé de son nom, a
   await assertSucceeds(lot('admin', nouveau('admin'), atelier('admin')));
 });
 
+// Diagnostic (24 nov.) : le lot « article + atelier » échouait ; ces deux tests isolent chaque écriture.
+test('Créer (diagnostic) : article seul, sans atelier', async () => {
+  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d1'), nouveau('modo')));
+});
+test('Créer (diagnostic) : article puis atelier, en deux requêtes', async () => {
+  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d2'), nouveau('modo')));
+  await assertSucceeds(setDoc(doc(db('modo'), 'articles/d2/atelier/brouillon'), atelier('modo')));
+});
+
 // ---------- Atelier (version de travail) ----------
 test('Atelier : lu par les rédacteurs ; écrit par l\'auteur de l\'article ou l\'admin', async () => {
   await semer('articles/a1', brouillon());
