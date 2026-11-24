@@ -568,6 +568,7 @@ async function vueEditeur(contenu, id) {
     });
     if (premiere) lot.set(F.doc(db, `slugs/${slug}`), { article: a.id });
     await avecDelai(lot.commit());
+    document.dispatchEvent(new CustomEvent('articles-changes'));
     return slug;
   }
 
@@ -613,6 +614,7 @@ async function vueEditeur(contenu, id) {
         try {
           const { db, F } = await firebase();
           await avecDelai(F.updateDoc(F.doc(db, `articles/${a.id}`), { statut: 'retire', modifieLe: F.serverTimestamp() }));
+          document.dispatchEvent(new CustomEvent('articles-changes'));
           fermerFenetre(); location.hash = `#/article/${encodeURIComponent(a.id)}`;
         } catch (err) { ev.target.disabled = false; ouvrirFenetre(`<h2>Retrait impossible</h2>${erreurHtml(err)}`); }
       });

@@ -9,9 +9,14 @@ import { FAMILLES } from './articles-outils.js';
 
 const adresse = (a) => `#/article/${encodeURIComponent(a.slug || a.id)}`;
 const parSourate = new Map(); // sourate → Promise<[articles publiés qui citent un verset de cette sourate]>
+const DUREE = 5 * 60 * 1000; // les publications des autres rédacteurs apparaissent au plus tard après 5 minutes
+let memoireLe = Date.now();
+// Publication ou retrait dans cette page (événement « articles-changes », articles.js) : mémoire vidée.
+document.addEventListener('articles-changes', () => { parSourate.clear(); memoireLe = Date.now(); });
 
 // ---------- Sous les versets ----------
 async function articlesDesSourates(sourates) {
+  if (Date.now() - memoireLe > DUREE) { parSourate.clear(); memoireLe = Date.now(); }
   const manquantes = sourates.filter((s) => !parSourate.has(s));
   for (let i = 0; i < manquantes.length; i += 10) {
     const lot = manquantes.slice(i, i + 10);
