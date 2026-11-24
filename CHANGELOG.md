@@ -1,6 +1,26 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles, étape 5 : import du blog Blogger « Zoom-Coran »
+- `npm run importer:articles` (`scripts/importer-articles.mjs`, `scripts/lib/import-articles.mjs`) : lit la sauvegarde
+  Takeout `import/articles/feed.atom` et la fiche `import/articles/controle-familles.csv` (hors Git). À blanc par
+  défaut (rapport `rapport-import.txt`, fiche `controle-import.csv`) ; `--ecrire`, `--verifier`, `--purger` ;
+  émulateurs, `--projet essai`, `--projet prod` (confirmation PROD) ; `--forcer`.
+- Articles : publiés → `publie` (adresse reprise de Blogger ; adresses identiques → titre complet), brouillons →
+  `brouillon` ; signés Amha Nathali et reliés à son compte ; famille d'après la fiche ; libellés Blogger ; HTML
+  assaini (34 `<style>`, 1 `<script>`, 3 cadres non YouTube retirés) ; versets repérés marqués « cités » ; version 1
+  publiée, atelier, adresse réservée ; champ `import` (source, URL, dates et libellés Blogger).
+- Images (205) téléchargées depuis Blogger et copiées dans Storage (`articles/<id>/images/blogger-…`), adresses
+  réécrites ; une image introuvable garde son adresse Blogger et figure dans le rapport.
+- Commentaires (51) : type `article`, « Anonymous » → Anonyme, « Amha NathAli » → Amha Nathali (relié à son compte),
+  supprimés écartés (2), réponses précédées de « ↪ en réponse à … » ; les 14 de la page brouillon « Zoom-Coran » →
+  fil du forum « Commentaires de l'ancienne page Zoom-Coran ».
+- Un article modifié dans l'atelier depuis l'import n'est pas écrasé par un nouvel import (sauf `--forcer`).
+- `deployerAlfamous1.bat` et le README déploient aussi les règles Storage (`--only hosting,firestore,functions,storage`),
+  nécessaires aux images et fichiers des articles.
+- Essai complet sur les émulateurs : 210 articles et 51 commentaires écrits, vérification conforme.
+- `lireCsv` accepte un séparateur (« ; »). 6 tests (`tests/import-articles.test.mjs`) ; `npm test` 58/58.
+
 ### Ajouté — onglet Articles, étape 3b : panneau Contexte complet, liens, Dossier pour Claude
 - Panneau **Contexte** (`src/js/articles-contexte.js`) : versets, racines (occurrences et versets d'après
   `racines.json`), entrées du lexique, sources, fichiers, discussions du forum (fils liés à l'article repérés

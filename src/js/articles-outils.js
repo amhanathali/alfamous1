@@ -40,14 +40,20 @@ export function slugDepuisBlogger(chemin) {
 
 // Références de versets « s:v » repérées dans un texte (19:26, 19.26, 2 : 183), dans l'ordre d'apparition et
 // sans doublon ; seules les références qui existent (sourates = [{ n, versets }]) sont gardées.
-export function versetsDansTexte(texte, sourates) {
+// Avec un point, la référence doit être sûre (option prudent, utilisée par l'import) : sourate ou verset ≥ 10, ou
+// « verset », « sourate », « Coran », « v. », « S. » juste avant — sinon « 2.1 » est un numéro de section.
+export function versetsDansTexte(texte, sourates, { prudent = false } = {}) {
   const max = new Map((sourates ?? []).map((s) => [s.n, s.versets]));
   const vus = new Set();
+  const t = String(texte ?? '');
   // Pas collé à un autre nombre (« 10.11.2024 », « 1.2.3 ») ; une ponctuation finale (« 19.26, ») est acceptée.
-  const re = /(?<!\d|\d[.,:/])(\d{1,3})\s?[:.]\s?(\d{1,3})(?!\d|[.,:/]\d)/g;
-  for (const m of String(texte ?? '').matchAll(re)) {
-    const s = Number(m[1]); const v = Number(m[2]);
-    if (max.has(s) && v >= 1 && v <= max.get(s)) vus.add(`${s}:${v}`);
+  const re = /(?<!\d|\d[.,:/])(\d{1,3})\s?([:.])\s?(\d{1,3})(?!\d|[.,:/]\d)/g;
+  for (const m of t.matchAll(re)) {
+    const s = Number(m[1]); const v = Number(m[3]);
+    if (!max.has(s) || v < 1 || v > max.get(s)) continue;
+    if (prudent && m[2] === '.' && s < 10 && v < 10
+      && !/(verset|versets|sourate|coran|qur'?an|\bv\.|\bs\.|\()\s*[\w'’ -]{0,12}$/i.test(t.slice(Math.max(0, m.index - 30), m.index))) continue;
+    vus.add(`${s}:${v}`);
   }
   return [...vus];
 }
