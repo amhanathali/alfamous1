@@ -32,3 +32,7 @@
 | 2026-11-23 | Commentaires importés d'Amha Nathali reliés à son compte (il peut les modifier) ; les autres sans compte (figés) | Décision de l'auteur |
 | 2026-11-23 | Comptes des anciens membres non importés : un courriel les invite à ouvrir un nouveau compte | Décision de l'auteur ; leurs anciens mots de passe ont été lisibles publiquement |
 | 2026-11-23 | Import : ni les commentaires « Validé par » (le commentaire validé, anonyme ou d'un autre membre, ni la mention), ni les blocs non signés suivis d'une signature seule (pas d'attribution déduite), ni les essais (lexique « todo », verset 5:1 « - ») | Décisions de l'auteur sur l'import à blanc |
+| 2026-11-24 | Onglet Articles : écriture et publication des articles dès le niveau 2 (modérateurs et admins) | Décision de l'auteur (cadrage, docs/ARTICLES.md) |
+| 2026-11-24 | Éditeur d'articles maison, simple (modes Visuel et HTML), avec import de fichiers Word (.docx, par mammoth.js), HTML, Markdown et texte | Décision de l'auteur : pouvoir écrire dans son propre éditeur ; pas de dépendance lourde |
+| 2026-11-24 | Commentaires du blog Blogger importés avec les articles (signatures harmonisées, réponses mises à plat) | Décision de l'auteur |
+| 2026-11-24 | Panneau Contexte : Vérification, Définition proposée, Recherches Alfamous, Articles liés, Mes Notes liées ; pas de commentaires traditionnels dans le contexte | Choix laissé à Claude par l'auteur ; règle d'or : le dossier qui sert à déduire le sens ne contient que le Coran |

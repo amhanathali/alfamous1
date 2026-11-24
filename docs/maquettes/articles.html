@@ -554,7 +554,7 @@ textarea.zone-ed { width: 100%; font: 13px/1.5 ui-monospace, Consolas, monospace
   <div class="roles" id="roles">
     <button data-n="0">0 · Visiteur</button>
     <button data-n="1">1 · Membre</button>
-    <button data-n="2">2 · Modérateur</button>
+    <button data-n="2">2 · Modérateur (rédacteur)</button>
     <button data-n="3" class="actif">3 · Admin (rédacteur)</button>
   </div>
 </div></div>
@@ -571,19 +571,16 @@ textarea.zone-ed { width: 100%; font: 13px/1.5 ui-monospace, Consolas, monospace
 
 <div style="max-width:920px;margin:0 auto;padding:0 16px 24px">
   <section class="questions">
-    <h2>Questions avant de coder</h2>
-    <p style="font-size:14px;color:var(--discret);margin:0">Détail dans <code>docs/ARTICLES.md</code>. Répondre « ok » pour accepter une proposition.</p>
+    <h2>Décisions du 24 nov. et questions restantes</h2>
+    <p style="font-size:14px;color:var(--discret);margin:0">Décidé : rédaction dès le <b>niveau 2</b> ; <b>éditeur maison</b> simple + import de fichiers Word ; <b>commentaires Blogger importés</b> ; panneau Contexte : éléments retenus par Claude (marqués « ajouté »). Détail dans <code>docs/ARTICLES.md</code>. Répondre « ok » pour accepter une proposition.</p>
     <ol>
-      <li><b>Droits.</b> Écrire et publier un article : admins seulement (proposé), ou rôle « rédacteur » attribué dans l'onglet Membres ?</li>
-      <li><b>Article publié.</b> Les modifications restent dans le brouillon jusqu'à « Publier les modifications » (proposé), ou passent en ligne tout de suite ?</li>
-      <li><b>Versions.</b> Une version à chaque « Enregistrer une version » et à chaque publication, plus une copie locale automatique (proposé) ?</li>
-      <li><b>Éditeur.</b> TinyMCE auto-hébergé, modes Visuel et HTML (proposé ; licence GPL à vérifier), ou éditeur maison ?</li>
-      <li><b>Mise en forme.</b> 35 articles ont leur propre feuille <code>&lt;style&gt;</code>, retirée à l'import : feuille commune des articles + relecture de ces 35 (proposé) ?</li>
-      <li><b>Vidéos.</b> 6 cadres intégrés (<code>&lt;iframe&gt;</code>) : garder les vidéos YouTube (proposé) ou les remplacer par un lien ?</li>
-      <li><b>Commentaires Blogger.</b> Les importer, ou les laisser sur l'archive Blogger ?</li>
-      <li><b>Adresse publique.</b> <code>blog.alfamous.ca/articles/…</code> (proposé : nom déjà connu des lecteurs) ou <code>atelier.alfamous.ca/articles/…</code> ?</li>
-      <li><b>Sous les versets.</b> Afficher l'article sous les seuls versets marqués « cité » (proposé) ou sous tous les versets de son contexte ?</li>
-      <li><b>Panneau Contexte.</b> Éléments proposés en plus de votre liste (marqués « nouveau ») : Mes Notes liées, Vérification (fait / déduction / hypothèse), Définition proposée « à valider », Recherches Alfamous, Commentaires traditionnels, Articles liés, Résumé court. Lesquels garder ?</li>
+      <li value="2"><b>Article publié.</b> Les modifications restent dans le brouillon jusqu'à « Publier les modifications » (proposé), ou passent en ligne tout de suite ?</li>
+      <li value="3"><b>Versions.</b> Une version à chaque « Enregistrer une version » et à chaque publication, plus une copie locale automatique (proposé) ?</li>
+      <li value="5"><b>Mise en forme.</b> 35 articles ont leur propre feuille <code>&lt;style&gt;</code>, retirée à l'import : feuille commune des articles + relecture de ces 35 (proposé) ?</li>
+      <li value="6"><b>Vidéos.</b> 6 cadres intégrés : garder les vidéos YouTube (proposé) ou les remplacer par un lien ?</li>
+      <li value="8"><b>Adresse publique.</b> <code>blog.alfamous.ca/articles/…</code> (proposé) ou <code>atelier.alfamous.ca/articles/…</code> ?</li>
+      <li value="9"><b>Sous les versets.</b> Afficher l'article sous les seuls versets marqués « cité » (proposé) ou sous tous les versets de son contexte ?</li>
+      <li value="10"><b>Nouvelle.</b> Un modérateur modifie seulement ses propres articles ; l'admin peut modifier tous les articles (proposé) ?</li>
     </ol>
   </section>
 </div>
@@ -650,7 +647,8 @@ function corpsArticle() {
 function commentairesArticle() {
   const coms = [
     { a: 'Membre Essai', d: '20 nov. 2026', t: 'Commentaire fictif sur l\'article, publié tout de suite (niveau 1). Les liens comme 19:26 deviennent cliquables.' },
-    { a: 'Afrukh Ifereles', d: '3 mars 2026', t: 'Commentaire fictif (exemple d\'un commentaire importé de Blogger, si la question 7 est acceptée).', imp: true }
+    { a: 'Amha Nathali', d: '5 mars 2026', t: '↪ en réponse à Anonyme (3 mars 2026) : réponse fictive, importée de Blogger (les réponses deviennent des commentaires précédés de cette mention).', imp: true },
+    { a: 'Anonyme', d: '3 mars 2026', t: 'Commentaire fictif importé de Blogger (« Anonymous » → « Anonyme »).', imp: true }
   ];
   const ecrire = niveau >= 1
     ? `<div class="ecrire"><textarea placeholder="Votre commentaire (texte simple, 4 000 caractères au plus)"></textarea><div class="ecrire-bas"><span>Publié tout de suite, signé de votre nom · 20 par heure</span><button class="btn principal" data-toast="Commentaire publié (maquette)">Publier</button></div></div>`
@@ -665,13 +663,13 @@ function commentairesArticle() {
 
 // ---------- Écran : liste ----------
 function vueListe() {
-  const vis = ARTICLES.filter((a) => (niveau >= 3 || a.etat !== 'brouillon') && (filtreF === 'toutes' || a.f === filtreF) && (!filtreL || a.lib.includes(filtreL)));
-  const nb = (f) => ARTICLES.filter((a) => (niveau >= 3 || a.etat !== 'brouillon') && (f === 'toutes' || a.f === f)).length;
+  const vis = ARTICLES.filter((a) => (niveau >= 2 || a.etat !== 'brouillon') && (filtreF === 'toutes' || a.f === filtreF) && (!filtreL || a.lib.includes(filtreL)));
+  const nb = (f) => ARTICLES.filter((a) => (niveau >= 2 || a.etat !== 'brouillon') && (f === 'toutes' || a.f === f)).length;
   return `<div class="note-maquette"><b>Liste des articles</b> (<code>#/articles</code>). Titres et dates copiés du flux Blogger (207 articles en tout) ; familles <b>proposées</b>, libellés et résumés d'exemple. ${niveau >= 3 ? 'Le rédacteur voit aussi ses brouillons.' : ''}</div>
   <div class="titre"><h1>Articles</h1><span class="resume">207 articles · le plus récent d'abord</span></div>
   <div class="barre-outils">
     <div class="filtres">${['toutes', ...Object.keys(FAMILLES)].map((f) => `<button data-f="${f}" class="${filtreF === f ? 'actif' : ''}">${f === 'toutes' ? 'Toutes' : FAMILLES[f]} · ${nb(f)}</button>`).join('')}</div>
-    ${niveau >= 3 ? '<button class="btn principal" data-e="editeur" data-nouveau="1">+ Nouvel article</button>' : ''}
+    ${niveau >= 2 ? '<button class="btn principal" data-e="editeur" data-nouveau="1">+ Nouvel article</button>' : ''}
   </div>
   <div class="barre-outils"><input class="art-recherche" placeholder="Chercher dans les titres et résumés…"><select><option>Plus récents</option><option>Plus anciens</option><option>Titre A → Z</option>${niveau >= 3 ? '<option>Dernière modification</option>' : ''}</select></div>
   <div class="libelles-filtre">Libellés : ${LIBELLES.map((l) => `<button data-l="${esc(l)}" class="${filtreL === l ? 'actif' : ''}">${l}</button>`).join('')}</div>
@@ -679,7 +677,7 @@ function vueListe() {
     <div class="vignette">${a.initiale}</div>
     <div><div class="art-titre">${a.titre}</div><p class="art-resume">Résumé d'exemple : deux lignes au plus, tirées du champ « résumé » (500 caractères).</p>
       <div class="art-meta">${fam(a.f)}${a.lib.map((l) => `<span class="libelle">${l}</span>`).join('')}${a.v ? `<span class="lien-cible">${a.v}</span>` : ''}</div></div>
-    <div class="art-droite">${a.etat === 'brouillon' ? '<span class="etat brouillon">brouillon</span>' : a.date}${a.etat === 'modifie' && niveau >= 3 ? '<br><span class="etat modifie">modifs non publiées</span>' : ''}<br>${a.etat !== 'brouillon' ? '💬 ' + (a.id === 'a1' ? 2 : 0) : ''}</div>
+    <div class="art-droite">${a.etat === 'brouillon' ? '<span class="etat brouillon">brouillon</span>' : a.date}${a.etat === 'modifie' && niveau >= 2 ? '<br><span class="etat modifie">modifs non publiées</span>' : ''}<br>${a.etat !== 'brouillon' ? '💬 ' + (a.id === 'a1' ? 3 : 0) : ''}</div>
   </div>`).join('') || '<p class="vide">Aucun article.</p>'}</div>
   <p class="aide-pub">Comme « Lecture » liste les sourates : un clic ouvre l'article. Les filtres se combinent (famille + libellé).</p>`;
 }
@@ -690,9 +688,10 @@ function vueArticle() {
   return `<a class="retour" href="#" data-e="liste">← Articles</a>
   <div class="note-maquette"><b>Lecture</b> (<code>#/article/aberration-1-1926-et-le-sawm-fige-en</code>). Titre et date copiés de Blogger ; arabe et translittération copiés de <code>donnees/texte/</code> ; texte de l'article fictif.</div>
   <article class="art-page">
-    <div class="art-meta">${fam(a.f)}${a.lib.map((l) => `<span class="libelle">${l}</span>`).join('')}<span>Amha Nathali · publié le 24 févr. 2026</span>${niveau >= 3 ? '<span class="etat modifie">modifs non publiées</span>' : ''}</div>
+    <div class="art-meta">${fam(a.f)}${a.lib.map((l) => `<span class="libelle">${l}</span>`).join('')}<span>Amha Nathali · publié le 24 févr. 2026</span>${niveau >= 2 ? '<span class="etat modifie">modifs non publiées</span>' : ''}</div>
     <h1>${a.titre}</h1>
     <p class="chapeau">Résumé d'exemple (champ « résumé »).</p>
+    ${niveau === 2 ? '<p><button class="btn" disabled title="Article d\'Amha Nathali : modification réservée à son auteur et à l\'admin (Q10)">Modifier</button> <button class="btn" data-histo>Historique (4 versions)</button> <span class="aide-pub">Article d\'un autre rédacteur : lecture seule (Q10).</span></p>' : ''}
     ${niveau >= 3 ? '<p><button class="btn principal" data-e="editeur">Modifier</button> <button class="btn" data-histo>Historique (4 versions)</button> <button class="btn" data-e="publique">Voir la page publique</button></p>' : ''}
     <div class="corps-art">${corpsArticle()}</div>
     <div class="pied-art"><span>Versets cités :</span>${['19:26', '2:183', '2:184'].map((r) => `<a class="lien-cible" href="#">${r}</a>`).join('')}<span>Racine :</span><a class="lien-cible" href="#" data-e="lexique"><span class="ar">صوم</span></a></div>
@@ -704,11 +703,12 @@ function vueArticle() {
 // ---------- Écran : éditeur ----------
 let nouveau = false;
 function vueEditeur() {
-  if (niveau < 3) return `<p class="message">Réservé aux rédacteurs (proposition : admins, niveau 3 — question 1).</p>`;
+  if (niveau < 2) return `<p class="message">Réservé aux rédacteurs (niveau 2 et plus : modérateurs et admins).</p>`;
+  if (niveau === 2 && !nouveau) return `<p class="message">Cet article appartient à Amha Nathali : un modérateur le lit mais ne le modifie pas (proposition, question 10).<br><br><button class="btn principal" data-e="editeur" data-nouveau="1">+ Nouvel article (le sien)</button></p>`;
   const titre = nouveau ? '' : ARTICLES[0].titre;
   const htmlSource = esc(`<h2>Le verset</h2>\n<div class="verset-bloc" data-ref="19:26">\n  <p class="ar" lang="ar">${V('19:26').ar}</p>\n  <p class="tr">${V('19:26').tr}</p>\n</div>\n<p>Analyse… (texte fictif)</p>`);
   return `<a class="retour" href="#" data-e="${nouveau ? 'liste' : 'article'}">← ${nouveau ? 'Articles' : 'Retour à l\'article'}</a>
-  <div class="note-maquette"><b>Éditeur</b> (<code>#/article/…/modifier</code>). À gauche le texte (modes Visuel et HTML), à droite le panneau <b>Contexte</b> : cliquer sur les sections pour les ouvrir. Barre du bas : brouillon, historique, aperçu, publication, « Dossier pour Claude ».</div>
+  <div class="note-maquette"><b>Éditeur maison</b> (<code>#/article/…/modifier</code>), ouvert dès le niveau 2. À gauche le texte (modes Visuel et HTML, « 📄 Importer un fichier » pour Word), à droite le panneau <b>Contexte</b> : cliquer sur les sections pour les ouvrir. Barre du bas : brouillon, historique, aperçu, publication, « Dossier pour Claude ».</div>
   <div class="atelier">
     <div class="editeur">
       <div class="ed-champs">
@@ -722,7 +722,7 @@ function vueEditeur() {
       </div>
       <div class="barre-ed">
         <button title="Titre de section"><b>T</b>2</button><button><b>G</b></button><button><i>I</i></button><button>❝</button><button>• Liste</button><button>▦ Tableau</button><button>🔗</button><button>🖼 Image</button>
-        <span class="sep"></span><button data-inserer title="Insère arabe + translittération copiés de donnees/">+ Verset</button><button title="Encadré">▭ Encadré</button><button title="Texte de droite à gauche">⇐ RTL</button>
+        <span class="sep"></span><button data-importer title="Word (.docx), HTML, Markdown ou texte">📄 Importer un fichier</button><button data-inserer title="Insère arabe + translittération copiés de donnees/">+ Verset</button><button title="Encadré">▭ Encadré</button><button title="Texte de droite à gauche">⇐ RTL</button>
         <span class="modes"><button data-mode="visuel" class="${modeEd === 'visuel' ? 'actif' : ''}">Visuel</button><button data-mode="html" class="${modeEd === 'html' ? 'actif' : ''}">HTML</button></span>
       </div>
       ${modeEd === 'visuel' ? `<div class="zone-ed corps-art" contenteditable="true">${nouveau ? '<p style="color:var(--discret)">Commencer à écrire, ou coller le HTML produit avec Claude dans le mode HTML…</p>' : corpsArticle()}</div>`
@@ -738,7 +738,7 @@ function vueEditeur() {
 }
 function panneauContexte() {
   const vv = nouveau ? [] : [['19:26', true, 'verset étudié'], ['2:183', true, ''], ['2:184', true, ''], ['2:187', false, 'à comparer']];
-  const sec = (titre, n, corps, { ouvert = false, neuf = false } = {}) => `<details class="ctx" ${ouvert ? 'open' : ''}><summary>${titre}${neuf ? '<span class="nouveau">nouveau</span>' : ''}<span class="n">${n}</span></summary><div class="ctx-corps">${corps}</div></details>`;
+  const sec = (titre, n, corps, { ouvert = false, neuf = false } = {}) => `<details class="ctx" ${ouvert ? 'open' : ''}><summary>${titre}${neuf ? '<span class="nouveau">ajouté</span>' : ''}<span class="n">${n}</span></summary><div class="ctx-corps">${corps}</div></details>`;
   return `<aside class="contexte"><h2>Contexte <small>privé · sert à écrire</small></h2>
   ${sec('Versets', vv.length, (vv.map(([r, c, note]) => `<div class="ctx-item"><div><a class="ref" href="#">${r}</a> <label class="cite"><input type="checkbox" ${c ? 'checked' : ''}> cité (affiché sous le verset)</label><div class="ar" lang="ar">${V(r).ar}</div>${note ? `<div class="petit">Note : ${note}</div>` : ''}</div><div class="actions"><button data-toast="Verset inséré dans le texte (copié de donnees/) — maquette">insérer</button><button>retirer</button></div></div>`).join('') || '<p class="petit">Aucun verset. Depuis Lecture ou des résultats : cocher « Choisir » puis « Ajouter au contexte ».</p>')
     + `<div class="ctx-ajout"><input placeholder="2:255 ou 2:183-187"><button class="btn">Ajouter</button></div>`, { ouvert: true })}
@@ -755,9 +755,7 @@ function panneauContexte() {
     <p class="petit">Les points non vérifiés sont rappelés à la publication (sans bloquer).</p>`, { neuf: true })}
   ${sec('Définition proposée', nouveau ? 0 : 1, nouveau ? '<p class="petit">Aucune.</p>' : '<div class="ctx-item"><div><span class="ar" lang="ar">صوم</span> <span class="etat brouillon">à valider</span><div class="petit">Texte de la définition proposée (fictif). Publiée au lexique seulement sur votre décision.</div></div><div class="actions"><button data-toast="Rien n\'est publié sans votre décision — maquette">publier au lexique…</button></div></div>', { neuf: true })}
   ${sec('Recherches Alfamous', nouveau ? 0 : 2, nouveau ? '<p class="petit">Aucune.</p>' : `<div class="ctx-item"><div><code>r:صوم</code> <span class="petit">${D.racine.n} occurrences</span></div><div class="actions"><button>rejouer</button></div></div><div class="ctx-item"><div><code>صوم 2:183</code> <span class="petit">exemple</span></div><div class="actions"><button>rejouer</button></div></div>`, { neuf: true })}
-  ${sec('Commentaires traditionnels', '', '<p class="petit">Traductions (tanzil.net) des versets du contexte, pour la comparaison ; jamais source du sens.</p>', { neuf: true })}
   ${sec('Articles liés', nouveau ? 0 : 1, nouveau ? '<p class="petit">Aucun.</p>' : '<div class="ctx-item"><div>Iftar (إفطار) : L\'infraction qui n\'existe pas</div><div class="actions"><button>retirer</button></div></div>', { neuf: true })}
-  ${sec('Résumé court', '', '<textarea style="width:100%;min-height:60px" placeholder="280 caractères pour les réseaux sociaux"></textarea>', { neuf: true })}
   </aside>`;
 }
 function fenetreHistorique() {
@@ -802,6 +800,16 @@ Relis le brouillon et propose une version révisée, au format HTML du blog…`;
     <div class="dossier">${txt.replace(/<(?!\/?span)/g, '&lt;')}</div>
     <p style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn principal" data-toast="Dossier copié dans le presse-papiers — maquette" data-fermer>Copier</button><button class="btn" data-toast="dossier-aberration-1-1926-et-le-sawm-fige-en.md téléchargé — maquette" data-fermer>Télécharger (.md)</button><button class="btn" disabled title="Étape 2, à discuter : clé dans Secret Manager, coût, plafond">Demander à Claude (plus tard)</button></p>`);
 }
+function fenetreImporter() {
+  fenetre('Importer un fichier', `<p style="margin:0 0 8px">Écrire dans Word, LibreOffice ou Google Docs (exporté en .docx), puis importer ici. Conversion dans le navigateur (mammoth.js), puis assainissement.</p>
+    <div class="depot" style="padding:22px">Déposer un fichier <b>.docx</b>, .html, .md ou .txt — ou <button class="lien-btn" style="font-size:13px">choisir…</button></div>
+    <div class="note-maquette" style="margin:10px 0"><b>Exemple après lecture de « sawm-v2.docx » (fictif)</b> : 3 titres, 14 paragraphes (2 en arabe, <code>dir="auto"</code>), 1 tableau, 2 images (copiées dans Storage). Perdus : couleurs et polices.</div>
+    <label class="choisir"><input type="radio" name="mode-imp" checked> Remplacer le brouillon (une version est enregistrée avant)</label><br>
+    <label class="choisir"><input type="radio" name="mode-imp"> Insérer à l'endroit du curseur</label><br>
+    <label class="choisir"><input type="checkbox" checked> Ranger le fichier d'origine dans les Fichiers du contexte (privé)</label>
+    <p class="aide-pub">Pas de synchronisation avec le fichier Word ensuite : la référence devient le brouillon de l'atelier.</p>
+    <p style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-toast="Fichier importé dans le brouillon (maquette)" data-fermer>Importer</button></p>`);
+}
 function fenetrePublier() {
   fenetre(nouveau ? 'Publier l\'article' : 'Publier les modifications', `<p>${nouveau ? 'L\'article devient lisible par tous dans l\'onglet Articles ; son adresse est fixée :' : 'Le brouillon remplace la version en ligne ; une version publiée est enregistrée.'}</p>
     ${nouveau ? '<p><code>/articles/le-sens-du-mot-sawm-suite/</code></p>' : ''}
@@ -818,7 +826,7 @@ function vueVerset() {
   return `<div class="note-maquette"><b>Lecture de la sourate 19</b> (versets copiés de <code>donnees/texte/019.json</code>). La ligne « Articles » apparaît sous un verset cité par un article publié (une seule requête par sourate). ${niveau >= 3 ? 'Cocher « Choisir » : la barre de sélection gagne « Ajouter au contexte… ».' : ''}</div>
   <div class="titre"><h1>Sourate 19</h1><span class="resume">versets 25 à 27</span></div>
   ${['19:25', '19:26', '19:27'].map(ligne).join('')}
-  ${choisis.size ? `<div class="barre-copie"><span>${choisis.size} verset${choisis.size > 1 ? 's' : ''} choisi${choisis.size > 1 ? 's' : ''}</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn">Aperçu</button><button class="btn">Copier</button>${niveau >= 3 ? '<button class="btn principal" data-ajouter>Ajouter au contexte…</button>' : ''}<button class="btn" data-vider>Vider</button></span></div>` : ''}`;
+  ${choisis.size ? `<div class="barre-copie"><span>${choisis.size} verset${choisis.size > 1 ? 's' : ''} choisi${choisis.size > 1 ? 's' : ''}</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn">Aperçu</button><button class="btn">Copier</button>${niveau >= 2 ? '<button class="btn principal" data-ajouter>Ajouter au contexte…</button>' : ''}<button class="btn" data-vider>Vider</button></span></div>` : ''}`;
 }
 function fenetreAjouter() {
   fenetre('Ajouter au contexte d\'un article', `<p>${[...choisis].join(', ')} → </p>
@@ -835,7 +843,7 @@ function vueLexique() {
   <div class="bloc"><h2>Occurrences dans le Coran <small>${D.racine.versets} versets</small></h2><p class="petit" style="font-size:14px;color:var(--discret)">${D.racine.refs.join(' · ')}</p></div>
   <div class="bloc"><h2>Définitions <small>(comme aujourd'hui)</small></h2><p class="vide">…</p></div>
   <div class="bloc"><h2>Articles <small>qui étudient ou citent cette entrée</small></h2>
-    <div class="liste-fils"><div class="art-ligne" data-e="article"><div class="vignette">صوم</div><div><div class="art-titre">${ARTICLES[0].titre}</div><div class="art-meta">${fam('racines')}<span>24 févr. 2026</span></div></div><div class="art-droite">💬 2</div></div>
+    <div class="liste-fils"><div class="art-ligne" data-e="article"><div class="vignette">صوم</div><div><div class="art-titre">${ARTICLES[0].titre}</div><div class="art-meta">${fam('racines')}<span>24 févr. 2026</span></div></div><div class="art-droite">💬 3</div></div>
     <div class="art-ligne"><div class="vignette">فطر</div><div><div class="art-titre">Iftar (إفطار) : L'infraction qui n'existe pas</div><div class="art-meta">${fam('racines')}<span>4 mars 2026</span><span class="etiquette">exemple</span></div></div><div class="art-droite"></div></div></div></div>
   <div class="bloc"><h2>Racines proches · Forum <small>(comme aujourd'hui)</small></h2><p class="vide">…</p></div>`;
 }
@@ -849,7 +857,7 @@ function vuePublique() {
     <div class="art-meta">${fam(a.f)}<span>Amha Nathali · 24 février 2026</span></div>
     <h1 style="font-size:30px;line-height:1.25">${a.titre}</h1>
     <div class="corps-art">${corpsArticle()}</div>
-    <p style="margin-top:20px;padding-top:12px;border-top:1px solid #e3ddd2;font-size:15px">💬 <a href="#" data-e="article">Lire les 2 commentaires et commenter dans l'atelier</a> · Versets cités : <a href="#">19:26</a>, <a href="#">2:183</a>, <a href="#">2:184</a> (ouvrent l'atelier)</p></div></div>
+    <p style="margin-top:20px;padding-top:12px;border-top:1px solid #e3ddd2;font-size:15px">💬 <a href="#" data-e="article">Lire les 3 commentaires et commenter dans l'atelier</a> · Versets cités : <a href="#">19:26</a>, <a href="#">2:183</a>, <a href="#">2:184</a> (ouvrent l'atelier)</p></div></div>
   <h3 style="margin:18px 0 6px;font-size:15px">Dans l'en-tête de la page (extrait)</h3>
   <div class="code-meta">${esc(`<title>${a.titre} — Alfamous</title>
 <meta name="description" content="(résumé de l'article)">
@@ -872,7 +880,13 @@ function vueImport() {
 Assainissement : 35 &lt;style&gt; et 1 &lt;script&gt; retirés · 6 &lt;iframe&gt; (question 6) · attributs style réduits à text-align et direction
 Images : copiées de blogger.googleusercontent.com vers Storage articles/{id}/images/
 Identifiants stables : imp-b-&lt;id Blogger&gt;  (relancer = remplacer, sans doublon)
-À expliquer avant l'import : 219 blocs dans articles-format-html.js contre 207 sur Blogger</div>
+À expliquer avant l'import : 219 blocs dans articles-format-html.js contre 207 sur Blogger
+
+Commentaires Blogger (importés) : 67 annoncés le 24 nov.
+  « Amha NathAli » → Amha Nathali (relié à son compte) · « Anonymous » → Anonyme · autres noms gardés
+  supprimés sur Blogger (sans nom ni texte) : non importés
+  réponses : « ↪ en réponse à &lt;nom&gt; (&lt;date&gt;) : » devant le texte
+  identifiants stables : imp-bc-&lt;id Blogger&gt;</div>
   <div class="liste-fils" style="margin-top:12px;font-size:14px">
   <div class="art-ligne" style="grid-template-columns:minmax(0,1fr) 140px 120px;font-weight:600;cursor:default"><span>Titre (Blogger)</span><span>Famille proposée</span><span>À relire</span></div>
   ${ARTICLES.filter((a) => a.etat !== 'brouillon' && !a.titre.includes('exemple')).map((a) => `<div class="art-ligne" style="grid-template-columns:minmax(0,1fr) 140px 120px;cursor:default"><span>${a.titre}</span><select><option>${FAMILLES[a.f]}</option>${Object.values(FAMILLES).filter((x) => x !== FAMILLES[a.f]).map((x) => `<option>${x}</option>`).join('')}</select><span class="petit">${a.id === 'a2' || a.id === 'a3' ? '&lt;style&gt; retiré' : ''}</span></div>`).join('')}
@@ -902,6 +916,7 @@ document.addEventListener('click', (e) => {
   if (t.closest('[data-histo]')) return fenetreHistorique();
   if (t.closest('[data-dossier]')) return fenetreDossier();
   if (t.closest('[data-publier]')) return fenetrePublier();
+  if (t.closest('[data-importer]')) return fenetreImporter();
   if (t.closest('[data-ajouter]')) return fenetreAjouter();
   if (t.closest('[data-inserer]')) toast('Verset choisi dans le contexte inséré (arabe + translittération copiés de donnees/) — maquette');
   const ts = t.closest('[data-toast]'); if (ts) toast(ts.dataset.toast);

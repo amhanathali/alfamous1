@@ -8,6 +8,9 @@
 - Maquette cliquable `docs/maquettes/articles.html` : liste et filtres, lecture et commentaires, éditeur et panneau
   Contexte, historique, Dossier pour Claude, ligne « Articles » sous un verset, fiche du lexique, page publique,
   fiche de contrôle de l'import. Titres et dates copiés de Blogger ; versets copiés de `donnees/` ; textes fictifs.
+- Décisions de l'auteur du 24 nov. reportées (cadrage, maquette, `docs/DECISIONS.md`) : rédaction dès le niveau 2 ;
+  éditeur maison simple avec « Importer un fichier » (Word `.docx`, HTML, Markdown, texte) ; commentaires Blogger
+  importés (67 annoncés) ; éléments du panneau Contexte retenus. 7 questions restent ouvertes.
 
 ### Ajouté — phase 4 : import des commentaires de l'ancienne application
 - `npm run importer` (`scripts/importer.mjs`) : lit les exports CSV de Versets1 et Lexique1 (dossier `import/`, hors Git)

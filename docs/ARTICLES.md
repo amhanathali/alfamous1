@@ -2,8 +2,9 @@
 
 Chantier : un onglet **Articles** dans Alfamous1, prolongement du lexique, pour remplacer à terme le blog Blogger
 « Zoom-Coran » (blog.alfamous.ca). Branche `articles/onglet`. Maquette : `docs/maquettes/articles.html`.
-**Rien n'est codé** tant que ce cadrage et la maquette ne sont pas acceptés. Les points marqués **[Q n]** attendent
-une décision de l'auteur (liste à la fin).
+**Rien n'est codé** tant que ce cadrage et la maquette ne sont pas acceptés. Décisions de l'auteur du 24 nov. :
+droits dès le niveau 2, éditeur maison simple avec import de fichiers Word, commentaires Blogger importés, éléments
+du panneau Contexte choisis par Claude (§ 2). Les points encore marqués **[Q n]** attendent une décision (liste à la fin).
 
 Constats de départ (vérifiés le 24 nov.) :
 - Blogger : **207 articles** publiés (flux public `blog.alfamous.ca/feeds/posts/summary?alt=json`), 9 libellés :
@@ -20,7 +21,7 @@ Constats de départ (vérifiés le 24 nov.) :
 | --- | --- | --- |
 | Liste des articles (comme Lecture liste les sourates) : filtres par famille et par libellé, recherche dans les titres et résumés, tri par date | `#/articles` | tous |
 | Lecture d'un article : titre, famille, libellés, date, auteur, texte, versets cités, sources, commentaires, discussions du forum liées | `#/article/<slug>` | tous (publié) |
-| Éditeur : texte + panneau « Contexte » ; brouillon, aperçu, publication, historique, « Dossier pour Claude » | `#/article/<id>/modifier`, `#/articles/nouveau` | rédacteurs **[Q1]** |
+| Éditeur : texte + panneau « Contexte » ; brouillon, aperçu, publication, historique, « Dossier pour Claude » | `#/article/<id>/modifier`, `#/articles/nouveau` | rédacteurs (niveau ≥ 2) |
 | Encadré « Articles » sous un verset cité et dans la fiche du lexique | (lecture, résultats, `#/lexique/<clé>`) | tous |
 | Page publique indexable, une par article, générée au déploiement | `/articles/<slug>/` | tous, moteurs de recherche |
 
@@ -72,17 +73,21 @@ le document public (et crée une version) dans un seul lot. Lisible et modifiabl
 | Sources et liens | `{ titre, url, note, publique }` | Saisie |
 | Discussions du forum | identifiants de fils (`notes` publiées) | Fil → « Ajouter au contexte » ; un fil peut être lié à l'article (`lien.type = 'article'`) |
 
-Éléments proposés en plus :
-- **Mes Notes liées** (notes privées de l'auteur, jamais publiées) ;
-- **Vérification** : liste de points classés *fait / déduction / hypothèse*, avec « vérifié » coché ou non
-  (méthode de l'auteur) ; un point non vérifié est signalé à la publication, sans bloquer ;
-- **Définition proposée pour le lexique** : texte + clé, statut « à valider » ; elle n'est publiée au lexique
-  (comme définition signée) que sur décision de l'auteur, jamais automatiquement ;
-- **Recherches Alfamous** gardées (ex. `r:صوم`, `صوم 2:183`) avec leurs chiffres, rejouables d'un clic ;
-- **Commentaires traditionnels** des versets du contexte (traductions tanzil.net) pour la comparaison, surtout
-  pour la famille « critiques » ;
-- **Articles liés** (affichés en bas de l'article) ;
-- **Résumé court** pour les réseaux sociaux (≤ 280 caractères).
+Éléments ajoutés (choisis par Claude le 24 nov., à la demande de l'auteur : ceux qui servent à écrire juste et à
+préparer le « Dossier pour Claude ») :
+- **Vérification** : points classés *fait / déduction / hypothèse*, « vérifié » coché ou non (méthode de l'auteur) ;
+  les points non vérifiés sont rappelés à la publication, sans bloquer ; ils passent dans le dossier ;
+- **Définition proposée pour le lexique** : clé + texte, statut « à valider » ; publiée au lexique (définition
+  signée) seulement sur décision de l'auteur ; le dossier la confronte aux définitions existantes, conflits signalés ;
+- **Recherches Alfamous** gardées (ex. `r:صوم`, `صوم 2:183`) avec leurs chiffres, rejouables d'un clic : les chiffres
+  cités dans l'article restent vérifiables ;
+- **Articles liés** : articles déjà publiés sur la même racine ou le même thème (affichés en bas de l'article) ;
+  le dossier en donne les définitions pour repérer les écarts (comme ḥajj / ḥujja) ;
+- **Mes Notes liées** : notes privées de l'auteur, jamais publiées.
+
+Écartés : les *commentaires traditionnels* (traductions tanzil.net) dans le contexte — restent consultables dans la
+lecture, mais ne doivent pas entrer dans le dossier qui sert à déduire le sens (règle d'or) ; le *résumé court*
+(le champ « résumé » suffit).
 
 ### `articles/{id}/versions/{n}` — historique
 `{ titre, corps, resume, famille, libelles, le, parUid, parNom, publiee }`. Une version à chaque
@@ -98,38 +103,48 @@ Les discussions longues passent par le forum (« Ouvrir une discussion » crée 
 
 ### Storage (aujourd'hui tout fermé)
 - `articles/{id}/images/{fichier}` : images du texte et de couverture ; **lecture publique** (noms aléatoires),
-  écriture par les rédacteurs ; images seulement, ≤ 5 Mo.
-- `articles/{id}/fichiers/{fichier}` : fichiers de travail du contexte (PDF, captures…) ; lecture et écriture par
-  les rédacteurs ; ≤ 25 Mo.
+  écriture par les rédacteurs (niveau ≥ 2) ; images seulement, ≤ 5 Mo.
+- `articles/{id}/fichiers/{fichier}` : fichiers de travail du contexte (PDF, captures, fichiers Word importés…) ;
+  lecture et écriture par les rédacteurs ; ≤ 25 Mo.
 - Tout le reste reste fermé. Règles testées à l'émulateur Storage (`npm run test:regles`, sur le PC).
 
-## 3. Droits — qui écrit et publie un article [Q1]
-Proposition : un article est un texte d'auteur, pas une contribution de la communauté.
+## 3. Droits — qui écrit et publie un article (décidé le 24 nov. : niveau 2 et plus)
+Un article est un texte d'auteur, pas une contribution de la communauté. Écriture et publication dès le niveau 2.
 
 | Action | 0 | 1 | 2 | 3 |
 | --- | --- | --- | --- | --- |
 | Lire les articles publiés, leurs commentaires et sources | ✓ | ✓ | ✓ | ✓ |
 | Commenter un article publié ; signaler un commentaire ; ouvrir une discussion | — | ✓ | ✓ | ✓ |
 | Masquer un commentaire d'article | — | — | ✓ | ✓ |
-| Créer, modifier, publier, retirer un article ; voir les brouillons ; contexte et fichiers | — | — | — | ✓ |
+| Créer un article, le modifier, le publier, le retirer — **ses propres articles** | — | — | ✓ | ✓ |
+| Voir les brouillons des autres rédacteurs (lecture seule) | — | — | ✓ | ✓ |
+| Modifier, publier, retirer l'article d'un autre | — | — | — | ✓ |
 | Supprimer définitivement un article | — | — | — | ✓ |
 
-Option à trancher : un rôle **rédacteur** (revendication `redacteur: true`, posée dans l'onglet Membres) pour
-ouvrir l'écriture à d'autres sans les rendre admins ; un rédacteur ne modifierait que ses propres articles.
+Proposition de détail (Claude) : un modérateur ne modifie que ses articles, l'admin peut intervenir sur tous ; les
+articles importés de Blogger appartiennent au compte d'Amha Nathali. Aucune revendication nouvelle : les règles
+lisent le niveau déjà en place (`request.auth.token.niveau >= 2`).
 La règle d'or du Blog s'applique à tout contenu coranique, quel que soit l'auteur.
 
-## 4. Éditeur [Q4]
-Les articles existants sont du HTML riche (sections, tableaux, encadrés, arabe en ligne). L'éditeur doit le garder.
+## 4. Éditeur (décidé le 24 nov. : maison, simple, + import de fichiers Word)
+Éditeur maison, sans dépendance lourde, dans l'esprit du code actuel :
+- **mode Visuel** (`contenteditable`) avec une barre courte : titre de section, gras, italique, citation, liste,
+  lien, image, tableau simple, encadré, « + Verset » (insère l'arabe et la translittération copiés de `donnees/`,
+  jamais tapés à la main), sens d'écriture droite-à-gauche ;
+- **mode HTML** : le code de l'article, pour coller le HTML produit avec Claude ou corriger finement ;
+- collage nettoyé (le HTML collé passe par l'assainissement du § 5).
 
-| Choix | Pour | Contre |
-| --- | --- | --- |
-| **TinyMCE 7, auto-hébergé (recommandé)** | Garde le HTML existant (éléments autorisés réglables), mode « code source », tableaux, droite-à-gauche, collage nettoyé, envoi d'images vers Storage ; servi par l'application comme le SDK Firebase (`vendor/`), chargé seulement dans l'éditeur | Lourd (quelques centaines de Ko, chargé à la demande) ; licence GPL v2+ annoncée pour l'auto-hébergement, **compatible GPL v3 à vérifier** avant de l'ajouter |
-| Éditeur maison (`contenteditable` + barre d'outils + mode HTML) | Aucune dépendance, dans l'esprit du code actuel | Plus de code à maintenir ; collage et tableaux fragiles |
-| Quill, CKEditor 5, TipTap | Modernes | Modèle de document strict : perdent les sections, encadrés et tableaux des articles importés |
-
-Dans tous les cas : deux modes, **Visuel** et **HTML** (pour coller le HTML produit avec Claude) ; arabe seul sur sa
-ligne et translittération dans le texte (gabarit du blog) ; bouton « Insérer un verset » qui insère le texte copié
-de `donnees/` (jamais tapé à la main).
+**Écrire ailleurs (Word, LibreOffice, Google Docs)** : bouton « Importer un fichier » dans l'éditeur.
+- `.docx` (Word ; Google Docs et LibreOffice l'exportent) : converti en HTML dans le navigateur par **mammoth.js**
+  (licence BSD-2, petite, servie par l'application comme le SDK Firebase), puis assaini. Gardés : titres (styles
+  « Titre 1/2/3 »), paragraphes, gras, italique, listes, tableaux, liens, images (copiées dans Storage).
+  Perdus : couleurs, polices, mises en page. Les paragraphes en arabe reçoivent `dir="auto"`.
+- `.html`, `.md` et `.txt` aussi acceptés.
+- Choix au moment de l'import : **remplacer** le brouillon ou **insérer** à l'endroit du curseur ; le fichier
+  d'origine est rangé dans les Fichiers du contexte (privé), ce qui permet de le relire ou de le rejoindre à une
+  conversation avec Claude ; le « Dossier pour Claude » reprend le texte converti.
+- Pas d'aller-retour automatique : après l'import, la référence est le brouillon de l'atelier (le fichier Word n'est
+  pas resynchronisé). Un export `.docx` du brouillon pourra s'ajouter plus tard si besoin.
 
 ## 5. HTML assaini
 Un seul module (`src/js/articles-assainir.js`), utilisé à l'enregistrement, à l'affichage et à la génération des
@@ -173,7 +188,16 @@ utilisée par LexData (gardée hors du dépôt). Les brouillons Blogger ne sont 
 4. **Vérification** (`--verifier`) : nombre d'articles, titres, images toutes copiées, aucun `<style>`/`<script>`.
 5. Émulateurs, puis `--projet essai`, puis `--projet prod` (confirmation PROD) le jour de la bascule.
 
-Commentaires Blogger : à importer ou non **[Q7]**.
+**Commentaires Blogger (décidé le 24 nov. : importés).** Flux public `/feeds/comments/default` : 67 commentaires
+annoncés le 24 nov. (sur 60 lisibles : 29 « Anonymous », 13 « Amha NathAli », 16 sans nom — supprimés sur Blogger —,
+2 autres noms ; 30 portent un lien vers un autre commentaire). Règles proposées, comme la phase 4 :
+- écrits dans `commentaires/` avec `type: 'article'`, `cle` = identifiant de l'article, date Blogger, champ
+  `import: { source: 'Blogger', bloggerId, parentId }`, identifiant stable `imp-bc-<id Blogger>` ;
+- signatures harmonisées : « Amha NathAli » → « Amha Nathali » (relié à son compte) ; « Anonymous » → « Anonyme » ;
+  autres noms gardés tels quels, sans compte ;
+- commentaires supprimés sur Blogger (sans nom ni texte) : non importés ;
+- réponses : pas de fil de réponses dans le modèle ; texte précédé de « ↪ en réponse à <nom> (<date>) : » ;
+- listés dans la fiche de contrôle (une ligne par commentaire) avant l'écriture.
 
 ## 7. Production assistée par IA
 **Étape 1 — bouton « Dossier pour Claude »** (aucun coût, aucune clé) : texte structuré copié dans le presse-papiers
@@ -188,7 +212,7 @@ et téléchargeable (`dossier-<slug>.md`) :
 7. demande à Claude (modifiable).
 On colle le dossier dans une conversation « [Blog] … », on recolle le HTML obtenu dans le mode HTML de l'éditeur.
 
-**Étape 2 — appel direct à l'API (plus tard, à discuter)** : une Cloud Function réservée aux rédacteurs,
+**Étape 2 — appel direct à l'API (plus tard, à discuter)** : une Cloud Function réservée aux rédacteurs (niveau ≥ 2),
 clé dans Secret Manager (jamais dans Git ni dans le navigateur), plafond mensuel, journal des appels, réponse
 déposée dans le brouillon (jamais publiée directement). Coût à chiffrer avant.
 
@@ -214,7 +238,7 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
 - **Fiche du lexique** : bloc « Articles » (articles dont `lexique` ou `racines` contient la clé), après les
   définitions.
 - **Sélection de versets** : la barre Aperçu · Copier · Vider gagne « Ajouter au contexte… » (choix de l'article,
-  rédacteurs seulement).
+  rédacteurs seulement, niveau ≥ 2).
 
 ## 10. Étapes proposées (une PR chacune, rien dans main sans accord)
 1. Cadrage + maquette (cette PR).
@@ -225,14 +249,18 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
 5. Import depuis Blogger (à blanc, relecture, émulateurs, essai).
 6. Pages publiques, plan du site, flux ; redirections préparées (activées le jour de la bascule).
 
-## Questions pour l'auteur
-- **Q1** Qui écrit et publie : admins seulement (proposé), ou rôle « rédacteur » attribué dans Membres ?
+## Décisions du 24 nov. 2026
+- **Droits** : écriture et publication dès le niveau 2 (détail § 3).
+- **Éditeur** : maison, simple (Visuel + HTML), avec import de fichiers Word (`.docx`), HTML, Markdown, texte (§ 4).
+- **Commentaires Blogger** : importés (§ 6).
+- **Panneau Contexte** : Vérification, Définition proposée, Recherches Alfamous, Articles liés, Mes Notes liées
+  ajoutés ; commentaires traditionnels et résumé court écartés (§ 2).
+
+## Questions encore ouvertes
 - **Q2** Article publié : modifications en brouillon jusqu'à « Publier les modifications » (proposé), ou en direct ?
 - **Q3** Versions : à chaque « Enregistrer une version » et à chaque publication (proposé), ou à chaque enregistrement ?
-- **Q4** Éditeur : TinyMCE auto-hébergé (proposé, licence à vérifier) ou éditeur maison ?
 - **Q5** Les 35 articles à `<style>` : feuille commune + relecture (proposé) ?
 - **Q6** Vidéos YouTube intégrées : garder (proposé) ou remplacer par un lien ?
-- **Q7** Commentaires Blogger : importer ou laisser ?
-- **Q8** Adresse des pages publiques : `blog.alfamous.ca/articles/…` (garde le nom connu des lecteurs, proposé) ou
-  `atelier.alfamous.ca/articles/…` ?
+- **Q8** Adresse des pages publiques : `blog.alfamous.ca/articles/…` (proposé) ou `atelier.alfamous.ca/articles/…` ?
 - **Q9** Sous les versets : seulement les versets marqués « cité » (proposé), ou tous les versets du contexte ?
+- **Q10** (nouvelle) Un modérateur modifie seulement ses articles, l'admin tous (proposé) ?
