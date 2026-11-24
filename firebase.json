@@ -25,6 +25,1079 @@
           }
         ]
       }
+    ],
+    "redirects": [
+      {
+        "source": "/2022/11/quest-ce-que-le-lexique-du-coran.html",
+        "destination": "/articles/quest-ce-que-le-lexique-du-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2023/01/lexique.html",
+        "destination": "/articles/lexique/",
+        "type": 301
+      },
+      {
+        "source": "/2023/01/prier-nest-pas-salat.html",
+        "destination": "/articles/prier-nest-pas-salat/",
+        "type": 301
+      },
+      {
+        "source": "/2023/02/comment-collaborer-la-construction-du.html",
+        "destination": "/articles/comment-collaborer-la-construction-du/",
+        "type": 301
+      },
+      {
+        "source": "/2023/04/laicite.html",
+        "destination": "/articles/laicite/",
+        "type": 301
+      },
+      {
+        "source": "/2023/04/le-coran-des-historiens.html",
+        "destination": "/articles/le-coran-des-historiens/",
+        "type": 301
+      },
+      {
+        "source": "/2023/04/le-tribut-impose-par-les-califes-aux.html",
+        "destination": "/articles/le-tribut-impose-par-les-califes-aux/",
+        "type": 301
+      },
+      {
+        "source": "/2023/04/qui-peut-expliquer-un-mot-du-codex.html",
+        "destination": "/articles/qui-peut-expliquer-un-mot-du-codex/",
+        "type": 301
+      },
+      {
+        "source": "/2023/06/napoleon-le-coran-et-le-califat.html",
+        "destination": "/articles/napoleon-le-coran-et-le-califat/",
+        "type": 301
+      },
+      {
+        "source": "/2023/07/attestation-historique-du-prophete.html",
+        "destination": "/articles/attestation-historique-du-prophete/",
+        "type": 301
+      },
+      {
+        "source": "/2023/07/la-kaaba-el-qibla.html",
+        "destination": "/articles/la-kaaba-el-qibla/",
+        "type": 301
+      },
+      {
+        "source": "/2023/07/tu-es-le-resultat-de-tes-pensees.html",
+        "destination": "/articles/tu-es-le-resultat-de-tes-pensees/",
+        "type": 301
+      },
+      {
+        "source": "/2023/08/al-amana-et-el-khilafa.html",
+        "destination": "/articles/al-amana-et-el-khilafa/",
+        "type": 301
+      },
+      {
+        "source": "/2023/12/les-chemins-de-lame-diversite-humaine.html",
+        "destination": "/articles/les-chemins-de-lame-diversite-humaine/",
+        "type": 301
+      },
+      {
+        "source": "/2024/03/coran-hadith-et-islam.html",
+        "destination": "/articles/coran-hadith-et-islam/",
+        "type": 301
+      },
+      {
+        "source": "/2024/03/retrouver-lislam-authentique-un-appel.html",
+        "destination": "/articles/retrouver-lislam-authentique-un-appel/",
+        "type": 301
+      },
+      {
+        "source": "/2024/04/la-mecque-mythe-ou-realite.html",
+        "destination": "/articles/la-mecque-mythe-ou-realite/",
+        "type": 301
+      },
+      {
+        "source": "/2024/05/la-banalite-du-mal.html",
+        "destination": "/articles/la-banalite-du-mal/",
+        "type": 301
+      },
+      {
+        "source": "/2024/06/pourquoi-allah-ne-repond-il-pas-aux.html",
+        "destination": "/articles/pourquoi-allah-ne-repond-il-pas-aux/",
+        "type": 301
+      },
+      {
+        "source": "/2024/07/analyse-des-premiers-versets-de-la.html",
+        "destination": "/articles/analyse-des-premiers-versets-de-la/",
+        "type": 301
+      },
+      {
+        "source": "/2024/07/clarifions-les-termes-coran-et-livre.html",
+        "destination": "/articles/clarifions-les-termes-coran-et-livre/",
+        "type": 301
+      },
+      {
+        "source": "/2024/07/retrouver-lislam-authentique-un-retour.html",
+        "destination": "/articles/retrouver-lislam-authentique-un-retour/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/arab-arab-ajami-et-uruban.html",
+        "destination": "/articles/arab-arab-ajami-et-uruban/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/aucun-sauvetage-ni-par-jesus-ni-par.html",
+        "destination": "/articles/aucun-sauvetage-ni-par-jesus-ni-par/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/avril-1980-un-echo-amazigh-bien-au-dela.html",
+        "destination": "/articles/avril-1980-un-echo-amazigh-bien-au-dela/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/blog-post.html",
+        "destination": "/articles/article-2025-04/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/centralisation-du-pouvoir-et.html",
+        "destination": "/articles/centralisation-du-pouvoir-et/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/comment-lislam-est-perverti-par-des.html",
+        "destination": "/articles/comment-lislam-est-perverti-par-des/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/deux-visages-un-heritage-entre-foi-et.html",
+        "destination": "/articles/deux-visages-un-heritage-entre-foi-et/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/elevation-uluw-et-chute-hubut-un-appel.html",
+        "destination": "/articles/elevation-uluw-et-chute-hubut-un-appel/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/iqra-lis-limperatif-de-la-lecture-dans.html",
+        "destination": "/articles/iqra-lis-limperatif-de-la-lecture-dans/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/je-pense-donc-je-suis-de-laffirmation.html",
+        "destination": "/articles/je-pense-donc-je-suis-de-laffirmation/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/kufr-shukr-et-iman-trois-poles.html",
+        "destination": "/articles/kufr-shukr-et-iman-trois-poles/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/la-notion-dobjet-une-cle-pour-decrypter.html",
+        "destination": "/articles/la-notion-dobjet-une-cle-pour-decrypter/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/la-souffrance-est-elle-necessaire-au.html",
+        "destination": "/articles/la-souffrance-est-elle-necessaire-au/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/la-stupidite-spirituelle-suivre-sans.html",
+        "destination": "/articles/la-stupidite-spirituelle-suivre-sans/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/la-verite-au-dela-des-sens-pourquoi-la.html",
+        "destination": "/articles/la-verite-au-dela-des-sens-pourquoi-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/larnaque-intellectuelle-des.html",
+        "destination": "/articles/larnaque-intellectuelle-des/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-danger-des-sectes-dans-le-coran.html",
+        "destination": "/articles/le-danger-des-sectes-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-jeune-sawm-siyam-dans-le-coran-sens.html",
+        "destination": "/articles/le-jeune-sawm-siyam-dans-le-coran-sens/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-lissan-arabiyy-mubin-un-systeme.html",
+        "destination": "/articles/le-lissan-arabiyy-mubin-un-systeme/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-mot-shahr-dans-le-coran-entre-mois.html",
+        "destination": "/articles/le-mot-shahr-dans-le-coran-entre-mois/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-mot-twf-travailler-uvrer.html",
+        "destination": "/articles/le-mot-twf-travailler-uvrer/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-mot-zawj-dans-le-coran-une.html",
+        "destination": "/articles/le-mot-zawj-dans-le-coran-une/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/le-nombre-dans-le-coran-le-mot-add-et.html",
+        "destination": "/articles/le-nombre-dans-le-coran-le-mot-add-et/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lechec-intellectuel-des-oulemas-et.html",
+        "destination": "/articles/lechec-intellectuel-des-oulemas-et/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/les-cinq-piliers-de-lislam-un-mensonge.html",
+        "destination": "/articles/les-cinq-piliers-de-lislam-un-mensonge/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/les-enfants-du-mensonge-une-lecture.html",
+        "destination": "/articles/les-enfants-du-mensonge-une-lecture/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/les-hadiths-une-construction-politique.html",
+        "destination": "/articles/les-hadiths-une-construction-politique/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/les-peuples-sous-domination-la-tragedie.html",
+        "destination": "/articles/les-peuples-sous-domination-la-tragedie/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/les-spams-religieux-sur-les-reseaux.html",
+        "destination": "/articles/les-spams-religieux-sur-les-reseaux/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lheritage-dibn-taymiyya-et-la.html",
+        "destination": "/articles/lheritage-dibn-taymiyya-et-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lidolatrie-moderne-quand-la-stupidite.html",
+        "destination": "/articles/lidolatrie-moderne-quand-la-stupidite/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lidolatrie-un-obscurantisme-immense.html",
+        "destination": "/articles/lidolatrie-un-obscurantisme-immense/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lillusion-du-savoir-effet-dunning.html",
+        "destination": "/articles/lillusion-du-savoir-effet-dunning/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lislam-institutionnel-une-trahison.html",
+        "destination": "/articles/lislam-institutionnel-une-trahison/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lobscurantisme-entre-ignorance.html",
+        "destination": "/articles/lobscurantisme-entre-ignorance/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/lordre-divin-justice-bienfaisance-et.html",
+        "destination": "/articles/lordre-divin-justice-bienfaisance-et/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/pourquoi-les-regimes-autoritaires.html",
+        "destination": "/articles/pourquoi-les-regimes-autoritaires/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/qui-sont-reellement-les-kofars-selon-le.html",
+        "destination": "/articles/qui-sont-reellement-les-kofars-selon-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/repenser-la-salat-dans-le-coran-mission.html",
+        "destination": "/articles/repenser-la-salat-dans-le-coran-mission/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/se-liberer-pour-mieux-croire-reflexion.html",
+        "destination": "/articles/se-liberer-pour-mieux-croire-reflexion/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/shukr-dans-le-coran-la-manifestation.html",
+        "destination": "/articles/shukr-dans-le-coran-la-manifestation/",
+        "type": 301
+      },
+      {
+        "source": "/2025/04/wittgenstein-les-jeux-de-langage-et-le.html",
+        "destination": "/articles/wittgenstein-les-jeux-de-langage-et-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/analyse-du-mot-racine-ard-dans-le-coran.html",
+        "destination": "/articles/analyse-du-mot-racine-ard-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/comprendre-la-racine-coranique-s-r-f.html",
+        "destination": "/articles/comprendre-la-racine-coranique-s-r-f/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/comprendre-les-types-de-fautes-dans-le.html",
+        "destination": "/articles/comprendre-les-types-de-fautes-dans-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/de-la-mission-la-soumission-le-piege.html",
+        "destination": "/articles/de-la-mission-la-soumission-le-piege/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/faqr-la-pauvrete-des-musulmans-causes.html",
+        "destination": "/articles/faqr-la-pauvrete-des-musulmans-causes/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/faut-il-vraiment-couper-des-mains.html",
+        "destination": "/articles/faut-il-vraiment-couper-des-mains/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/foi-authentique-ou-appartenance.html",
+        "destination": "/articles/foi-authentique-ou-appartenance/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/hajj-et-qibla-demystification.html",
+        "destination": "/articles/hajj-et-qibla-demystification/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/la-circoncision-une-alteration-du-corps.html",
+        "destination": "/articles/la-circoncision-une-alteration-du-corps/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/lahw-et-hadith-dans-le-coran.html",
+        "destination": "/articles/lahw-et-hadith-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/laylat-al-qadr-laube-du-big-bang.html",
+        "destination": "/articles/laylat-al-qadr-laube-du-big-bang/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-bayt-dans-le-coran-un-support-de.html",
+        "destination": "/articles/le-bayt-dans-le-coran-un-support-de/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-contrat-dans-le-coran-relecture-de.html",
+        "destination": "/articles/le-contrat-dans-le-coran-relecture-de/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-coran-nie-les-miracles-materiels.html",
+        "destination": "/articles/le-coran-nie-les-miracles-materiels/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-doute-salvateur-repenser-lheritage.html",
+        "destination": "/articles/le-doute-salvateur-repenser-lheritage/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-hadid-coranique-limites.html",
+        "destination": "/articles/le-hadid-coranique-limites/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/le-lissan-arabiyy-mubin-nest-pas-la.html",
+        "destination": "/articles/le-lissan-arabiyy-mubin-nest-pas-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/les-absurdites-du-jugement-dernier-un.html",
+        "destination": "/articles/les-absurdites-du-jugement-dernier-un/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/muslim-vs-mujrim-la-vraie-ligne-de.html",
+        "destination": "/articles/muslim-vs-mujrim-la-vraie-ligne-de/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/reinterpretation-contextuelle-des.html",
+        "destination": "/articles/reinterpretation-contextuelle-des/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/sallu-alayhi-un-appel-lengagement-pas.html",
+        "destination": "/articles/sallu-alayhi-un-appel-lengagement-pas/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/sirat-mustaqim-la-voie-droite-de.html",
+        "destination": "/articles/sirat-mustaqim-la-voie-droite-de/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/socrate-et-abraham-quand-la-foi.html",
+        "destination": "/articles/socrate-et-abraham-quand-la-foi/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/une-lecture-rationnelle-de-2185-partir.html",
+        "destination": "/articles/une-lecture-rationnelle-de-2185-partir/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/vers-une-bibliographie-critique-des.html",
+        "destination": "/articles/vers-une-bibliographie-critique-des/",
+        "type": 301
+      },
+      {
+        "source": "/2025/05/voiles-fermentations-et-alterations.html",
+        "destination": "/articles/voiles-fermentations-et-alterations/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/allahou-akbar-une-expression-etrangere.html",
+        "destination": "/articles/allahou-akbar-une-expression-etrangere/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/avec-quelles-lunettes-voyons-nous-le.html",
+        "destination": "/articles/avec-quelles-lunettes-voyons-nous-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/hafs-et-warsh-transmetteurs-du-coran.html",
+        "destination": "/articles/hafs-et-warsh-transmetteurs-du-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/la-salat-coranique-mission-eclairante.html",
+        "destination": "/articles/la-salat-coranique-mission-eclairante/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/lexploitation-commerciale-de-la.html",
+        "destination": "/articles/lexploitation-commerciale-de-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/preserver-ses-furouj-deconstruction-dun.html",
+        "destination": "/articles/preserver-ses-furouj-deconstruction-dun/",
+        "type": 301
+      },
+      {
+        "source": "/2025/06/redecouvrir-le-coran-un-livre-vivant.html",
+        "destination": "/articles/redecouvrir-le-coran-un-livre-vivant/",
+        "type": 301
+      },
+      {
+        "source": "/2025/07/al-azhar-fabrique-dun-islam-de.html",
+        "destination": "/articles/al-azhar-fabrique-dun-islam-de/",
+        "type": 301
+      },
+      {
+        "source": "/2025/07/le-messager-dans-le-coran-lhomme-ou-le.html",
+        "destination": "/articles/le-messager-dans-le-coran-lhomme-ou-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/09/these-et-versets-root-maxw-900px-fg.html",
+        "destination": "/articles/these-et-versets-root-maxw-900px-fg/",
+        "type": 301
+      },
+      {
+        "source": "/2025/10/abraham-netait-ni-juif-ni-chretien.html",
+        "destination": "/articles/abraham-netait-ni-juif-ni-chretien/",
+        "type": 301
+      },
+      {
+        "source": "/2025/10/djinn-sheitan-entre-mythe-et-realite.html",
+        "destination": "/articles/djinn-sheitan-entre-mythe-et-realite/",
+        "type": 301
+      },
+      {
+        "source": "/2025/10/kitab-injil-tawrat-zabur-coran-le-meme.html",
+        "destination": "/articles/kitab-injil-tawrat-zabur-coran-le-meme/",
+        "type": 301
+      },
+      {
+        "source": "/2025/10/root-fg0b1320-muted5b6475-accent1b6cff.html",
+        "destination": "/articles/root-fg0b1320-muted5b6475-accent1b6cff/",
+        "type": 301
+      },
+      {
+        "source": "/2025/11/la-mission-du-messager-transmettre-le.html",
+        "destination": "/articles/la-mission-du-messager-transmettre-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/11/le-zulm-linjustice-supreme-selon-le.html",
+        "destination": "/articles/le-zulm-linjustice-supreme-selon-le/",
+        "type": 301
+      },
+      {
+        "source": "/2025/11/obeir-au-messager-une-notion.html",
+        "destination": "/articles/obeir-au-messager-une-notion/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/arabe-dans-le-coran-une-qualification.html",
+        "destination": "/articles/arabe-dans-le-coran-une-qualification/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/attester-sans-avoir-vu-est-un-faux.html",
+        "destination": "/articles/attester-sans-avoir-vu-est-un-faux/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/bayyinat-ou-sihr.html",
+        "destination": "/articles/bayyinat-ou-sihr/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/cartographie-coranique-de-la.html",
+        "destination": "/articles/cartographie-coranique-de-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/comment-repondre-au-pourquoi-de-mon.html",
+        "destination": "/articles/comment-repondre-au-pourquoi-de-mon/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/islam-islamisme-et-arabisation-la.html",
+        "destination": "/articles/islam-islamisme-et-arabisation-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/jld-de-la-peau-la-contrainte-relire-un.html",
+        "destination": "/articles/jld-de-la-peau-la-contrainte-relire-un/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/kabylie-de-la-proclamation-de-la-rfk-la.html",
+        "destination": "/articles/kabylie-de-la-proclamation-de-la-rfk-la/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/kabylie-une-civilisation-politique.html",
+        "destination": "/articles/kabylie-une-civilisation-politique/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/la-salat-comme-loi-de-connexion.html",
+        "destination": "/articles/la-salat-comme-loi-de-connexion/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/le-coran-face-au-mythe-quand-lhistoire.html",
+        "destination": "/articles/le-coran-face-au-mythe-quand-lhistoire/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/le-hirak-algerien-lepreuve-de-fanon-non.html",
+        "destination": "/articles/le-hirak-algerien-lepreuve-de-fanon-non/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/le-mythe-de-linfaillibilite-prophetique.html",
+        "destination": "/articles/le-mythe-de-linfaillibilite-prophetique/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/les-anhar-de-pharaon-des-masses.html",
+        "destination": "/articles/les-anhar-de-pharaon-des-masses/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/pourquoi-les-gens-refusent-ils-que-les.html",
+        "destination": "/articles/pourquoi-les-gens-refusent-ils-que-les/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/racine-jnh-nos-ailes-interieures-et-les.html",
+        "destination": "/articles/racine-jnh-nos-ailes-interieures-et-les/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/se-croire-guide-n-est-pas-etre-guide.html",
+        "destination": "/articles/se-croire-guide-n-est-pas-etre-guide/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/tajwid-vs-tadabbur-quand-le-son.html",
+        "destination": "/articles/tajwid-vs-tadabbur-quand-le-son/",
+        "type": 301
+      },
+      {
+        "source": "/2025/12/une-idee-dangereuse-est-souvent-une.html",
+        "destination": "/articles/une-idee-dangereuse-est-souvent-une/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/comment-aider-le-mak-porter-une.html",
+        "destination": "/articles/comment-aider-le-mak-porter-une/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/fondementsciviquessocietekabyle.html",
+        "destination": "/articles/fondementsciviquessocietekabyle/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/hajj-du-pelerinage-au-plaidoyer.html",
+        "destination": "/articles/hajj-du-pelerinage-au-plaidoyer/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/islam-authentique-et-islamisme-quand.html",
+        "destination": "/articles/islam-authentique-et-islamisme-quand/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/je-suis-algerien-et-fier-anatomie-dune.html",
+        "destination": "/articles/je-suis-algerien-et-fier-anatomie-dune/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/kabylie-lexception-historique.html",
+        "destination": "/articles/kabylie-lexception-historique/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/kabylie-lexception-historique2.html",
+        "destination": "/articles/kabylie-lexception-historique2/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/kabylie-lexception-historique3.html",
+        "destination": "/articles/kabylie-lexception-historique3/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/lire-par-soi-meme-cest-reprendre-son.html",
+        "destination": "/articles/lire-par-soi-meme-cest-reprendre-son/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/masculin-et-feminin-dans-le-coran.html",
+        "destination": "/articles/masculin-et-feminin-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/non-je-ne-suis-pas-fou.html",
+        "destination": "/articles/non-je-ne-suis-pas-fou/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/principes-ethiques-de-conduite-le-socle.html",
+        "destination": "/articles/principes-ethiques-de-conduite-le-socle/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/quand-un-regime-subventionne-la-foi-et.html",
+        "destination": "/articles/quand-un-regime-subventionne-la-foi-et/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/questions-interdites-non-censurees.html",
+        "destination": "/articles/questions-interdites-non-censurees/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/riba-interet-ou-desequilibre.html",
+        "destination": "/articles/riba-interet-ou-desequilibre/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/temoignages.html",
+        "destination": "/articles/temoignages/",
+        "type": 301
+      },
+      {
+        "source": "/2026/01/wal-asr-le-coran-comme-extrait-du-livre.html",
+        "destination": "/articles/wal-asr-le-coran-comme-extrait-du-livre/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/474-quand-la-propagande-islamiste.html",
+        "destination": "/articles/474-quand-la-propagande-islamiste/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/aberration-1-1926-et-le-sawm-fige-en.html",
+        "destination": "/articles/aberration-1-1926-et-le-sawm-fige-en/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/aqim-salat-rite-gestuel-ou-organisation.html",
+        "destination": "/articles/aqim-salat-rite-gestuel-ou-organisation/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/blanc-et-noir-dans-le-coran.html",
+        "destination": "/articles/blanc-et-noir-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/blog-post.html",
+        "destination": "/articles/article-2026-02/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/cest-quoi-etre-kabyle.html",
+        "destination": "/articles/cest-quoi-etre-kabyle/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/comment-le-coran-combat-lislamisme.html",
+        "destination": "/articles/comment-le-coran-combat-lislamisme/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/dignedefoi.html",
+        "destination": "/articles/dignedefoi/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/ils-reconnaissent-la-vertu-mais.html",
+        "destination": "/articles/ils-reconnaissent-la-vertu-mais/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/jeune-t-on-la-lune-ou-applique-t-on-un.html",
+        "destination": "/articles/jeune-t-on-la-lune-ou-applique-t-on-un/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/kun-fayakun-et-la-capacite-humaine.html",
+        "destination": "/articles/kun-fayakun-et-la-capacite-humaine/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/la-nostalgie-trompeuse-de-lislam-de-nos.html",
+        "destination": "/articles/la-nostalgie-trompeuse-de-lislam-de-nos/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/la-violence-sexuelle-taboue-quand-le.html",
+        "destination": "/articles/la-violence-sexuelle-taboue-quand-le/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/le-miroir-flatteur-de-linconscience.html",
+        "destination": "/articles/le-miroir-flatteur-de-linconscience/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/le-prophete-et-son-peuple-etaient-ils.html",
+        "destination": "/articles/le-prophete-et-son-peuple-etaient-ils/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/le-sawm-nest-pas-la-faim-mais-la-taqwa.html",
+        "destination": "/articles/le-sawm-nest-pas-la-faim-mais-la-taqwa/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/le-siyam-nest-pas-la-faim-et-la.html",
+        "destination": "/articles/le-siyam-nest-pas-la-faim-et-la/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/le-temoignage-selon-le-coran-dire-la.html",
+        "destination": "/articles/le-temoignage-selon-le-coran-dire-la/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/les-conditions-deveil-pourquoi-la.html",
+        "destination": "/articles/les-conditions-deveil-pourquoi-la/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/lettre-ouverte-aux-islamistes-etre-nest.html",
+        "destination": "/articles/lettre-ouverte-aux-islamistes-etre-nest/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/nest-pas-sexe-cest-une-relation-sociale.html",
+        "destination": "/articles/nest-pas-sexe-cest-une-relation-sociale/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/nushuz-et-couple-dans-434-une.html",
+        "destination": "/articles/nushuz-et-couple-dans-434-une/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/pourquoi-la-plupart-ne-comprennent-ils.html",
+        "destination": "/articles/pourquoi-la-plupart-ne-comprennent-ils/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/quand-lideologie-remplace-le-bon-sens.html",
+        "destination": "/articles/quand-lideologie-remplace-le-bon-sens/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/qui-est-ton-rassoul.html",
+        "destination": "/articles/qui-est-ton-rassoul/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/r-q-b-dans-le-coran-vigilance-garde.html",
+        "destination": "/articles/r-q-b-dans-le-coran-vigilance-garde/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/ramadan-pourquoi-la-criminalite-augmente.html",
+        "destination": "/articles/ramadan-pourquoi-la-criminalite-augmente/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/reference-perdue-vie-comprimee.html",
+        "destination": "/articles/reference-perdue-vie-comprimee/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/s-f-w-clarifier-filtrer-rendre-apte.html",
+        "destination": "/articles/s-f-w-clarifier-filtrer-rendre-apte/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/si-la-majorite-nest-pas-une-preuve-que.html",
+        "destination": "/articles/si-la-majorite-nest-pas-une-preuve-que/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/sourate-29-resume-raisonne-et-themes.html",
+        "destination": "/articles/sourate-29-resume-raisonne-et-themes/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/tout-debat-ne-merite-pas-ta-presence.html",
+        "destination": "/articles/tout-debat-ne-merite-pas-ta-presence/",
+        "type": 301
+      },
+      {
+        "source": "/2026/02/wld-engendrer-produire-ruiner-et.html",
+        "destination": "/articles/wld-engendrer-produire-ruiner-et/",
+        "type": 301
+      },
+      {
+        "source": "/2026/03/analyse-coranique-de-la-racine.html",
+        "destination": "/articles/analyse-coranique-de-la-racine/",
+        "type": 301
+      },
+      {
+        "source": "/2026/03/arabi-vs-ajami-une-question-de.html",
+        "destination": "/articles/arabi-vs-ajami-une-question-de/",
+        "type": 301
+      },
+      {
+        "source": "/2026/03/iftar-linfraction-qui-nexiste-pas.html",
+        "destination": "/articles/iftar-linfraction-qui-nexiste-pas/",
+        "type": 301
+      },
+      {
+        "source": "/2026/03/omar-khayyam-un-esprit-critique-face-au.html",
+        "destination": "/articles/omar-khayyam-un-esprit-critique-face-au/",
+        "type": 301
+      },
+      {
+        "source": "/2026/03/reflechir-par-soi-meme-le-vrai-chemin.html",
+        "destination": "/articles/reflechir-par-soi-meme-le-vrai-chemin/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/ce-nest-pas-larabe-qui-ouvre-le-coran.html",
+        "destination": "/articles/ce-nest-pas-larabe-qui-ouvre-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/comment-tu-fais-ta-salat.html",
+        "destination": "/articles/comment-tu-fais-ta-salat/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/discours-de-la-methode-de-rene-descartes.html",
+        "destination": "/articles/discours-de-la-methode-de-rene-descartes/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/le-coran-na-jamais-defendu-la-langue.html",
+        "destination": "/articles/le-coran-na-jamais-defendu-la-langue/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/le-coran-ordonne-t-il-de-tuer-les.html",
+        "destination": "/articles/le-coran-ordonne-t-il-de-tuer-les/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/plus-rapide-que-chatgpt-letrange-cas-de.html",
+        "destination": "/articles/plus-rapide-que-chatgpt-letrange-cas-de/",
+        "type": 301
+      },
+      {
+        "source": "/2026/04/quand-descartes-detruit-les-faux-dieux.html",
+        "destination": "/articles/quand-descartes-detruit-les-faux-dieux/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/bienheureux-ceux-qui-savent-quils-ne.html",
+        "destination": "/articles/bienheureux-ceux-qui-savent-quils-ne/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/kabbale-et-kybalion-etude-critique-et.html",
+        "destination": "/articles/kabbale-et-kybalion-etude-critique-et/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/le-hadith-qui-interdit-decrire-les.html",
+        "destination": "/articles/le-hadith-qui-interdit-decrire-les/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/les-atomes-comment-lhumanite-prouve.html",
+        "destination": "/articles/les-atomes-comment-lhumanite-prouve/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/les-cigognes-adorent-les-bebes.html",
+        "destination": "/articles/les-cigognes-adorent-les-bebes/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/les-formes-de-lignorance-et-la-peur-du.html",
+        "destination": "/articles/les-formes-de-lignorance-et-la-peur-du/",
+        "type": 301
+      },
+      {
+        "source": "/2026/05/quand-la-langue-punit-le-pourquoi-aux.html",
+        "destination": "/articles/quand-la-langue-punit-le-pourquoi-aux/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/abd-le-chercheur-de-verite-dans-lordre.html",
+        "destination": "/articles/abd-le-chercheur-de-verite-dans-lordre/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/bayt-et-dar-dans-le-coran-ni-maison-ni.html",
+        "destination": "/articles/bayt-et-dar-dans-le-coran-ni-maison-ni/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/es-tu-celui-qui-pense-ou-celui-qui.html",
+        "destination": "/articles/es-tu-celui-qui-pense-ou-celui-qui/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/guerir-de-la-peur-comprendre-et.html",
+        "destination": "/articles/guerir-de-la-peur-comprendre-et/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/la-grandeur-de-lunivers-dans-le-coran.html",
+        "destination": "/articles/la-grandeur-de-lunivers-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/le-jeune-therapeutique-reactiver-les.html",
+        "destination": "/articles/le-jeune-therapeutique-reactiver-les/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/le-sens-des-declinaisons-de-la-racine_0106756503.html",
+        "destination": "/articles/le-sens-des-declinaisons-de-la-racine-jrm-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/le-sens-des-declinaisons-de-la-racine_0706117732.html",
+        "destination": "/articles/le-sens-des-declinaisons-de-la-racine-slm-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/06/le-sens-des-declinaisons-de-la-racine.html",
+        "destination": "/articles/le-sens-des-declinaisons-de-la-racine-amn-dans-le-coran/",
+        "type": 301
+      },
+      {
+        "source": "/2026/07/lintelligence-supreme-et-la-creation.html",
+        "destination": "/articles/lintelligence-supreme-et-la-creation/",
+        "type": 301
+      },
+      {
+        "source": "/2026/07/reflexion-sur-la-theorie-de-levolution.html",
+        "destination": "/articles/reflexion-sur-la-theorie-de-levolution/",
+        "type": 301
+      },
+      {
+        "source": "/2026/08/leveil-des-consciences-de-la-methode.html",
+        "destination": "/articles/leveil-des-consciences-de-la-methode/",
+        "type": 301
+      },
+      {
+        "regex": "^/search/label/(?P<libelle>[^/?]+)$",
+        "destination": "/articles/libelle/:libelle",
+        "type": 301
+      },
+      {
+        "source": "/search",
+        "destination": "/articles/",
+        "type": 301
+      },
+      {
+        "source": "/search/**",
+        "destination": "/articles/",
+        "type": 301
+      },
+      {
+        "source": "/feeds/**",
+        "destination": "/articles/flux.xml",
+        "type": 301
+      },
+      {
+        "source": "/p/**",
+        "destination": "/articles/",
+        "type": 301
+      },
+      {
+        "regex": "^/\\d{4}(/.*)?$",
+        "destination": "/articles/",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/articles/libelle/**",
+        "destination": "/articles/index.html"
+      }
     ]
   },
   "firestore": {

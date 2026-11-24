@@ -245,18 +245,25 @@ clé dans Secret Manager (jamais dans Git ni dans le navigateur), plafond mensue
 déposée dans le brouillon (jamais publiée directement). Coût à chiffrer avant.
 
 ## 8. Pages publiques et redirection
-- **Génération au déploiement** : `npm run construire -- --articles` lit les articles publiés (clé de compte de
-  service hors dépôt, comme `npm run importer`) et écrit dans `dist/` : `/articles/<slug>/index.html` (HTML assaini,
-  titre, description, `canonical`, Open Graph, données structurées `Article`, liens vers les versets dans
-  l'application), `/articles/index.html` (liste par famille), `/sitemap.xml`, `/robots.txt`, `/articles/flux.xml`
-  (flux Atom pour les abonnés du flux Blogger). Une publication apparaît sur ces pages au déploiement suivant
-  (`deployerAlfamous1.bat`) ; l'onglet Articles, lui, est à jour tout de suite.
+- **Génération au déploiement** : `npm run construire -- --articles --projet essai|prod` lit les articles publiés
+  (clé de compte de service hors dépôt, comme `npm run importer`) et écrit dans `dist/` : `/articles/<slug>/index.html`
+  (HTML assaini de nouveau, titre, description, `canonical`, Open Graph, données structurées `Article`, date Blogger
+  pour les articles importés, liens vers les versets dans l'atelier), `/articles/index.html` (liste par famille,
+  aussi servie à `/articles/libelle/<libellé>/`, filtrée), `/sitemap.xml`, `/robots.txt`, `/articles/flux.xml`
+  (flux Atom, 50 derniers articles, texte complet). Une publication apparaît sur ces pages au déploiement suivant
+  (`deployerAlfamous1.bat`, qui prend la clé dans `%USERPROFILE%\cles\`) ; l'onglet Articles, lui, est à jour tout de
+  suite. Code : `scripts/lib/pages-articles.mjs` (fonctions pures, testées), `scripts/lib/construire-articles.mjs`.
+- **Indexation** : seule la production (`blog.alfamous.ca`) est indexée. Sur alfamous-essai : `noindex` sur chaque
+  page et `robots.txt` fermé, pour que Google ne voie pas les articles en double.
 - **Commentaires** : sur la page publique, lien « Lire et commenter dans l'atelier » (la page reste statique).
 - **Redirection de blog.alfamous.ca (le jour de la bascule)** : le domaine est ajouté à Firebase Hosting
   (même site), puis le DNS de `blog` est changé chez le registraire (aujourd'hui vers Blogger). Redirections 301,
-  générées une fois depuis l'import et inscrites dans `firebase.json` : chaque `/AAAA/MM/<slug>.html` →
-  `/articles/<slug>/` ; `/search/label/<libellé>` → `/articles/?libelle=…` ; `/feeds/posts/default` →
-  `/articles/flux.xml` ; le reste → `/articles/`. Le blog Blogger reste en archive (privé), jamais supprimé.
+  générées une fois depuis l'import et inscrites dans `firebase.json` (déjà actives sur les sites de Firebase,
+  sans effet tant que `blog` pointe vers Blogger) : les 207 `/AAAA/MM/<nom>.html` → `/articles/<slug>/` ;
+  `/search/label/<libellé>` → `/articles/libelle/<libellé>` (Firebase ne remplace pas une variable dans une
+  requête `?…`) ; `/feeds/**` → `/articles/flux.xml` ; `/search…`, `/p/…`, `/AAAA…` → `/articles/`. Sur
+  `blog.alfamous.ca`, l'accueil `/` mène à `/articles/` (script de `index.html`) : l'application reste à `/`
+  pour `atelier.alfamous.ca`. Vérifié avec l'émulateur Hosting (`firebase emulators:start --only hosting`). Le blog Blogger reste en archive (privé), jamais supprimé.
   Domaine des pages : `blog.alfamous.ca/articles/…` (décidé le 24 nov.) ; l'atelier reste sur `atelier.alfamous.ca`.
 
 ## 9. Affichage dans le reste de l'application
@@ -279,7 +286,8 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
 5. Import depuis Blogger (à blanc, relecture, émulateurs, essai) — script `npm run importer:articles` (24 nov.) :
    à blanc sur la sauvegarde : 210 articles (207 publiés), 205 images, 51 commentaires + 14 dans le fil de la page,
    2 écartés, 3 cadres non YouTube retirés ; rapport et fiche dans `import/articles/`.
-6. Pages publiques, plan du site, flux ; redirections préparées (activées le jour de la bascule).
+6. Pages publiques, plan du site, flux ; redirections préparées (activées le jour de la bascule) — fait le 24 nov. :
+   207 pages, liste, flux, plan du site ; 213 redirections dans `firebase.json`.
 
 ## Décisions du 24 nov. 2026
 - **Droits** : écriture et publication dès le niveau 2 (détail § 3).
