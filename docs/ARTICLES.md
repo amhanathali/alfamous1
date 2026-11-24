@@ -273,7 +273,8 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
 2. Données et règles : `articles`, `atelier`, `versions`, `slugs`, type de commentaire `article`, Storage ;
    tests à l'émulateur.
 3. Onglet Articles (liste, lecture, commentaires) + éditeur, brouillon, publication, historique — **3a** (24 nov.) :
-   tout cela avec un panneau Contexte réduit (versets, sources, fichiers) ; **3b** : reste du panneau, puis étape 4.
+   tout cela avec un panneau Contexte réduit (versets, sources, fichiers) ; **3b** (24 nov.) : panneau complet,
+   « Ajouter au contexte… », articles sous les versets et dans le lexique, « Dossier pour Claude » (l'étape 4 est faite avec).
 4. Panneau Contexte, « Ajouter au contexte », encadrés sous les versets et dans le lexique, « Dossier pour Claude ».
 5. Import depuis Blogger (à blanc, relecture, émulateurs, essai).
 6. Pages publiques, plan du site, flux ; redirections préparées (activées le jour de la bascule).

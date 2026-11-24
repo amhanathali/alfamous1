@@ -14,6 +14,7 @@ import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
 import { routeArticles } from './articles.js';
+import { initArticlesLiens } from './articles-liens.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -459,6 +460,7 @@ initLexique();
 initMembres(contenu);
 initHistorique({ lexique: clesLexique });
 initSelection({ traduction: () => traductionActive });
+initArticlesLiens(contenu);
 initCompte();
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
 surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?))/.test(location.hash)) router(); });
