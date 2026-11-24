@@ -2,6 +2,13 @@
 // Prépare le dossier dist/ que Firebase Hosting met en ligne.
 // Copie : src/ (l'application) et les données publiques de donnees/.
 // Ne copie JAMAIS import/ (commentaires à importer dans Firestore) ni scripts/.
+//
+// Pages publiques des articles (docs/ARTICLES.md § 8) : ajouter --articles et la cible.
+//   npm run construire -- --articles                  émulateurs du PC (pages pour http://localhost:5050)
+//   npm run construire -- --articles --projet essai   alfamous-essai (pages non indexées par les moteurs)
+//   npm run construire -- --articles --projet prod    alfamous-atelier (pages de blog.alfamous.ca, indexées)
+// Lecture des articles publiés avec la clé de service HORS du dépôt (GOOGLE_APPLICATION_CREDENTIALS),
+// comme npm run importer:articles. deployerAlfamous1.bat s'en charge.
 import { cpSync, rmSync, mkdirSync, existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,6 +43,17 @@ for (const nom of Object.keys(VENDOR)) {
   cpSync(cheminVendor(RACINE, nom), join(DIST, 'vendor', nom));
 }
 
+// ---------- Pages publiques des articles ----------
+const args = process.argv.slice(2);
+let pagesArticles = '';
+if (args.includes('--articles')) {
+  const i = args.indexOf('--projet');
+  const alias = i >= 0 ? args[i + 1] : null;
+  const { construirePagesArticles } = await import('./lib/construire-articles.mjs');
+  const { nb, site } = await construirePagesArticles({ racine: RACINE, dist: DIST, alias });
+  pagesArticles = ` ${nb} pages d'articles (${site.base}${site.indexer ? '' : ', non indexées'}).`;
+}
+
 writeFileSync(join(DIST, 'version.json'), JSON.stringify({ construit: new Date().toISOString() }) + '\n');
 if (existsSync(join(DIST, 'import'))) throw new Error('import/ ne doit pas être publié');
-console.log(`dist/ prêt : application, données, ${traductions.length} traduction(s) tanzil (${traductions.join(', ') || 'aucune'}).`);
+console.log(`dist/ prêt : application, données, ${traductions.length} traduction(s) tanzil (${traductions.join(', ') || 'aucune'}).${pagesArticles}`);

@@ -6,9 +6,12 @@ REM Etapes :
 REM   0. code a jour : branche main, git pull --ff-only (jamais de fusion), npm install
 REM   1. tests (npm test) et tests des regles Firestore (npm run test:regles)
 REM      -> arreter d abord les emulateurs d ESSAI_LOCAL.bat (ports 9099, 8085, 9199 occupes sinon)
-REM   2. construction de dist/ (npm run construire)
-REM   3. mise en ligne : site (Hosting), regles et index Firestore, Cloud Functions (onglet Membres)
-REM Les regles Storage ne sont pas deployees (Storage pas utilise par l application pour l instant).
+REM   2. construction de dist/ avec les pages publiques des articles (npm run construire -- --articles) :
+REM      lecture des articles publies avec la cle de service HORS du depot :
+REM        essai : %USERPROFILE%\cles\alfamous-essai.json     prod : %USERPROFILE%\cles\alfamous-atelier.json
+REM      cle absente : on demande s il faut continuer sans ces pages
+REM   3. mise en ligne : site (Hosting, avec les redirections de l ancien blog), regles et index Firestore,
+REM      regles Storage, Cloud Functions
 cd /d "%~dp0"
 if "%~1"=="suite" goto suite
 REM Bloc lu en entier avant execution : git pull peut modifier ce fichier sans risque,
@@ -27,9 +30,11 @@ REM puis la nouvelle version est relancee pour la suite.
 :suite
 set CIBLE=essai
 set SITE=https://alfamous-essai.web.app
+set CLE=%USERPROFILE%\cles\alfamous-essai.json
 if /i "%~2"=="prod" (
   set CIBLE=prod
   set SITE=https://alfamous-atelier.web.app
+  set CLE=%USERPROFILE%\cles\alfamous-atelier.json
 )
 if "%CIBLE%"=="prod" (
   echo.
@@ -48,8 +53,20 @@ call npm test || goto echec
 call npm run test:regles || goto echec_regles
 
 echo.
-echo [2/3] Construction de dist/...
+echo [2/3] Construction de dist/ (application et pages publiques des articles)...
+if exist "%CLE%" goto avec_articles
+echo.
+echo Cle de service introuvable : %CLE%
+echo Sans elle, les pages publiques des articles (/articles/...) ne sont pas construites
+echo et celles deja en ligne disparaissent a ce deploiement.
+set /p SANS=Continuer sans les pages des articles ? (O/N) : 
+if /i not "%SANS%"=="O" goto echec
 call npm run construire || goto echec
+goto construit
+:avec_articles
+set GOOGLE_APPLICATION_CREDENTIALS=%CLE%
+call npm run construire -- --articles --projet %CIBLE% || goto echec
+:construit
 
 echo.
 echo [3/3] Mise en ligne sur %CIBLE% (site, regles et index Firestore, regles Storage, Cloud Functions)...

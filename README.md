@@ -78,7 +78,9 @@ En ligne, la configuration Firebase vient de Hosting (`/__/firebase/init.json`) 
 **Double-cliquer sur deployerAlfamous1.bat** (site d'essai), ou `deployerAlfamous1.bat prod` (production, confirmation
 « PROD » demandée). Arrêter d'abord les émulateurs d'ESSAI_LOCAL.bat (les tests des règles en lancent d'autres).
 Le script met le code à jour (branche `main`, `git pull --ff-only`), lance `npm test` et `npm run test:regles`,
-construit `dist/`, puis déploie le site, les règles et index Firestore et les Cloud Functions (`functions/`) :
+construit `dist/` avec les pages publiques des articles (clé de service `%USERPROFILE%\cles\alfamous-essai.json` ou
+`alfamous-atelier.json`, hors dépôt), puis déploie le site, les règles et index Firestore, les règles Storage et les
+Cloud Functions (`functions/`) :
 ```bat
 npm run traductions      &REM facultatif, une fois : télécharge les commentaires traditionnels (tanzil.net)
 npx firebase deploy --only hosting,firestore,functions,storage --project essai

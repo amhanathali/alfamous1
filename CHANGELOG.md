@@ -1,6 +1,19 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles, étape 6 : pages publiques, plan du site, flux, redirections de l'ancien blog
+- `npm run construire -- --articles --projet essai|prod` : lit les articles publiés (clé de service hors dépôt) et écrit
+  dans `dist/` une page par article (`/articles/<slug>/` : HTML assaini de nouveau, canonical, Open Graph, données
+  structurées, date Blogger, versets liés vers l'atelier, « Lire et commenter dans l'atelier »), la liste par famille
+  (`/articles/`, filtrée par libellé à `/articles/libelle/<libellé>/`), le flux Atom (`/articles/flux.xml`, 50 derniers
+  articles), `/sitemap.xml` et `/robots.txt`. Feuille `src/css/articles-public.css`.
+- alfamous-essai : pages `noindex` et `robots.txt` fermé ; seule la production (`blog.alfamous.ca`) est indexée.
+- `firebase.json` : 213 redirections 301 de l'ancien blog (207 articles, libellés, flux, recherche, pages, archives)
+  et la réécriture des pages de libellé ; vérifiées avec l'émulateur Hosting. Sur `blog.alfamous.ca`, l'accueil mène
+  à `/articles/`.
+- `deployerAlfamous1.bat` construit les pages avec la clé `%USERPROFILE%\cles\alfamous-<projet>.json` ; sans clé, il
+  demande s'il faut continuer sans les pages. 13 tests (`tests/pages-articles.test.mjs`) ; `npm test` 72/72.
+
 ### Ajouté — onglet Articles, étape 5 : import du blog Blogger « Zoom-Coran »
 - `npm run importer:articles` (`scripts/importer-articles.mjs`, `scripts/lib/import-articles.mjs`) : lit la sauvegarde
   Takeout `import/articles/feed.atom` et la fiche `import/articles/controle-familles.csv` (hors Git). À blanc par

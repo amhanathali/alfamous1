@@ -13,6 +13,8 @@
   <script>
     // Thème choisi avant l'affichage (évite un éclair blanc).
     try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    // blog.alfamous.ca (après la bascule depuis Blogger) : l'accueil mène aux articles, l'atelier reste sur atelier.alfamous.ca.
+    if (location.hostname === 'blog.alfamous.ca' && !location.hash) location.replace('/articles/');
   </script>
 </head>
 <body>
