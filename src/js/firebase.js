@@ -22,7 +22,7 @@ async function initialiser() {
     import(`${SDK}/firebase-functions.js`),
   ]);
   const config = LOCAL
-    ? { projectId: 'demo-alfamous1', apiKey: 'cle-demo', authDomain: 'localhost' }
+    ? { projectId: 'demo-alfamous1', apiKey: 'cle-demo', authDomain: 'localhost', storageBucket: 'demo-alfamous1.appspot.com' }
     : await fetch('/__/firebase/init.json').then((r) => { if (!r.ok) throw new Error('configuration Firebase introuvable'); return r.json(); });
   const app = initializeApp(config);
   const auth = A.getAuth(app);

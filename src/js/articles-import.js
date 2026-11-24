@@ -51,7 +51,7 @@ function chargerMammoth() {
 
 export async function versDocx(arrayBuffer, envoyerImage) {
   const mammoth = await chargerMammoth();
-  let images = 0;
+  let images = 0; let echecs = 0;
   const options = {
     styleMap: ['p[style-name=\'Title\'] => h2:fresh', 'p[style-name=\'Titre\'] => h2:fresh', 'p[style-name=\'Quote\'] => blockquote > p:fresh',
       'p[style-name=\'Citation\'] => blockquote > p:fresh'],
@@ -59,8 +59,8 @@ export async function versDocx(arrayBuffer, envoyerImage) {
       const type = image.contentType || 'image/png';
       if (!/^image\/(png|jpeg|gif|webp)$/.test(type)) return { src: '' };
       const octets = await image.read();
-      const fichier = new File([octets], `image-${++images}.${type.split('/')[1].replace('jpeg', 'jpg')}`, { type });
-      return { src: await envoyerImage(fichier) };
+      const fichier = new File([octets], `image-${images + echecs + 1}.${type.split('/')[1].replace('jpeg', 'jpg')}`, { type });
+      try { const src = await envoyerImage(fichier); images += 1; return { src }; } catch (e) { echecs += 1; console.error(e); return { src: '' }; }
     }),
   };
   const r = await mammoth.convertToHtml({ arrayBuffer }, options);
@@ -70,6 +70,7 @@ export async function versDocx(arrayBuffer, envoyerImage) {
   const nbPara = (html.match(/<p[\s>]/g) || []).length;
   const nbTableaux = (html.match(/<table/g) || []).length;
   const bilan = `Lu : ${nbTitres} titre${nbTitres > 1 ? 's' : ''}, ${nbPara} paragraphe${nbPara > 1 ? 's' : ''}`
-    + `${nbTableaux ? `, ${nbTableaux} tableau${nbTableaux > 1 ? 'x' : ''}` : ''}${images ? `, ${images} image${images > 1 ? 's' : ''} envoyée${images > 1 ? 's' : ''} dans Storage` : ''}.`;
+    + `${nbTableaux ? `, ${nbTableaux} tableau${nbTableaux > 1 ? 'x' : ''}` : ''}${images ? `, ${images} image${images > 1 ? 's' : ''} envoyée${images > 1 ? 's' : ''} dans Storage` : ''}.`
+    + `${echecs ? ` ATTENTION : ${echecs} image${echecs > 1 ? 's' : ''} non envoyée${echecs > 1 ? 's' : ''} (absente${echecs > 1 ? 's' : ''} du texte).` : ''}`;
   return { html, bilan };
 }
