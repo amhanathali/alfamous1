@@ -16,6 +16,9 @@
   supprimés écartés (2), réponses précédées de « ↪ en réponse à … » ; les 14 de la page brouillon « Zoom-Coran » →
   fil du forum « Commentaires de l'ancienne page Zoom-Coran ».
 - Un article modifié dans l'atelier depuis l'import n'est pas écrasé par un nouvel import (sauf `--forcer`).
+- `deployerAlfamous1.bat` et le README déploient aussi les règles Storage (`--only hosting,firestore,functions,storage`),
+  nécessaires aux images et fichiers des articles.
+- Essai complet sur les émulateurs : 210 articles et 51 commentaires écrits, vérification conforme.
 - `lireCsv` accepte un séparateur (« ; »). 6 tests (`tests/import-articles.test.mjs`) ; `npm test` 58/58.
 
 ### Ajouté — onglet Articles, étape 3b : panneau Contexte complet, liens, Dossier pour Claude

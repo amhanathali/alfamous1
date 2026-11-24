@@ -52,8 +52,8 @@ echo [2/3] Construction de dist/...
 call npm run construire || goto echec
 
 echo.
-echo [3/3] Mise en ligne sur %CIBLE% (site, regles et index Firestore, Cloud Functions)...
-call npx firebase deploy --only hosting,firestore,functions --project %CIBLE% || goto echec_deploiement
+echo [3/3] Mise en ligne sur %CIBLE% (site, regles et index Firestore, regles Storage, Cloud Functions)...
+call npx firebase deploy --only hosting,firestore,functions,storage --project %CIBLE% || goto echec_deploiement
 
 echo.
 echo Deploiement termine : %SITE%
