@@ -163,7 +163,7 @@ export function preparerImport(entrees, { familles = new Map(), assainir, sourat
     if (iframes > iframesGardes) anomalies.push(`Article ${p.id} (« ${p.titre} ») : ${iframes - iframesGardes} cadre(s) intégré(s) non YouTube retiré(s)`);
     if (corps.length > LIMITES.corps) anomalies.push(`Article ${p.id} : texte trop long (${corps.length} caractères)`);
     const texte = texteBrut(corps);
-    const versets = versetsDansTexte(`${p.titre} ${texte}`, sourates).slice(0, LIMITES.versets);
+    const versets = versetsDansTexte(`${p.titre} ${texte}`, sourates, { prudent: true }).slice(0, LIMITES.versets);
     const titre = (p.titre || '(sans titre)').slice(0, LIMITES.titre);
     const resume = (p.resume || texte.slice(0, 280).replace(/\s+\S*$/, '') + (texte.length > 280 ? '…' : '')).slice(0, LIMITES.resume);
     const premiereImage = (corps.match(/<img\b[^>]*\bsrc="([^"]+)"/i) || [])[1]?.replace(/&amp;/g, '&') || null;

@@ -25,6 +25,8 @@ const erreurHtml = (e) => `<p class="message erreur">${echapper(messageErreur(e)
 const puceFamille = (f) => `<span class="famille f-${echapper(f)}">${echapper(FAMILLES[f] || f)}</span>`;
 const puceEtat = (a) => (a.statut === 'brouillon' ? '<span class="etat brouillon">brouillon</span>'
   : a.statut === 'retire' ? '<span class="etat retire">retiré</span>' : '');
+// Image d'un article : https (en ligne) ou /v0/b/… (Storage des émulateurs, relayé par servir.mjs).
+const imageOk = (u) => typeof u === 'string' && /^(https:\/\/|\/v0\/b\/)/.test(u);
 const adresse = (a) => `#/article/${encodeURIComponent(a.statut === 'publie' && a.slug ? a.slug : a.id)}`;
 
 // ---------- Routage ----------
@@ -77,7 +79,7 @@ async function vueListe(contenu, params) {
     return `#/articles${p.toString() ? `?${p}` : ''}`;
   };
   const ligne = (a) => {
-    const image = a.image && /^https?:/.test(a.image) ? `<img src="${echapper(a.image)}" alt="" loading="lazy">` : '';
+    const image = imageOk(a.image) ? `<img src="${echapper(a.image)}" alt="" loading="lazy">` : '';
     return `<a class="art-ligne" href="${adresse(a)}">
       <span class="vignette">${image || echapper((String(a.titre || '').match(/\p{L}/u) || ['?'])[0])}</span>
       <span class="art-centre"><span class="art-titre">${echapper(a.titre || 'Sans titre')}</span>
@@ -142,7 +144,7 @@ async function vueLecture(contenu, cle) {
       ${a.resume ? `<p class="chapeau">${echapper(a.resume)}</p>` : ''}
       ${redacteur() ? `<p class="actions-art">${proprio(a) ? `<a class="btn principal" href="#/article/${encodeURIComponent(a.id)}/modifier">Modifier</a>` : '<span class="aide">Article d\'un autre rédacteur : lecture seule.</span>'}
         ${a.nbVersions ? `<button class="btn" type="button" data-historique>Historique (${a.nbVersions} version${a.nbVersions > 1 ? 's' : ''})</button>` : ''}</p>` : ''}
-      ${a.image && /^https?:/.test(a.image) ? `<img class="couverture" src="${echapper(a.image)}" alt="">` : ''}
+      ${imageOk(a.image) && !String(a.corps || '').includes(echapper(a.image)) ? `<img class="couverture" src="${echapper(a.image)}" alt="">` : ''}
       <div class="corps-art">${a.statut === 'brouillon' ? '<p class="aide">Brouillon jamais publié : le texte de travail est dans l\'éditeur.</p>' : assainir(a.corps)}</div>
       ${(a.versets || []).length ? `<div class="pied-art"><span>Versets cités :</span>${a.versets.map((r) => `<a class="lien-cible" href="${lienRequete(r)}">${echapper(r)}</a>`).join('')}</div>` : ''}
       ${sources.length ? `<div class="pied-art sources-art"><b>Sources</b><ul>${sources.map((s) => `<li>${s.url && /^https?:/.test(s.url) ? `<a href="${echapper(s.url)}" target="_blank" rel="noopener noreferrer">${echapper(s.titre || s.url)}</a>` : echapper(s.titre)}${s.note ? ` — ${echapper(s.note)}` : ''}</li>`).join('')}</ul></div>` : ''}
@@ -493,7 +495,7 @@ async function vueEditeur(contenu, id) {
   async function enregistrer({ silencieux = false } = {}) {
     const d = lire();
     if (d.corps.length > LIMITES.corps) throw new Error('Texte trop long (300 000 caractères au plus).');
-    if (d.image && (d.image.length > 300 || !/^https?:\/\//.test(d.image))) throw new Error('Image de couverture : adresse https://… de 300 caractères au plus.');
+    if (d.image && (d.image.length > 300 || !imageOk(d.image))) throw new Error('Image de couverture : adresse https://… de 300 caractères au plus.');
     const { db, F } = await firebase();
     const ts = F.serverTimestamp();
     const atelier = { titre: d.titre, famille: d.famille, libelles: d.libelles, resume: d.resume, image: d.image, corps: d.corps, contexte: d.contexte, majLe: ts, majPar: session.utilisateur.uid };

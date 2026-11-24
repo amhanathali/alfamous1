@@ -41,6 +41,12 @@ test('versetsDansTexte : références existantes seulement, sans doublon, dans l
   assert.deepEqual(versetsDansTexte('le 10.11.2024 à 3.5 km, 1.2.3', sourates), ['3:5']); // limite connue : « 3.5 » repéré
 });
 
+test('versetsDansTexte prudent : « 2.1 » numéro de section écarté, sauf « verset » avant ; 4.34 et 19:26 gardés', () => {
+  const t = '1.1 Introduction. 2.2 Méthode. Voir 4.34, le verset 1.5, (2.7) et 3:3.';
+  assert.deepEqual(versetsDansTexte(t, sourates, { prudent: true }), ['4:34', '1:5', '2:7', '3:3']);
+  assert.deepEqual(versetsDansTexte(t, sourates).slice(0, 2), ['1:1', '2:2']);
+});
+
 test('souratesDe : sourates triées sans doublon', () => {
   assert.deepEqual(souratesDe(['19:26', '2:183', '2:184', '112:1']), [2, 19, 112]);
   assert.deepEqual(souratesDe([]), []);
