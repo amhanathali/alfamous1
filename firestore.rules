@@ -305,7 +305,6 @@ service cloud.firestore {
       match /atelier/{doc} {
         allow read: if niveau() >= 2;
         allow create, update: if doc == 'brouillon'
-          && artApres() != null
           && proprioArticle(artApres())
           && request.resource.data.keys().hasOnly(
                ['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'contexte', 'majLe', 'majPar'])
