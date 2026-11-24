@@ -37,6 +37,19 @@ async function initialiser() {
   return { auth, db, A, F, fonctions, Fn };
 }
 
+// Storage (images et fichiers des articles), chargé à part : seuls les rédacteurs en ont besoin.
+let pretStockage = null;
+export function stockage() {
+  if (!pretStockage) {
+    pretStockage = Promise.all([firebase(), import(`${SDK}/firebase-storage.js`)]).then(([{ auth }, S]) => {
+      const st = S.getStorage(auth.app);
+      if (LOCAL) S.connectStorageEmulator(st, location.hostname, Number(location.port) || 80); // relais vers 9199
+      return { st, S };
+    }).catch((e) => { pretStockage = null; throw e; });
+  }
+  return pretStockage;
+}
+
 // Promesse limitée dans le temps (émulateurs éteints : Firestore réessaie longtemps sans répondre).
 export function avecDelai(promesse, ms = 8000) {
   return Promise.race([promesse, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('délai dépassé'), { code: 'unavailable' })), ms))]);

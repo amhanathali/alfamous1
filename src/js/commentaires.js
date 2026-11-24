@@ -111,7 +111,7 @@ function dessiner(zone, liste) {
   const n = session.niveau;
   const uid = session.utilisateur?.uid;
   const lexique = type === 'lexique';
-  const cible = lexique ? `« ${cle} »` : cle;
+  const cible = lexique ? `« ${cle} »` : type === 'article' ? 'cet article' : cle;
   const nbMasques = liste.filter((c) => c.masque).length;
 
   const items = liste.map((c) => {

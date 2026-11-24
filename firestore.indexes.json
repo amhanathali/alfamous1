@@ -181,6 +181,28 @@
           "order": "DESCENDING"
         }
       ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "libelles",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "famille",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "statut",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "publieLe",
+          "order": "DESCENDING"
+        }
+      ]
     }
   ],
   "fieldOverrides": [

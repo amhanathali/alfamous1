@@ -21,6 +21,7 @@ function puceLien(l, cliquable = true) {
   const balise = (href, html) => (cliquable && href ? `<a class="lien-cible" href="${href}">${html}</a>` : `<span class="lien-cible">${html}</span>`);
   if (l.type === 'verset') return balise(lienRequete(l.cle), `verset ${echapper(l.cle)}`);
   if (l.type === 'racine') return balise(lienRequete(`r:${l.cle}`), `racine <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
+  if (l.type === 'article') return balise(`#/article/${encodeURIComponent(l.cle)}`, 'article');
   return balise(`#/lexique/${encodeURIComponent(l.cle)}`, `lexique <span class="ar" lang="ar">${echapper(l.cle)}</span>`);
 }
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
@@ -32,8 +33,9 @@ export function menuNotes() {
   if (!zone) return;
   const h = location.hash;
   const actif = (re) => (re.test(h) ? ' actif' : '');
-  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres)/.test(h) ? '' : 'actif'}">Lecture</a>
+  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?)/.test(h) ? '' : 'actif'}">Lecture</a>
     <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
+    <a href="#/articles" class="${actif(/^#\/articles?(\/|$|\?)/).trim()}">Articles</a>
     ${session.utilisateur && session.niveau >= 1 ? `<a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}">Mes Notes</a>` : ''}
     <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>
     ${session.niveau >= 3 ? `<a href="#/membres" class="${actif(/^#\/membres/).trim()}">Membres</a>` : ''}`;
@@ -112,7 +114,8 @@ async function vueEditeur(contenu, id, params) {
         <input type="text" name="titre" maxlength="${TITRE_MAX}" value="${echapper(n.titre)}" placeholder="Ex. : Le mot « aḥad » dans 112:1"></label>
       <label>Porte sur</label>
       <div class="ligne-lien">
-        <select name="type">${[['aucun', 'Rien (note libre)'], ['verset', 'Un verset'], ['racine', 'Une racine'], ['lexique', 'Une entrée du lexique']]
+        <select name="type">${[['aucun', 'Rien (note libre)'], ['verset', 'Un verset'], ['racine', 'Une racine'], ['lexique', 'Une entrée du lexique'],
+          ...(l.type === 'article' ? [['article', 'Un article']] : [])]
           .map(([k, t]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
         <input type="text" name="cle" value="${echapper(l.cle)}" placeholder="112:1 · أحد · expression du lexique" ${l.type === 'aucun' ? 'disabled' : ''} dir="auto">
       </div>
@@ -472,8 +475,8 @@ async function supprimerReponse(id, rid) {
 export async function ligneForum(zone, cle, type = 'verset') {
   if (!zone) return;
   if (type === 'verset' && !/^\d{1,3}:\d{1,3}$/.test(cle)) return;
-  const quoi = type === 'verset' ? cle : `« ${echapper(cle)} »`;
-  const surQuoi = type === 'verset' ? 'ce verset' : 'cette entrée';
+  const quoi = type === 'verset' ? cle : type === 'article' ? 'cet article' : `« ${echapper(cle)} »`;
+  const surQuoi = type === 'verset' ? 'ce verset' : type === 'article' ? 'cet article' : 'cette entrée';
   try {
     const { db, F } = await firebase();
     const col = F.collection(db, 'notes');

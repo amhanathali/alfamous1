@@ -1,6 +1,25 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles, étape 3a : liste, lecture, éditeur, publication
+- Onglet **Articles** dans le menu (`src/js/articles.js`) : liste `#/articles` (familles, libellés, filtre des titres
+  et résumés, 30 par page ; brouillons et articles retirés visibles des rédacteurs), lecture `#/article/<adresse>`
+  (texte assaini, versets cités, sources, commentaires de type `article`, ligne du forum « cet article »).
+- **Éditeur maison** (niveau ≥ 2) : modes Visuel et HTML, barre courte (titres, gras, italique, citation, listes,
+  lien, image envoyée dans Storage, tableau, encadré, droite-à-gauche), « + Verset » (arabe et translittération copiés
+  de `donnees/texte`), collage assaini, **import de fichiers** Word `.docx` (mammoth.js ; images envoyées dans
+  Storage), HTML, Markdown, texte ; fichier d'origine rangé dans le contexte. Brouillon privé (`atelier/brouillon`),
+  copie locale automatique (reprise proposée), « Enregistrer une version », historique (aperçu, restaurer),
+  aperçu, publier (adresse vérifiée puis réservée), publier les modifications, retirer, republier.
+- Panneau **Contexte** (étape 3a) : versets (cité, note, insérer), sources (publiées ou non), fichiers.
+- `src/js/articles-assainir.js` (DOMPurify) : un seul assainissement pour l'affichage et l'enregistrement ;
+  `src/js/articles-import.js` (Markdown, texte, Word). 8 tests (`tests/articles-assainir.test.mjs`,
+  `tests/articles-import.test.mjs`, avec jsdom). `npm test` : 52/52.
+- Bibliothèques servies par l'application (`vendor/`, `scripts/lib/vendor.mjs`) : DOMPurify 3.5 (MPL-2.0 ou
+  Apache-2.0), mammoth.js 1.13 (BSD-2-Clause) ; SDK Firebase Storage ; relais de l'émulateur Storage (9199) dans
+  `servir.mjs`. Index : libellé + famille.
+- Articles d'essai dans `npm run emulateurs:peupler` (2 publiés, 1 brouillon, 1 commentaire).
+
 ### Ajouté — onglet Articles, étape 2 : données et règles (pas encore d'écran)
 - `firestore.rules` : `articles/{id}` (lu par tous une fois publié, par les rédacteurs sinon), `atelier/brouillon`
   (version de travail privée), `versions/{n}` (historique), `slugs/{slug}` (adresses réservées) ; rédaction dès le

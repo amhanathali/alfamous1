@@ -4,7 +4,7 @@
 //                              Une modification du code se voit en rechargeant la page (F5), sans reconstruire.
 //   npm run servir -- --dist → sert dist/ (exactement ce qui sera déployé ; lancer « npm run construire » avant).
 // Adresse : http://localhost:5050 (autre port : set PORT=5051 avant la commande).
-// Les appels aux émulateurs Firebase (Auth 9099, Firestore 8085) sont relayés par ce serveur :
+// Les appels aux émulateurs Firebase (Auth 9099, Firestore 8085, Storage 9199, Functions 5001) sont relayés par ce serveur :
 // la page n'a qu'une adresse à joindre (certains navigateurs, dont celui intégré à Claude,
 // refusent qu'une page joigne un autre port de la machine).
 import { createServer, request } from 'node:http';
@@ -12,13 +12,14 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join, dirname, extname, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lireModuleSdk } from './lib/sdk-firebase.mjs';
+import { cheminVendor } from './lib/vendor.mjs';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const modeDist = process.argv.includes('--dist');
 const port = Number(process.env.PORT || 5050);
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.json': 'application/json; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png',
+  '.json': 'application/json; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.txt': 'text/plain; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png',
 };
 
 // Fichiers publics en mode développement (jamais import/, scripts/, src/config/).
@@ -37,6 +38,7 @@ const EMULATEURS = [
   { prefixes: ['/google.firestore.v1.Firestore/', '/v1/projects/', '/v1beta1/projects/'], port: 8085 },
   { prefixes: ['/identitytoolkit.googleapis.com/', '/securetoken.googleapis.com/', '/emulator/'], port: 9099 },
   { prefixes: ['/demo-alfamous1/'], port: 5001 }, // Cloud Functions (onglet Membres)
+  { prefixes: ['/v0/b/'], port: 9199 }, // Storage (images et fichiers des articles)
 ];
 function relayer(req, res) {
   const cible = EMULATEURS.find((e) => e.prefixes.some((p) => req.url.startsWith(p)));
@@ -72,6 +74,14 @@ createServer(async (req, res) => {
       if (!code) { res.writeHead(404).end('introuvable'); return; }
       res.writeHead(200, { 'Content-Type': TYPES['.js'], 'Cache-Control': 'no-store' });
       res.end(code);
+      return;
+    }
+    // Bibliothèques tierces (mode développement) : lues dans node_modules.
+    const lib = !modeDist && chemin.startsWith('/vendor/') && cheminVendor(RACINE, chemin.slice('/vendor/'.length));
+    if (lib) {
+      const ext = extname(lib);
+      res.writeHead(200, { 'Content-Type': TYPES[ext === '.mjs' ? '.js' : ext] || TYPES['.js'], 'Cache-Control': 'no-store' });
+      res.end(await readFile(lib));
       return;
     }
     const fichier = resoudre(chemin.endsWith('/') ? `${chemin}index.html` : chemin);
