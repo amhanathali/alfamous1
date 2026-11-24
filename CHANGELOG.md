@@ -1,6 +1,14 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles : cadrage (rien de codé)
+- `docs/ARTICLES.md` : modèle de données (`articles`, brouillon privé `atelier/brouillon`, `versions`, `slugs`,
+  commentaires de type `article`, Storage), droits, éditeur, HTML assaini, import depuis Blogger, « Dossier pour
+  Claude », pages publiques et redirection de blog.alfamous.ca ; 9 questions pour l'auteur.
+- Maquette cliquable `docs/maquettes/articles.html` : liste et filtres, lecture et commentaires, éditeur et panneau
+  Contexte, historique, Dossier pour Claude, ligne « Articles » sous un verset, fiche du lexique, page publique,
+  fiche de contrôle de l'import. Titres et dates copiés de Blogger ; versets copiés de `donnees/` ; textes fictifs.
+
 ### Ajouté — phase 4 : import des commentaires de l'ancienne application
 - `npm run importer` (`scripts/importer.mjs`) : lit les exports CSV de Versets1 et Lexique1 (dossier `import/`, hors Git)
   et écrit les commentaires dans `commentaires/` (types `verset` et `lexique`). À blanc par défaut (rapport

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — onglet Articles (cadrage)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Copie de src/css/app.css */
+/* Alfamous1 — feuille de style. Thème clair par défaut, sombre selon le système ou le bouton. */
+:root {
+  --fond: #f7f4ee;
+  --surface: #ffffff;
+  --texte: #1f2328;
+  --discret: #5f6670;
+  --bordure: #e3ddd2;
+  --accent: #8a4b16;
+  --accent-doux: #f3e5d6;
+  --surligne: #fbe3a6;
+  --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='clair']) {
+    --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+    --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+    --ombre: none; color-scheme: dark;
+  }
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d;
+  --ombre: none; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--fond); color: var(--texte);
+  font: 17px/1.55 var(--latin);
+}
+a { color: var(--lien); }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+
+/* ---------- En-tête ---------- */
+.entete { position: sticky; top: 0; z-index: 10; background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.entete-haut, .recherche, .options, main, .pied { max-width: 920px; margin: 0 auto; }
+.entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.entete-actions { display: flex; align-items: center; gap: 10px; }
+.choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
+select, input, button { font: inherit; color: inherit; }
+select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
+.bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
+
+.recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
+.recherche input {
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  border: 1px solid var(--bordure); background: var(--surface);
+}
+.recherche .effacer {
+  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
+  color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
+}
+.recherche .effacer:hover { color: var(--accent); }
+.options select { max-width: 280px; }
+.recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.recherche button {
+  border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer;
+}
+:root[data-theme='sombre'] .recherche button { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .recherche button { color: #1d2024; } }
+.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.exemples a { margin: 0 3px; }
+
+/* ---------- Contenu ---------- */
+main { padding: 16px; min-height: 60vh; }
+.titre { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin: 8px 0 16px; }
+.titre h1 { margin: 0; font-size: 22px; }
+.titre .ar { font-size: 30px; }
+.resume { color: var(--discret); font-size: 15px; }
+.message { padding: 24px; text-align: center; color: var(--discret); }
+.erreur { color: #b42318; }
+
+.verset {
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px;
+  padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre);
+}
+.verset-entete { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--discret); }
+.ref { font-weight: 600; color: var(--accent); text-decoration: none; background: var(--accent-doux); padding: 1px 8px; border-radius: 999px; }
+.verset .ar { font-size: 28px; line-height: 2.1; margin: 6px 0 4px; text-align: right; }
+.mot { cursor: pointer; border-radius: 4px; padding: 0 1px; }
+.mot:hover, .mot:focus { background: var(--accent-doux); outline: none; }
+.mot.surligne { background: var(--surligne); }
+.tr { font-style: italic; color: var(--discret); font-size: 15px; margin: 0; }
+.trad { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 16px; }
+.basmala { text-align: center; font-size: 28px; margin: 4px 0 16px; }
+
+.nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0; }
+.nav a { text-decoration: none; padding: 6px 12px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); }
+.plus { display: block; margin: 12px auto; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); cursor: pointer; }
+
+/* ---------- Racine ---------- */
+.racine-titre { font-size: 44px; line-height: 1.2; }
+.panneaux { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 640px) { .panneaux { grid-template-columns: 1fr; } }
+.panneau { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 14px; }
+.panneau h2 { font-size: 15px; margin: 0 0 8px; color: var(--discret); font-weight: 600; }
+.puces { display: flex; flex-wrap: wrap; gap: 6px; direction: rtl; }
+.puce {
+  font-family: var(--arabe); font-size: 20px; text-decoration: none; color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 0 10px; background: var(--fond);
+}
+.puce small { font-family: var(--latin); font-size: 12px; color: var(--discret); margin-inline-start: 4px; }
+.puce:hover { border-color: var(--accent); }
+.repartition { display: flex; align-items: flex-end; gap: 1px; height: 60px; margin-top: 4px; }
+.repartition a { flex: 1; background: var(--accent); opacity: .75; min-height: 1px; border-radius: 1px 1px 0 0; }
+.repartition a:hover { opacity: 1; }
+.repartition-legende { display: flex; justify-content: space-between; font-size: 12px; color: var(--discret); }
+
+/* ---------- Onglets, tableaux ---------- */
+.panneau { margin-bottom: 12px; }
+.onglets { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--bordure); margin: 8px 0 12px; }
+.onglets button, .lettres button, .tableau th button {
+  background: none; border: 0; cursor: pointer; color: var(--discret); font: inherit;
+}
+.onglets button { padding: 8px 12px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.onglets button.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.onglets small { color: var(--discret); font-weight: 400; }
+.aide { color: var(--discret); font-size: 14px; margin: 0 0 8px; }
+.tableau { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.tableau th, .tableau td { padding: 6px 10px; border-bottom: 1px solid var(--bordure); text-align: left; }
+.tableau th { background: var(--fond); font-weight: 600; font-size: 13px; color: var(--discret); }
+.tableau th button { font-weight: 600; font-size: 13px; padding: 0; }
+.tableau th button.actif { color: var(--accent); }
+.tableau td .ar { font-size: 22px; text-decoration: none; }
+.tableau tr:last-child td { border-bottom: 0; }
+.lettres { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; direction: rtl; }
+.lettres button { font-family: var(--arabe); font-size: 20px; padding: 0 10px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--surface); color: var(--texte); }
+.lettres button.actif { border-color: var(--accent); color: var(--accent); }
+.plus-terme { color: var(--discret); font-family: var(--latin); font-size: 18px; margin: 0 4px; }
+.lien-racine-titre { color: inherit; text-decoration: none; border-bottom: 1px dotted var(--accent); }
+.lien-racine { font-size: 22px; }
+.fiche-actions { margin: 8px 0 0; font-size: 14px; }
+.intro ul { padding-inline-start: 20px; color: var(--texte); }
+.intro li { margin: 4px 0; }
+code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
+
+/* ---------- Accueil ---------- */
+.intro { font-size: 17px; margin-bottom: 16px; }
+.grille-sourates { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.grille-sourates a {
+  display: flex; justify-content: space-between; align-items: center; gap: 6px; text-decoration: none; color: var(--texte);
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; padding: 8px 10px; font-size: 14px;
+}
+.grille-sourates a:hover { border-color: var(--accent); }
+.grille-sourates .n { color: var(--accent); font-weight: 600; min-width: 2.2em; }
+.grille-sourates .ar { font-size: 18px; }
+
+/* ---------- Fiche d'un mot ---------- */
+.fiche-mot {
+  position: fixed; z-index: 20; left: 50%; bottom: 16px; transform: translateX(-50%);
+  width: min(520px, calc(100% - 24px)); background: var(--surface); color: var(--texte);
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 14px 16px 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, .18);
+}
+.fiche-mot .ar { font-size: 34px; text-align: center; margin: 0; }
+.fiche-mot dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 8px 0 0; font-size: 15px; }
+.fiche-mot dt { color: var(--discret); }
+.fiche-mot dd { margin: 0; }
+.fiche-mot .fermer { position: absolute; top: 6px; right: 10px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+
+.pied { padding: 24px 16px 40px; font-size: 13px; color: var(--discret); text-align: center; }
+
+.lien-bouton { background: none; border: 0; padding: 0; color: var(--lien); text-decoration: underline; cursor: pointer; font: inherit; }
+
+/* Versets voisins (bas de carte) */
+.voisins { display: flex; justify-content: center; gap: 10px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.voisin {
+  display: inline-flex; align-items: center; gap: 4px; background: none; cursor: pointer;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px 2px 8px; font-size: 13px; color: var(--discret);
+}
+.voisin[data-voisin="1"] { padding: 2px 8px 2px 12px; }
+.voisin:hover, .voisin:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.voisin svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.voisin:disabled { opacity: .5; cursor: wait; }
+.verset.contexte { border-style: dashed; box-shadow: none; }
+@keyframes eclair { from { background: var(--accent-doux); } to { background: var(--surface); } }
+.verset.eclair { animation: eclair 1.2s ease-out; }
+
+.trad-source { display: block; font-size: 12px; color: var(--discret); text-transform: uppercase; letter-spacing: .04em; margin-bottom: 2px; }
+
+/* ---------- Comptes (phase 2) ---------- */
+.compte { display: flex; align-items: center; gap: 8px; font-size: 14px; flex-wrap: wrap; justify-content: flex-end; }
+.compte-nom { font-weight: 600; }
+.badge-niveau { font-size: 12px; border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 0 8px; }
+.lien-bouton.alerte { color: #b42318; }
+.fenetre {
+  border: 1px solid var(--bordure); border-radius: 14px; padding: 18px 20px; width: min(520px, calc(100% - 24px));
+  background: var(--surface); color: var(--texte); box-shadow: 0 8px 30px rgba(0, 0, 0, .25);
+}
+.fenetre::backdrop { background: rgba(0, 0, 0, .35); }
+.fenetre h2 { margin: 0 0 10px; font-size: 20px; }
+.fenetre .fermer { position: absolute; top: 8px; right: 12px; background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+.fenetre label { display: block; font-size: 14px; color: var(--discret); margin: 8px 0; }
+.fenetre input, .fenetre textarea {
+  display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--bordure); background: var(--fond); color: var(--texte);
+}
+.fenetre-bas { display: flex; justify-content: flex-end; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 14px; }
+.form-msg { color: #b42318; font-size: 14px; margin: 6px 0 0; min-height: 1em; }
+.btn { border: 1px solid var(--bordure); background: var(--surface); color: var(--texte); border-radius: 8px; padding: 5px 14px; cursor: pointer; font-size: 14px; }
+.btn.principal { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+:root[data-theme='sombre'] .btn.principal { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .btn.principal { color: #1d2024; } }
+.btn.danger-plein { background: #b42318; border-color: #b42318; color: #fff; font-weight: 600; }
+.btn:disabled { opacity: .5; cursor: wait; }
+.version { border-left: 3px solid var(--bordure); padding: 4px 10px; margin: 8px 0; white-space: pre-wrap; }
+.version.actuelle { border-color: var(--accent); }
+.version small { color: var(--discret); display: block; }
+
+/* ---------- Commentaires sous le verset ---------- */
+.verset-pied { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--bordure); }
+.verset-pied .voisins { margin: 0; padding: 0; border: 0; grid-column: 2; }
+.verset-pied .bouton-com { grid-column: 3; justify-self: end; }
+@media (max-width: 520px) { .verset-pied { grid-template-columns: 1fr auto; } .verset-pied .voisins { grid-column: 1; justify-content: flex-start; } .verset-pied .bouton-com { grid-column: 2; } }
+.bouton-com {
+  display: inline-flex; align-items: center; gap: 6px; background: none; cursor: pointer; font-size: 13px; white-space: nowrap;
+  border: 1px solid var(--bordure); border-radius: 999px; padding: 2px 12px; color: var(--discret);
+}
+.bouton-com.a-des { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.bouton-com:hover, .bouton-com:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.bouton-com svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
+
+.commentaires { margin-top: 12px; border-top: 1px solid var(--bordure); padding-top: 10px; }
+.com-entete { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.com-entete h3 { margin: 0; font-size: 15px; }
+.com-entete .discret { font-size: 13px; color: var(--discret); }
+.com-liste { max-height: 460px; overflow-y: auto; padding-right: 4px; overscroll-behavior: contain; }
+.com { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--bordure); }
+.com:last-child { border-bottom: 0; }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent-doux); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 15px; }
+.com-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 8px; align-items: baseline; }
+.com-meta .auteur { color: var(--texte); font-weight: 600; font-size: 15px; }
+.toi { font-size: 11px; background: var(--accent); color: var(--surface); border-radius: 999px; padding: 0 6px; }
+.com-texte { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.com-texte .ar { font-size: 20px; }
+.com-texte.placeholder { color: var(--discret); font-style: italic; }
+.com.masque { opacity: .65; }
+.com-texte.barre { text-decoration: line-through; text-decoration-color: var(--discret); }
+.bandeau-masque { font-size: 12px; color: var(--discret); background: var(--fond); border: 1px solid var(--bordure); border-radius: 6px; padding: 1px 8px; display: inline-block; margin-top: 4px; }
+.com-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; font-size: 13px; }
+.com-actions button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--discret); font: inherit; }
+.com-actions button:hover { color: var(--accent); text-decoration: underline; }
+.com-actions .danger:hover { color: #b42318; }
+.signal { color: #b42318; font-size: 12px; }
+.ecrire { margin-top: 10px; background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 10px; }
+.ecrire textarea { width: 100%; min-height: 84px; resize: vertical; font: inherit; color: inherit; background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 8px 10px; }
+.ecrire textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.ecrire-bas { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px; font-size: 13px; color: var(--discret); }
+.ecrire.connexion { text-align: center; font-size: 14px; color: var(--discret); }
+.ecrire.connexion .btn { margin: 6px 4px 0; }
+
+/* ---------- Menu Lecture / Mes Notes / Forum (phase 2) ---------- */
+.menu { display: flex; gap: 4px; max-width: 920px; margin: 8px auto 0; border-bottom: 1px solid var(--bordure); }
+.menu a { padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 15px; }
+.menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+
+/* ---------- Mes Notes et forum ---------- */
+.barre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.filtres { display: flex; flex-wrap: wrap; gap: 4px; }
+.filtres button { border: 1px solid var(--bordure); background: var(--surface); color: var(--discret); border-radius: 999px; padding: 2px 12px; cursor: pointer; font-size: 13px; }
+.filtres button.actif { border-color: var(--accent); color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+a.btn { text-decoration: none; display: inline-block; }
+.liste-fils { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.fil-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 12px 14px; border-bottom: 1px solid var(--bordure); text-decoration: none; color: inherit; }
+.fil-ligne:last-child { border-bottom: 0; }
+.fil-ligne:hover { background: var(--fond); }
+.fil-ligne.masque .fil-titre { font-style: italic; color: var(--discret); }
+.fil-titre { font-weight: 600; font-size: 16px; }
+.fil-meta { font-size: 13px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: center; }
+.fil-meta .extrait { overflow-wrap: anywhere; }
+.fil-droite { text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.fil-droite b { display: block; color: var(--texte); font-size: 15px; }
+.lien-cible { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; border: 1px solid var(--bordure); border-radius: 999px; padding: 0 8px; background: var(--fond); color: var(--texte); text-decoration: none; }
+.lien-cible .ar { font-size: 16px; }
+.etat { font-size: 11px; border-radius: 999px; padding: 0 7px; font-weight: 600; }
+.etat.prive { background: var(--fond); border: 1px solid var(--bordure); color: var(--discret); }
+.etat.publie { background: #e3f1e6; color: #1f6b35; }
+:root[data-theme='sombre'] .etat.publie { background: #1f3b27; color: #9fd9ae; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .etat.publie { background: #1f3b27; color: #9fd9ae; } }
+.vide { padding: 24px; text-align: center; color: var(--discret); margin: 0; }
+.retour { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+.editeur { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; box-shadow: var(--ombre); }
+.editeur label { display: block; font-size: 14px; color: var(--discret); margin: 10px 0 4px; }
+.editeur input[type=text], .editeur textarea, .editeur select { display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--fond); color: var(--texte); }
+.editeur textarea { min-height: 180px; resize: vertical; font: inherit; }
+.editeur input:disabled { opacity: .5; }
+.ligne-lien { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px; }
+.ligne-lien select, .ligne-lien input { margin-top: 0 !important; }
+@media (max-width: 560px) { .ligne-lien { grid-template-columns: 1fr; } }
+.editeur-bas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 12px; }
+.editeur-bas .gauche, .editeur-bas .droite { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.aide-pub { font-size: 13px; color: var(--discret); margin: 8px 0 0; }
+.fil-tete { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.fil-tete h1 { font-size: 22px; margin: 6px 0; }
+.verset-cite { background: var(--fond); border: 1px solid var(--bordure); border-radius: 10px; padding: 6px 10px; margin: 8px 0; font-size: 13px; }
+.verset-cite .ar { font-size: 24px; text-align: right; margin: 0; }
+.message-fil { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--bordure); }
+.message-fil:last-of-type { border-bottom: 0; }
+.message-fil.masque { opacity: .65; }
+.reponses { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 4px 16px 12px; }
+.reponses h2 { font-size: 15px; margin: 10px 0 0; }
+.reponses h2 .aide { font-weight: 400; font-size: 13px; }
+.com-actions a { color: var(--discret); font-size: 13px; }
+.forum-verset { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--discret); }
+.forum-verset:empty { display: none; }
+
+/* ---------- Lexique (phase 3) ---------- */
+.filtre-lexique { flex: 1; min-width: 220px; font-size: 16px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); }
+.liste-lex { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; }
+.lex-ligne { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 12px; padding: 10px 14px; border-bottom: 1px solid var(--bordure); color: inherit; text-decoration: none; align-items: center; }
+.lex-ligne:last-child { border-bottom: 0; }
+.lex-ligne:hover { background: var(--fond); }
+.lex-cle { font-size: 17px; font-weight: 600; text-align: start; }
+.lex-cle .ar { font-size: 24px; font-weight: 400; }
+.lex-extrait { font-size: 14px; color: var(--discret); grid-column: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lex-droite { grid-row: 1 / span 2; grid-column: 2; text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.lex-droite b { color: var(--texte); font-size: 15px; }
+.etiquette { font-size: 11px; font-weight: 400; border-radius: 999px; padding: 0 7px; border: 1px solid var(--bordure); color: var(--discret); background: var(--fond); margin-inline-start: 6px; vertical-align: middle; }
+.entree-tete, .bloc { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; box-shadow: var(--ombre); }
+.entree-haut { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.entree-cle { margin: 0; font-size: 32px; line-height: 1.3; }
+.entree-cle .ar { font-size: 48px; font-weight: 400; }
+.entree-haut .aide { margin: 0; }
+.chiffres { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 4px; font-size: 15px; }
+.chiffres b { font-size: 18px; }
+.liens-entree { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin-top: 6px; }
+.liens-entree:empty { display: none; }
+.rappel { font-size: 13px; color: var(--discret); margin: 10px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); }
+.bloc > .commentaires { margin-top: 0; border-top: 0; padding-top: 0; }
+.bloc > h2 { font-size: 16px; margin: 0 0 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.bloc > h2 small { font-weight: 400; color: var(--discret); font-size: 13px; }
+.proches-opt { font-size: 14px; color: var(--discret); display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+.puce.avec-lex { border-color: var(--accent); background: var(--accent-doux); }
+.pt { color: var(--accent); }
+.legende { font-size: 12px; color: var(--discret); margin: 8px 0 0; }
+.encadre-lex { background: var(--accent-doux); border: 1px solid var(--accent); border-radius: 12px; padding: 8px 14px; margin: 0 0 12px; font-size: 15px; }
+.lex-fiche { margin: 8px 0 0; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; }
+
+/* ---------- Historique sous le champ de recherche (phase 3) ---------- */
+.historique { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 20; background: var(--surface); border: 1px solid var(--bordure); border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, .14); padding: 4px 0; font-size: 15px; max-height: 60vh; overflow-y: auto; }
+.historique h4 { margin: 6px 12px 2px; font-size: 12px; color: var(--discret); font-weight: 600; display: flex; justify-content: space-between; }
+.historique h4 button { background: none; border: 0; color: var(--discret); font: inherit; cursor: pointer; text-decoration: underline; }
+.historique a { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 4px 12px; color: var(--texte); text-decoration: none; }
+.historique a:hover, .historique a.actif { background: var(--accent-doux); }
+.historique a small { color: var(--discret); white-space: nowrap; }
+.historique .police-ar { font-family: var(--arabe); font-size: 19px; }
+.historique a > span { unicode-bidi: isolate; }
+
+/* ---------- Sélection et copie de versets (phase 3) ---------- */
+.verset-infos { display: inline-flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: flex-end; }
+.choisir { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+.verset.choisi { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.barre-copie { position: fixed; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--surface); border-top: 2px solid var(--accent); box-shadow: 0 -4px 16px rgba(0, 0, 0, .08); padding: 8px 16px; }
+.barre-copie-in { max-width: 920px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.barre-copie small { color: var(--discret); }
+.barre-copie .droite { display: flex; gap: 6px; flex-wrap: wrap; }
+body:has(.barre-copie:not([hidden])) .pied { padding-bottom: 90px; }
+.options-copie { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
+.options-copie label { margin: 4px 0; }
+.fenetre .options-copie input { display: inline; width: auto; margin: 0 4px 0 0; }
+@media (max-width: 520px) { .options-copie { grid-template-columns: 1fr; } }
+.apercu-copie { background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; white-space: pre-wrap; font: 14px/1.6 var(--latin); max-height: 300px; overflow: auto; margin: 8px 0 0; }
+
+/* ---------- Onglet Membres (admins) ---------- */
+.membres { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; overflow: hidden; font-size: 15px; }
+.membres th, .membres td { padding: 8px 10px; border-bottom: 1px solid var(--bordure); text-align: left; vertical-align: middle; }
+.membres th { background: var(--fond); font-size: 13px; color: var(--discret); font-weight: 600; }
+.membres tr:last-child td { border-bottom: 0; }
+.membres .nom { font-weight: 600; }
+.membres .courriel { font-size: 13px; color: var(--discret); display: block; overflow-wrap: anywhere; }
+.membres .date { font-size: 13px; color: var(--discret); white-space: nowrap; }
+.membres .nombre { text-align: right; font-variant-numeric: tabular-nums; }
+.membres select { font-size: 14px; }
+.membres tr.bloque .nom { text-decoration: line-through; color: var(--discret); }
+.pastille { font-size: 11px; border-radius: 999px; padding: 0 7px; font-weight: 600; white-space: nowrap; }
+.pastille.ok { background: #e3f1e6; color: #1f6b35; }
+.pastille.non { background: #fbe9e7; color: #b42318; }
+:root[data-theme='sombre'] .pastille.ok { background: #1f3b27; color: #9fd9ae; }
+:root[data-theme='sombre'] .pastille.non { background: #3b1f1f; color: #f0a8a0; }
+.journal-niveaux { margin-top: 16px; }
+.journal-niveaux p { margin: 4px 0; font-size: 14px; color: var(--discret); }
+@media (max-width: 720px) {
+  .membres thead { display: none; }
+  .membres tr { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 10px; padding: 8px 10px; border-bottom: 1px solid var(--bordure); }
+  .membres td { border: 0; padding: 0; text-align: left; }
+  .membres td:first-child, .membres td.col-niveau { grid-column: 1 / -1; }
+  .membres td[data-l]:not(:first-child):not(.col-niveau)::before { content: attr(data-l) ' : '; color: var(--discret); font-size: 12px; }
+}
+
+
+/* ===== Maquette : bandeau ===== */
+.demo { background: #2b2f36; color: #f2efe9; font-size: 14px; padding: 10px 16px; }
+.demo-in { max-width: 1180px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.demo b { color: #e0a46c; }
+.demo .roles { display: flex; gap: 4px; flex-wrap: wrap; }
+.demo .roles button { background: transparent; color: #f2efe9; border: 1px solid #5a606a; border-radius: 999px; padding: 2px 10px; cursor: pointer; font-size: 13px; }
+.demo .roles button.actif { background: #e0a46c; border-color: #e0a46c; color: #1d2024; font-weight: 600; }
+.note-maquette { border: 1px dashed var(--accent); border-radius: 10px; padding: 8px 12px; font-size: 14px; color: var(--discret); margin: 0 0 14px; background: var(--surface); }
+.note-maquette b { color: var(--texte); }
+.questions { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-top: 20px; }
+.questions h2 { font-size: 17px; margin: 0 0 6px; }
+.questions li { margin: 7px 0; }
+.toast { position: fixed; left: 50%; bottom: 80px; transform: translateX(-50%); background: #2b2f36; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 14px; z-index: 60; }
+.voile { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: grid; place-items: center; z-index: 50; padding: 16px; }
+.fenetre { position: relative; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; max-width: 760px; width: 100%; max-height: 88vh; overflow: auto; box-shadow: 0 12px 40px rgba(0,0,0,.2); }
+.fenetre h2 { margin: 0 0 8px; font-size: 18px; display: flex; justify-content: space-between; gap: 8px; }
+.fenetre label.art-ligne, .fenetre label.choisir { display: flex !important; gap: 10px; align-items: center; margin: 0; }
+.fenetre input[type=radio], .fenetre input[type=checkbox] { width: auto !important; margin: 0 !important; display: inline-block !important; }
+.fenetre .fermer { background: none; border: 0; font-size: 22px; cursor: pointer; color: var(--discret); }
+
+/* ===== Articles : liste ===== */
+.menu .nb { font-size: 12px; background: var(--accent-doux); color: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 4px; }
+.art-recherche { flex: 1; min-width: 220px; font-size: 16px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); }
+.libelles-filtre { display: flex; flex-wrap: wrap; gap: 4px; margin: -4px 0 12px; font-size: 13px; color: var(--discret); align-items: center; }
+.libelles-filtre button { border: 1px dashed var(--bordure); background: none; color: var(--discret); border-radius: 6px; padding: 0 8px; cursor: pointer; font-size: 12px; }
+.libelles-filtre button.actif { border-style: solid; border-color: var(--accent); color: var(--accent); background: var(--accent-doux); }
+.art-ligne { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 4px 14px; padding: 12px 14px; border-bottom: 1px solid var(--bordure); cursor: pointer; align-items: start; }
+.art-ligne:last-child { border-bottom: 0; }
+.art-ligne:hover { background: var(--fond); }
+.vignette { width: 64px; height: 48px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-doux), var(--fond)); border: 1px solid var(--bordure); display: grid; place-items: center; font-family: var(--arabe); font-size: 20px; color: var(--accent); }
+.art-titre { font-weight: 600; font-size: 16px; }
+.art-resume { font-size: 14px; color: var(--discret); margin: 2px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.art-meta { font-size: 12px; color: var(--discret); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+.famille { font-size: 11px; font-weight: 600; border-radius: 999px; padding: 0 8px; }
+.f-racines { background: #f3e5d6; color: #8a4b16; }
+.f-critiques { background: #e6e3f3; color: #4a3d8f; }
+.f-identite { background: #dff0ea; color: #1f6b4f; }
+.f-reflexions { background: #e9edf2; color: #3c4a5c; }
+:root[data-theme='sombre'] .famille { filter: brightness(.75) saturate(1.2); }
+.libelle { font-size: 11px; border: 1px solid var(--bordure); border-radius: 6px; padding: 0 6px; }
+.art-droite { text-align: right; font-size: 13px; color: var(--discret); white-space: nowrap; }
+.etat.brouillon { background: #fff4d6; color: #8a6100; border: 1px solid #f0d58a; }
+.etat.modifie { background: var(--accent-doux); color: var(--accent); }
+
+/* ===== Article : lecture ===== */
+.art-page { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 18px 22px; box-shadow: var(--ombre); }
+.art-page h1 { font-size: 28px; line-height: 1.25; margin: 8px 0; }
+.art-page .chapeau { font-size: 17px; color: var(--discret); margin: 0 0 12px; }
+.corps-art { font-size: 17px; line-height: 1.7; }
+.corps-art h2 { font-size: 21px; margin: 22px 0 8px; }
+.corps-art .verset-bloc { border-inline-start: 3px solid var(--accent); background: var(--fond); border-radius: 8px; padding: 8px 14px; margin: 12px 0; }
+.corps-art .verset-bloc .ar { font-size: 26px; text-align: right; line-height: 2; margin: 0; }
+.corps-art .verset-bloc .tr { margin: 0; }
+.corps-art .verset-bloc .refv { font-size: 13px; color: var(--accent); font-weight: 600; text-decoration: none; }
+.fictif { background: repeating-linear-gradient(-45deg, transparent 0 8px, rgba(138,75,22,.05) 8px 16px); border-radius: 6px; padding: 2px 6px; }
+.pied-art { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; color: var(--discret); margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--bordure); }
+.sources-art li { margin: 4px 0; font-size: 15px; }
+
+/* ===== Éditeur ===== */
+.atelier { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: start; }
+@media (max-width: 900px) { .atelier { grid-template-columns: 1fr; } }
+main.large, .large .barre-outils { max-width: 1180px; }
+.ed-champs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; }
+.ed-champs .plein { grid-column: 1 / -1; }
+.barre-ed { display: flex; flex-wrap: wrap; gap: 2px; border: 1px solid var(--bordure); border-bottom: 0; border-radius: 8px 8px 0 0; padding: 4px; background: var(--fond); margin-top: 10px; align-items: center; }
+.barre-ed button { border: 1px solid transparent; background: none; border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 14px; color: var(--texte); }
+.barre-ed button:hover { border-color: var(--bordure); background: var(--surface); }
+.barre-ed .sep { width: 1px; height: 20px; background: var(--bordure); margin: 0 4px; }
+.barre-ed .modes { margin-left: auto; display: flex; gap: 2px; }
+.barre-ed .modes button.actif { background: var(--accent); color: #fff; }
+.zone-ed { border: 1px solid var(--bordure); border-radius: 0 0 8px 8px; background: var(--surface); padding: 12px 16px; min-height: 380px; max-height: 70vh; overflow: auto; }
+.zone-ed:focus { outline: 2px solid var(--accent); }
+textarea.zone-ed { width: 100%; font: 13px/1.5 ui-monospace, Consolas, monospace; resize: vertical; color: var(--texte); }
+.ed-etat { font-size: 13px; color: var(--discret); margin-top: 6px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+
+.contexte { position: sticky; top: 140px; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; max-height: calc(100vh - 160px); overflow: auto; }
+.contexte > h2 { font-size: 16px; margin: 0; padding: 10px 14px; border-bottom: 1px solid var(--bordure); display: flex; justify-content: space-between; align-items: baseline; position: sticky; top: 0; background: var(--surface); z-index: 1; }
+.contexte > h2 small { font-weight: 400; color: var(--discret); font-size: 12px; }
+.ctx { border-bottom: 1px solid var(--bordure); }
+.ctx:last-child { border-bottom: 0; }
+.ctx summary { padding: 8px 14px; cursor: pointer; font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; list-style: none; }
+.ctx summary::-webkit-details-marker { display: none; }
+.ctx summary::before { content: '▸'; color: var(--discret); margin-right: 6px; }
+.ctx[open] summary::before { content: '▾'; }
+.ctx summary span.n { font-weight: 400; color: var(--discret); font-size: 13px; margin-left: auto; }
+.ctx summary .nouveau { font-size: 10px; background: var(--accent-doux); color: var(--accent); border-radius: 999px; padding: 0 6px; margin-left: 6px; font-weight: 600; align-self: center; }
+.ctx-corps { padding: 0 14px 10px; font-size: 14px; }
+.ctx-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; padding: 6px 0; border-top: 1px dashed var(--bordure); align-items: start; }
+.ctx-item:first-child { border-top: 0; }
+.ctx-item .ar { font-size: 19px; line-height: 1.7; text-align: right; }
+.ctx-item .petit { font-size: 12px; color: var(--discret); }
+.ctx-item .actions { display: flex; flex-direction: column; gap: 2px; align-items: flex-end; font-size: 12px; }
+.ctx-item .actions button, .lien-btn { background: none; border: 0; padding: 0; color: var(--lien); cursor: pointer; font: inherit; font-size: 12px; text-decoration: underline; }
+.ctx-ajout { display: flex; gap: 6px; margin-top: 6px; }
+.ctx-ajout input { flex: 1; min-width: 0; font-size: 14px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--bordure); background: var(--fond); }
+.cite { font-size: 11px; display: inline-flex; gap: 3px; align-items: center; color: var(--discret); }
+.verif { font-size: 11px; border-radius: 4px; padding: 0 5px; font-weight: 600; }
+.verif.fait { background: #e3f1e6; color: #1f6b35; } .verif.deduction { background: #e6e3f3; color: #4a3d8f; } .verif.hypothese { background: #fff4d6; color: #8a6100; }
+.depot { border: 2px dashed var(--bordure); border-radius: 8px; padding: 10px; text-align: center; color: var(--discret); font-size: 13px; margin-top: 6px; }
+
+.actions-ed { position: sticky; bottom: 0; z-index: 15; margin: 14px -16px 0; padding: 10px 16px; background: var(--surface); border-top: 2px solid var(--accent); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.actions-ed .gauche, .actions-ed .droite { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+/* Historique */
+.versions { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 12px; }
+@media (max-width: 640px) { .versions { grid-template-columns: 1fr; } }
+.v-liste button { display: block; width: 100%; text-align: left; border: 1px solid var(--bordure); background: var(--fond); border-radius: 8px; padding: 6px 8px; margin-bottom: 6px; cursor: pointer; font-size: 13px; color: var(--texte); }
+.v-liste button.actif { border-color: var(--accent); background: var(--accent-doux); }
+.diff { font-size: 14px; line-height: 1.6; background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; }
+.diff del { background: #fde2e1; color: #8a1c13; } .diff ins { background: #e3f1e6; color: #1f6b35; text-decoration: none; }
+.dossier { white-space: pre-wrap; font: 13px/1.5 ui-monospace, Consolas, monospace; background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; max-height: 52vh; overflow: auto; }
+.dossier .ar { font-family: var(--arabe); font-size: 18px; }
+
+/* Encadré articles (versets, lexique) */
+.ligne-articles { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--bordure); font-size: 14px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--discret); }
+.ligne-articles a { font-weight: 600; }
+.barre-copie { position: sticky; bottom: 0; z-index: 15; margin: 0 -16px; padding: 10px 16px; background: var(--surface); border-top: 2px solid var(--accent); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.choisir { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--discret); cursor: pointer; }
+.verset.choisi { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.entree-cle { font-family: var(--arabe); font-size: 48px; line-height: 1.2; direction: rtl; margin: 0; }
+.chiffres { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 8px 0 4px; font-size: 15px; }
+
+/* Page publique */
+.publique { background: #fff; color: #1f2328; border-radius: 12px; border: 1px solid var(--bordure); overflow: hidden; }
+.publique .barre-nav { background: #f7f4ee; border-bottom: 1px solid #e3ddd2; padding: 6px 12px; font: 13px ui-monospace, Consolas, monospace; color: #5f6670; display: flex; gap: 8px; align-items: center; }
+.publique .barre-nav span { background: #fff; border: 1px solid #e3ddd2; border-radius: 999px; padding: 2px 12px; flex: 1; }
+.publique .pub-in { max-width: 720px; margin: 0 auto; padding: 24px 20px 32px; }
+.publique header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid #e3ddd2; padding-bottom: 8px; margin-bottom: 18px; font-size: 14px; }
+.publique header b { font-size: 20px; }
+.publique a { color: #8a4b16; }
+.code-meta { font: 12px/1.5 ui-monospace, Consolas, monospace; white-space: pre-wrap; background: var(--fond); border: 1px solid var(--bordure); border-radius: 8px; padding: 10px; color: var(--discret); overflow: auto; }
+</style>
+</head>
+<body>
+<div class="demo"><div class="demo-in">
+  <span><b>MAQUETTE</b> — rien n'est enregistré · écran :</span>
+  <div class="roles" id="ecrans">
+    <button data-e="liste" class="actif">Liste</button>
+    <button data-e="article">Lecture</button>
+    <button data-e="editeur">Éditeur + contexte</button>
+    <button data-e="verset">Sous un verset</button>
+    <button data-e="lexique">Fiche du lexique</button>
+    <button data-e="publique">Page publique</button>
+    <button data-e="import">Import</button>
+  </div>
+  <span>voir comme :</span>
+  <div class="roles" id="roles">
+    <button data-n="0">0 · Visiteur</button>
+    <button data-n="1">1 · Membre</button>
+    <button data-n="2">2 · Modérateur</button>
+    <button data-n="3" class="actif">3 · Admin (rédacteur)</button>
+  </div>
+</div></div>
+
+<header class="entete">
+  <div class="entete-haut">
+    <a class="logo" href="#" data-e="liste">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+    <div class="entete-actions"><span id="compte" class="compte"></span><button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre">◐</button></div>
+  </div>
+  <nav class="menu" id="menu"></nav>
+</header>
+
+<main id="vue"></main>
+
+<div style="max-width:920px;margin:0 auto;padding:0 16px 24px">
+  <section class="questions">
+    <h2>Questions avant de coder</h2>
+    <p style="font-size:14px;color:var(--discret);margin:0">Détail dans <code>docs/ARTICLES.md</code>. Répondre « ok » pour accepter une proposition.</p>
+    <ol>
+      <li><b>Droits.</b> Écrire et publier un article : admins seulement (proposé), ou rôle « rédacteur » attribué dans l'onglet Membres ?</li>
+      <li><b>Article publié.</b> Les modifications restent dans le brouillon jusqu'à « Publier les modifications » (proposé), ou passent en ligne tout de suite ?</li>
+      <li><b>Versions.</b> Une version à chaque « Enregistrer une version » et à chaque publication, plus une copie locale automatique (proposé) ?</li>
+      <li><b>Éditeur.</b> TinyMCE auto-hébergé, modes Visuel et HTML (proposé ; licence GPL à vérifier), ou éditeur maison ?</li>
+      <li><b>Mise en forme.</b> 35 articles ont leur propre feuille <code>&lt;style&gt;</code>, retirée à l'import : feuille commune des articles + relecture de ces 35 (proposé) ?</li>
+      <li><b>Vidéos.</b> 6 cadres intégrés (<code>&lt;iframe&gt;</code>) : garder les vidéos YouTube (proposé) ou les remplacer par un lien ?</li>
+      <li><b>Commentaires Blogger.</b> Les importer, ou les laisser sur l'archive Blogger ?</li>
+      <li><b>Adresse publique.</b> <code>blog.alfamous.ca/articles/…</code> (proposé : nom déjà connu des lecteurs) ou <code>atelier.alfamous.ca/articles/…</code> ?</li>
+      <li><b>Sous les versets.</b> Afficher l'article sous les seuls versets marqués « cité » (proposé) ou sous tous les versets de son contexte ?</li>
+      <li><b>Panneau Contexte.</b> Éléments proposés en plus de votre liste (marqués « nouveau ») : Mes Notes liées, Vérification (fait / déduction / hypothèse), Définition proposée « à valider », Recherches Alfamous, Commentaires traditionnels, Articles liés, Résumé court. Lesquels garder ?</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+const D = {"versets":{"19:25":{"ar":"وَهُزِّىٓ إِلَيْكِ بِجِذْعِ ٱلنَّخْلَةِ تُسَـٰقِطْ عَلَيْكِ رُطَبًا جَنِيًّا","tr":"wahuzzī ilayki biǧiḏʿi an-naḫlati tusāqiṭ ʿalayki ruṭaban ǧaniyyan","p":306},"19:26":{"ar":"فَكُلِى وَٱشْرَبِى وَقَرِّى عَيْنًا فَإِمَّا تَرَيِنَّ مِنَ ٱلْبَشَرِ أَحَدًا فَقُولِىٓ إِنِّى نَذَرْتُ لِلرَّحْمَـٰنِ صَوْمًا فَلَنْ أُكَلِّمَ ٱلْيَوْمَ إِنسِيًّا","tr":"fakulī wašrabī waqarrī ʿaynan faʾimmā tarayinna mina al-bašari aḥadan faqūlī innī naḏartu lilrraḥmāni ṣawman falan ukallima al-yawma insiyyan","p":307},"19:27":{"ar":"فَأَتَتْ بِهِۦ قَوْمَهَا تَحْمِلُهُۥ قَالُوا۟ يَـٰمَرْيَمُ لَقَدْ جِئْتِ شَيْـًٔا فَرِيًّا","tr":"faʾatat bihī qawmahā taḥmiluhū qālū yāmaryamu laqad ǧiʾti šayʾan fariyyan","p":307},"2:183":{"ar":"يَـٰٓأَيُّهَا ٱلَّذِينَ ءَامَنُوا۟ كُتِبَ عَلَيْكُمُ ٱلصِّيَامُ كَمَا كُتِبَ عَلَى ٱلَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ","tr":"yāʾayyuhā allaḏīna āmanū kutiba ʿalaykumu aṣ-ṣiyāmu kamā kutiba ʿalā allaḏīna min qablikum laʿallakum tattaqūna","p":28},"2:184":{"ar":"أَيَّامًا مَّعْدُودَٰتٍ فَمَن كَانَ مِنكُم مَّرِيضًا أَوْ عَلَىٰ سَفَرٍ فَعِدَّةٌ مِّنْ أَيَّامٍ أُخَرَ وَعَلَى ٱلَّذِينَ يُطِيقُونَهُۥ فِدْيَةٌ طَعَامُ مِسْكِينٍ فَمَن تَطَوَّعَ خَيْرًا فَهُوَ خَيْرٌ لَّهُۥ وَأَن تَصُومُوا۟ خَيْرٌ لَّكُمْ إِن كُنتُمْ تَعْلَمُونَ","tr":"ayyāman maʿdūdātin faman kāna minkum marīḍan aw ʿalā safarin faʿiddatun min ayyāmin uḫara waʿalā allaḏīna yuṭīqūnahū fidyatun ṭaʿāmu miskīnin faman taṭawwaʿa ḫayran fahuwa ḫayrun lahū waʾan taṣūmū ḫayrun lakum in kuntum taʿlamūna","p":28},"2:187":{"ar":"أُحِلَّ لَكُمْ لَيْلَةَ ٱلصِّيَامِ ٱلرَّفَثُ إِلَىٰ نِسَآئِكُمْ هُنَّ لِبَاسٌ لَّكُمْ وَأَنتُمْ لِبَاسٌ لَّهُنَّ عَلِمَ ٱللَّهُ أَنَّكُمْ كُنتُمْ تَخْتَانُونَ أَنفُسَكُمْ فَتَابَ عَلَيْكُمْ وَعَفَا عَنكُمْ فَٱلْـَٔـٰنَ بَـٰشِرُوهُنَّ وَٱبْتَغُوا۟ مَا كَتَبَ ٱللَّهُ لَكُمْ وَكُلُوا۟ وَٱشْرَبُوا۟ حَتَّىٰ يَتَبَيَّنَ لَكُمُ ٱلْخَيْطُ ٱلْأَبْيَضُ مِنَ ٱلْخَيْطِ ٱلْأَسْوَدِ مِنَ ٱلْفَجْرِ ثُمَّ أَتِمُّوا۟ ٱلصِّيَامَ إِلَى ٱلَّيْلِ وَلَا تُبَـٰشِرُوهُنَّ وَأَنتُمْ عَـٰكِفُونَ فِى ٱلْمَسَـٰجِدِ تِلْكَ حُدُودُ ٱللَّهِ فَلَا تَقْرَبُوهَا كَذَٰلِكَ يُبَيِّنُ ٱللَّهُ ءَايَـٰتِهِۦ لِلنَّاسِ لَعَلَّهُمْ يَتَّقُونَ","tr":"uḥilla lakum laylata aṣ-ṣiyāmi ar-rafaṯu ilā nisāʾikum hunna libāsun lakum waʾantum libāsun lahunna ʿalima allāhu annakum kuntum taḫtānūna anfusakum fatāba ʿalaykum waʿafā ʿankum fa-l-ʾāna bāširūhunna wabtaġū mā kataba allāhu lakum wakulū wašrabū ḥattā yatabayyana lakumu al-ḫayṭu al-ʾabyaḍu mina al-ḫayṭi al-ʾaswadi mina al-faǧri ṯumma atimmū aṣ-ṣiyāma ilā allayli walā tubāširūhunna waʾantum ʿākifūna fī al-masāǧidi tilka ḥudūdu allāhi falā taqrabūhā kaḏālika yubayyinu allāhu āyātihī lilnnāsi laʿallahum yattaqūna","p":29}},"racine":{"n":14,"versets":11,"refs":["2:183","2:184","2:185","2:187","2:196","4:92","5:89","5:95","19:26","33:35","58:4"]},"dateDonnees":"dépôt alfamous1, branche main"};
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let niveau = 3, ecran = 'liste', filtreF = 'toutes', filtreL = null, modeEd = 'visuel', choisis = new Set();
+const FAMILLES = { racines: 'Racines', critiques: 'Critiques', identite: 'Identité amazighe & kabyle', reflexions: 'Autres réflexions' };
+const fam = (f) => `<span class="famille f-${f}">${FAMILLES[f]}</span>`;
+const V = (r) => D.versets[r];
+
+// Titres et dates : copiés du flux Blogger (24 nov. 2026). Familles, libellés, résumés : propositions ou exemples.
+const ARTICLES = [
+  { id: 'a1', titre: "Aberration 1 — 19.26 et le sawm figé en jeûne alimentaire", date: '24 févr. 2026', f: 'racines', lib: ['Les mots du Coran'], v: '19:26', initiale: 'صوم', etat: 'modifie' },
+  { id: 'a0', titre: "Le sens du mot ṣawm — suite (brouillon d'exemple)", date: '—', f: 'racines', lib: [], initiale: 'صوم', etat: 'brouillon' },
+  { id: 'a2', titre: "L'Éveil des consciences : De la méthode scientifique à la libération intellectuelle", date: '4 août 2026', f: 'critiques', lib: ['Sciences & Philosophie'], initiale: '?' },
+  { id: 'a3', titre: "Réflexion sur la théorie de l'évolution : l'analogie du Boeing", date: '10 juil. 2026', f: 'reflexions', lib: ['Sciences & Philosophie'], initiale: '✈' },
+  { id: 'a4', titre: "ʿAbd (عبد) : le chercheur de vérité dans l'ordre coranique", date: '21 juin 2026', f: 'racines', lib: ['Les mots du Coran'], initiale: 'عبد' },
+  { id: 'a5', titre: "Le Jeûne Thérapeutique : Réactiver les Superpouvoirs de Notre Biologie", date: '18 juin 2026', f: 'reflexions', lib: ['Développement personnel'], initiale: '⚕' },
+  { id: 'a6', titre: "بيت (bayt) et دار (dār) dans le Coran : ni maison, ni demeure, ni temple", date: '8 juin 2026', f: 'racines', lib: ['Les mots du Coran'], initiale: 'بيت' },
+  { id: 'a7', titre: "Le hadith qui interdit d'écrire les hadiths : le paradoxe qui ébranle la tradition", date: '27 mai 2026', f: 'critiques', lib: ['Société'], initiale: '?' },
+  { id: 'a8', titre: "Le Coran n'a jamais défendu la langue arabe", date: '29 avr. 2026', f: 'critiques', lib: ['Société'], initiale: '?' },
+  { id: 'a9', titre: "ʿArabī vs ʿAjamī : une question de structure du langage (عرب # عجم)", date: '18 mars 2026', f: 'racines', lib: ['Les mots du Coran'], initiale: 'عرب' },
+  { id: 'a10', titre: "Omar Khayyam : un esprit critique face au dogmatisme religieux", date: '10 mars 2026', f: 'critiques', lib: ['Sciences & Philosophie'], initiale: '?' },
+  { id: 'a11', titre: "Iftar (إفطار) : L'infraction qui n'existe pas", date: '4 mars 2026', f: 'racines', lib: ['Les mots du Coran'], initiale: 'فطر' },
+  { id: 'a12', titre: "Fondements civiques de la société kabyle (exemple)", date: '—', f: 'identite', lib: ['Société', 'Politique'], initiale: 'ⴰ' }
+];
+const LIBELLES = ['Les mots du Coran', 'Développement personnel', 'Société', 'Politique', 'Divers', 'Conférences', 'Livres', 'Outils', 'Sciences & Philosophie'];
+
+// ---------- Menu, compte ----------
+function menu() {
+  $('#menu').innerHTML = `<a href="#">Lecture</a><a href="#" data-e="lexique">Lexique</a>
+    <a href="#" data-e="liste" class="${['liste','article','editeur','import'].includes(ecran) ? 'actif' : ''}">Articles</a>
+    ${niveau >= 1 ? '<a href="#">Mes Notes</a>' : ''}<a href="#">Forum</a>${niveau >= 3 ? '<a href="#">Membres</a>' : ''}`;
+  const noms = ['', 'Membre Essai', 'Modo Essai', 'Amha Nathali'];
+  $('#compte').innerHTML = niveau ? `<span class="compte-nom">${noms[niveau]}</span><span class="etiquette">niveau ${niveau}</span>` : '<button class="btn">Se connecter</button>';
+}
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.append(d); setTimeout(() => d.remove(), 2200); }
+function fenetre(titre, html) {
+  const v = document.createElement('div'); v.className = 'voile';
+  v.innerHTML = `<div class="fenetre"><h2>${titre}<button class="fermer" title="Fermer">×</button></h2>${html}</div>`;
+  v.addEventListener('click', (e) => { if (e.target === v || e.target.closest('.fermer') || e.target.closest('[data-fermer]')) v.remove(); });
+  document.body.append(v); return v;
+}
+
+// ---------- Blocs réutilisés ----------
+function blocVerset(r, { cite = true } = {}) {
+  const x = V(r);
+  return `<div class="verset-bloc"><a class="refv" href="#">${r.replace(':', ':')}</a><p class="ar" lang="ar">${x.ar}</p><p class="tr">${x.tr}</p></div>`;
+}
+function corpsArticle() {
+  return `<p class="fictif">Introduction de l'article — <i>texte fictif de la maquette ; le vrai texte viendra de l'import Blogger.</i></p>
+  <h2>Le verset</h2>
+  ${blocVerset('19:26')}
+  <p class="fictif">Analyse — <i>texte fictif</i>. Le mot <span class="ar" lang="ar">صَوْمًا</span> (ṣawman) dans son contexte…</p>
+  <h2>Les autres occurrences</h2>
+  ${blocVerset('2:183')}
+  <p class="fictif">Suite — <i>texte fictif</i>. La racine <span class="ar" lang="ar">صوم</span> compte ${D.racine.n} occurrences dans ${D.racine.versets} versets (chiffres calculés sur <code>donnees/racines.json</code>).</p>
+  <h2>Conclusion</h2>
+  <p class="fictif">Conclusion et question d'éveil — <i>texte fictif</i>.</p>`;
+}
+function commentairesArticle() {
+  const coms = [
+    { a: 'Membre Essai', d: '20 nov. 2026', t: 'Commentaire fictif sur l\'article, publié tout de suite (niveau 1). Les liens comme 19:26 deviennent cliquables.' },
+    { a: 'Afrukh Ifereles', d: '3 mars 2026', t: 'Commentaire fictif (exemple d\'un commentaire importé de Blogger, si la question 7 est acceptée).', imp: true }
+  ];
+  const ecrire = niveau >= 1
+    ? `<div class="ecrire"><textarea placeholder="Votre commentaire (texte simple, 4 000 caractères au plus)"></textarea><div class="ecrire-bas"><span>Publié tout de suite, signé de votre nom · 20 par heure</span><button class="btn principal" data-toast="Commentaire publié (maquette)">Publier</button></div></div>`
+    : `<div class="ecrire connexion">Connectez-vous (courriel vérifié) pour commenter.<br><button class="btn">Se connecter</button></div>`;
+  return `<div class="bloc"><h2>Commentaires <small>même modèle que les versets : plus récents en premier, historique, signalement, masquage</small></h2>
+    <div class="com-liste">${coms.map((c) => `<div class="com"><div class="avatar">${c.a[0]}</div><div><div class="com-meta"><span class="auteur">${c.a}</span><span>${c.d}</span>${c.imp ? '<span class="etiquette">importé de Blogger</span>' : ''}</div>
+      <p class="com-texte">${c.t}</p><div class="com-actions">${niveau >= 1 ? '<button data-toast="Signalé (maquette)">Signaler</button>' : ''}${niveau >= 2 ? '<button data-toast="Masqué (maquette)">Masquer</button>' : ''}${niveau >= 3 ? '<button class="danger" data-toast="Supprimé (maquette)">Supprimer</button>' : ''}</div></div></div>`).join('')}</div>
+    ${ecrire}</div>
+    <div class="bloc"><h2>Discussions du forum <small>fils liés à l'article</small></h2>
+      <div class="forum-ligne"><a href="#">ṣawm et nadhr : même engagement ? <span class="etiquette">fictif</span></a><span>3 réponses</span>${niveau >= 1 ? '<button class="btn" data-toast="L\'éditeur du forum s\'ouvre, lié à l\'article (maquette)">Ouvrir une discussion</button>' : ''}</div></div>`;
+}
+
+// ---------- Écran : liste ----------
+function vueListe() {
+  const vis = ARTICLES.filter((a) => (niveau >= 3 || a.etat !== 'brouillon') && (filtreF === 'toutes' || a.f === filtreF) && (!filtreL || a.lib.includes(filtreL)));
+  const nb = (f) => ARTICLES.filter((a) => (niveau >= 3 || a.etat !== 'brouillon') && (f === 'toutes' || a.f === f)).length;
+  return `<div class="note-maquette"><b>Liste des articles</b> (<code>#/articles</code>). Titres et dates copiés du flux Blogger (207 articles en tout) ; familles <b>proposées</b>, libellés et résumés d'exemple. ${niveau >= 3 ? 'Le rédacteur voit aussi ses brouillons.' : ''}</div>
+  <div class="titre"><h1>Articles</h1><span class="resume">207 articles · le plus récent d'abord</span></div>
+  <div class="barre-outils">
+    <div class="filtres">${['toutes', ...Object.keys(FAMILLES)].map((f) => `<button data-f="${f}" class="${filtreF === f ? 'actif' : ''}">${f === 'toutes' ? 'Toutes' : FAMILLES[f]} · ${nb(f)}</button>`).join('')}</div>
+    ${niveau >= 3 ? '<button class="btn principal" data-e="editeur" data-nouveau="1">+ Nouvel article</button>' : ''}
+  </div>
+  <div class="barre-outils"><input class="art-recherche" placeholder="Chercher dans les titres et résumés…"><select><option>Plus récents</option><option>Plus anciens</option><option>Titre A → Z</option>${niveau >= 3 ? '<option>Dernière modification</option>' : ''}</select></div>
+  <div class="libelles-filtre">Libellés : ${LIBELLES.map((l) => `<button data-l="${esc(l)}" class="${filtreL === l ? 'actif' : ''}">${l}</button>`).join('')}</div>
+  <div class="liste-fils">${vis.map((a) => `<div class="art-ligne" data-ouvrir="${a.id}">
+    <div class="vignette">${a.initiale}</div>
+    <div><div class="art-titre">${a.titre}</div><p class="art-resume">Résumé d'exemple : deux lignes au plus, tirées du champ « résumé » (500 caractères).</p>
+      <div class="art-meta">${fam(a.f)}${a.lib.map((l) => `<span class="libelle">${l}</span>`).join('')}${a.v ? `<span class="lien-cible">${a.v}</span>` : ''}</div></div>
+    <div class="art-droite">${a.etat === 'brouillon' ? '<span class="etat brouillon">brouillon</span>' : a.date}${a.etat === 'modifie' && niveau >= 3 ? '<br><span class="etat modifie">modifs non publiées</span>' : ''}<br>${a.etat !== 'brouillon' ? '💬 ' + (a.id === 'a1' ? 2 : 0) : ''}</div>
+  </div>`).join('') || '<p class="vide">Aucun article.</p>'}</div>
+  <p class="aide-pub">Comme « Lecture » liste les sourates : un clic ouvre l'article. Les filtres se combinent (famille + libellé).</p>`;
+}
+
+// ---------- Écran : lecture ----------
+function vueArticle() {
+  const a = ARTICLES[0];
+  return `<a class="retour" href="#" data-e="liste">← Articles</a>
+  <div class="note-maquette"><b>Lecture</b> (<code>#/article/aberration-1-1926-et-le-sawm-fige-en</code>). Titre et date copiés de Blogger ; arabe et translittération copiés de <code>donnees/texte/</code> ; texte de l'article fictif.</div>
+  <article class="art-page">
+    <div class="art-meta">${fam(a.f)}${a.lib.map((l) => `<span class="libelle">${l}</span>`).join('')}<span>Amha Nathali · publié le 24 févr. 2026</span>${niveau >= 3 ? '<span class="etat modifie">modifs non publiées</span>' : ''}</div>
+    <h1>${a.titre}</h1>
+    <p class="chapeau">Résumé d'exemple (champ « résumé »).</p>
+    ${niveau >= 3 ? '<p><button class="btn principal" data-e="editeur">Modifier</button> <button class="btn" data-histo>Historique (4 versions)</button> <button class="btn" data-e="publique">Voir la page publique</button></p>' : ''}
+    <div class="corps-art">${corpsArticle()}</div>
+    <div class="pied-art"><span>Versets cités :</span>${['19:26', '2:183', '2:184'].map((r) => `<a class="lien-cible" href="#">${r}</a>`).join('')}<span>Racine :</span><a class="lien-cible" href="#" data-e="lexique"><span class="ar">صوم</span></a></div>
+    <div class="pied-art" style="display:block"><b style="color:var(--texte)">Sources</b><ul class="sources-art"><li>Exemple de source publique (titre, lien, note) — <i>fictif</i></li></ul></div>
+  </article>
+  ${commentairesArticle()}`;
+}
+
+// ---------- Écran : éditeur ----------
+let nouveau = false;
+function vueEditeur() {
+  if (niveau < 3) return `<p class="message">Réservé aux rédacteurs (proposition : admins, niveau 3 — question 1).</p>`;
+  const titre = nouveau ? '' : ARTICLES[0].titre;
+  const htmlSource = esc(`<h2>Le verset</h2>\n<div class="verset-bloc" data-ref="19:26">\n  <p class="ar" lang="ar">${V('19:26').ar}</p>\n  <p class="tr">${V('19:26').tr}</p>\n</div>\n<p>Analyse… (texte fictif)</p>`);
+  return `<a class="retour" href="#" data-e="${nouveau ? 'liste' : 'article'}">← ${nouveau ? 'Articles' : 'Retour à l\'article'}</a>
+  <div class="note-maquette"><b>Éditeur</b> (<code>#/article/…/modifier</code>). À gauche le texte (modes Visuel et HTML), à droite le panneau <b>Contexte</b> : cliquer sur les sections pour les ouvrir. Barre du bas : brouillon, historique, aperçu, publication, « Dossier pour Claude ».</div>
+  <div class="atelier">
+    <div class="editeur">
+      <div class="ed-champs">
+        <label class="plein">Titre<input type="text" value="${esc(titre)}" placeholder="Titre de l'article (200 caractères)"></label>
+        <label>Famille<select>${Object.entries(FAMILLES).map(([k, v]) => `<option ${k === 'racines' ? 'selected' : ''}>${v}</option>`).join('')}</select></label>
+        <label>Libellés<input type="text" value="${nouveau ? '' : 'Les mots du Coran'}" placeholder="séparés par des virgules (10 au plus)" list="libs"></label>
+        <datalist id="libs">${LIBELLES.map((l) => `<option value="${l}">`).join('')}</datalist>
+        <label class="plein">Résumé<input type="text" placeholder="Deux phrases (liste, page publique, réseaux sociaux)" value="${nouveau ? '' : 'Résumé d\'exemple.'}"></label>
+        <label>Image de couverture<input type="text" value="${nouveau ? '' : 'articles/a1/images/couverture.jpg'}" placeholder="déposer une image ou choisir dans Fichiers"></label>
+        <label>Adresse (slug)<input type="text" value="${nouveau ? '' : 'aberration-1-1926-et-le-sawm-fige-en'}" ${nouveau ? 'placeholder="proposée à partir du titre"' : 'disabled title="Fixée à la première publication"'}></label>
+      </div>
+      <div class="barre-ed">
+        <button title="Titre de section"><b>T</b>2</button><button><b>G</b></button><button><i>I</i></button><button>❝</button><button>• Liste</button><button>▦ Tableau</button><button>🔗</button><button>🖼 Image</button>
+        <span class="sep"></span><button data-inserer title="Insère arabe + translittération copiés de donnees/">+ Verset</button><button title="Encadré">▭ Encadré</button><button title="Texte de droite à gauche">⇐ RTL</button>
+        <span class="modes"><button data-mode="visuel" class="${modeEd === 'visuel' ? 'actif' : ''}">Visuel</button><button data-mode="html" class="${modeEd === 'html' ? 'actif' : ''}">HTML</button></span>
+      </div>
+      ${modeEd === 'visuel' ? `<div class="zone-ed corps-art" contenteditable="true">${nouveau ? '<p style="color:var(--discret)">Commencer à écrire, ou coller le HTML produit avec Claude dans le mode HTML…</p>' : corpsArticle()}</div>`
+        : `<textarea class="zone-ed" spellcheck="false">${htmlSource}</textarea>`}
+      <div class="ed-etat"><span>${nouveau ? 'Nouveau brouillon (privé)' : 'Brouillon privé · enregistré à 9 h 41 · copie locale toutes les 30 s'}</span><span>HTML assaini à l'enregistrement : ni &lt;style&gt; ni &lt;script&gt;</span></div>
+      <div class="actions-ed">
+        <div class="gauche"><button class="btn" data-toast="Brouillon enregistré (privé) — maquette">Enregistrer le brouillon</button><button class="btn" data-toast="Version 5 enregistrée — maquette">Enregistrer une version</button><button class="btn" data-histo>Historique</button><button class="btn" data-dossier>Dossier pour Claude</button></div>
+        <div class="droite"><button class="btn" data-e="article">Aperçu</button>${nouveau ? '<button class="btn principal" data-publier>Publier</button>' : '<button class="btn" data-toast="Article retiré : lisible des rédacteurs seulement — maquette">Retirer</button><button class="btn principal" data-publier>Publier les modifications</button>'}</div>
+      </div>
+    </div>
+    ${panneauContexte()}
+  </div>`;
+}
+function panneauContexte() {
+  const vv = nouveau ? [] : [['19:26', true, 'verset étudié'], ['2:183', true, ''], ['2:184', true, ''], ['2:187', false, 'à comparer']];
+  const sec = (titre, n, corps, { ouvert = false, neuf = false } = {}) => `<details class="ctx" ${ouvert ? 'open' : ''}><summary>${titre}${neuf ? '<span class="nouveau">nouveau</span>' : ''}<span class="n">${n}</span></summary><div class="ctx-corps">${corps}</div></details>`;
+  return `<aside class="contexte"><h2>Contexte <small>privé · sert à écrire</small></h2>
+  ${sec('Versets', vv.length, (vv.map(([r, c, note]) => `<div class="ctx-item"><div><a class="ref" href="#">${r}</a> <label class="cite"><input type="checkbox" ${c ? 'checked' : ''}> cité (affiché sous le verset)</label><div class="ar" lang="ar">${V(r).ar}</div>${note ? `<div class="petit">Note : ${note}</div>` : ''}</div><div class="actions"><button data-toast="Verset inséré dans le texte (copié de donnees/) — maquette">insérer</button><button>retirer</button></div></div>`).join('') || '<p class="petit">Aucun verset. Depuis Lecture ou des résultats : cocher « Choisir » puis « Ajouter au contexte ».</p>')
+    + `<div class="ctx-ajout"><input placeholder="2:255 ou 2:183-187"><button class="btn">Ajouter</button></div>`, { ouvert: true })}
+  ${sec('Racines et lexique', nouveau ? 0 : 2, nouveau ? '<p class="petit">Aucune.</p>' : `<div class="ctx-item"><div><span class="ar" lang="ar">صوم</span> <span class="petit">racine · ${D.racine.n} occurrences, ${D.racine.versets} versets</span></div><div class="actions"><button>occurrences</button></div></div>
+    <div class="ctx-item"><div><span class="ar" lang="ar">صوم</span> <span class="petit">entrée du lexique · définitions lues dans Firestore</span></div><div class="actions"><button data-e="lexique">fiche</button></div></div>
+    <div class="ctx-ajout"><input placeholder="racine ou clé du lexique"><button class="btn">Ajouter</button></div>`)}
+  ${sec('Fichiers et images', nouveau ? 0 : 2, `${nouveau ? '' : '<div class="ctx-item"><div>🖼 couverture.jpg <span class="petit">212 Ko · image publique</span></div><div class="actions"><button>insérer</button></div></div><div class="ctx-item"><div>📄 notes-sawm.pdf <span class="petit">1,4 Mo · fichier de travail (privé)</span></div><div class="actions"><button>ouvrir</button></div></div>'}<div class="depot">Déposer des fichiers ici (Storage) — images ≤ 5 Mo, fichiers ≤ 25 Mo</div>`)}
+  ${sec('Sources et liens', nouveau ? 0 : 1, `${nouveau ? '' : '<div class="ctx-item"><div>Exemple de source <span class="petit">fictif · publiée en bas de l\'article</span></div><div class="actions"><button>modifier</button></div></div>'}<div class="ctx-ajout"><input placeholder="https://… ou référence"><button class="btn">Ajouter</button></div>`)}
+  ${sec('Discussions du forum', nouveau ? 0 : 1, `${nouveau ? '' : '<div class="ctx-item"><div>ṣawm et nadhr : même engagement ? <span class="petit">fictif · 3 réponses</span></div><div class="actions"><button>ouvrir</button></div></div>'}<p class="petit">Depuis un fil : « Ajouter au contexte ».</p>`)}
+  ${sec('Mes Notes liées', nouveau ? 0 : 1, nouveau ? '<p class="petit">Aucune.</p>' : '<div class="ctx-item"><div>Idées pour la suite <span class="petit">note privée · fictif</span></div><div class="actions"><button>ouvrir</button></div></div>', { neuf: true })}
+  ${sec('Vérification', nouveau ? 0 : '1 / 3', nouveau ? '<p class="petit">Aucun point.</p>' : `<div class="ctx-item"><div><span class="verif fait">fait</span> Nombre d'occurrences de صوم <span class="petit">vérifié</span></div><div class="actions"><input type="checkbox" checked></div></div>
+    <div class="ctx-item"><div><span class="verif deduction">déduction</span> Point fictif à relire</div><div class="actions"><input type="checkbox"></div></div>
+    <div class="ctx-item"><div><span class="verif hypothese">hypothèse</span> Point fictif à documenter</div><div class="actions"><input type="checkbox"></div></div>
+    <p class="petit">Les points non vérifiés sont rappelés à la publication (sans bloquer).</p>`, { neuf: true })}
+  ${sec('Définition proposée', nouveau ? 0 : 1, nouveau ? '<p class="petit">Aucune.</p>' : '<div class="ctx-item"><div><span class="ar" lang="ar">صوم</span> <span class="etat brouillon">à valider</span><div class="petit">Texte de la définition proposée (fictif). Publiée au lexique seulement sur votre décision.</div></div><div class="actions"><button data-toast="Rien n\'est publié sans votre décision — maquette">publier au lexique…</button></div></div>', { neuf: true })}
+  ${sec('Recherches Alfamous', nouveau ? 0 : 2, nouveau ? '<p class="petit">Aucune.</p>' : `<div class="ctx-item"><div><code>r:صوم</code> <span class="petit">${D.racine.n} occurrences</span></div><div class="actions"><button>rejouer</button></div></div><div class="ctx-item"><div><code>صوم 2:183</code> <span class="petit">exemple</span></div><div class="actions"><button>rejouer</button></div></div>`, { neuf: true })}
+  ${sec('Commentaires traditionnels', '', '<p class="petit">Traductions (tanzil.net) des versets du contexte, pour la comparaison ; jamais source du sens.</p>', { neuf: true })}
+  ${sec('Articles liés', nouveau ? 0 : 1, nouveau ? '<p class="petit">Aucun.</p>' : '<div class="ctx-item"><div>Iftar (إفطار) : L\'infraction qui n\'existe pas</div><div class="actions"><button>retirer</button></div></div>', { neuf: true })}
+  ${sec('Résumé court', '', '<textarea style="width:100%;min-height:60px" placeholder="280 caractères pour les réseaux sociaux"></textarea>', { neuf: true })}
+  </aside>`;
+}
+function fenetreHistorique() {
+  const v = fenetre('Historique des versions', `<div class="versions"><div class="v-liste">
+    <button class="actif">Brouillon actuel<br><small>aujourd'hui 9 h 41 · non publié</small></button>
+    <button>Version 4 · <b>publiée</b><br><small>24 févr. 2026 · import Blogger</small></button>
+    <button>Version 3<br><small>exemple</small></button><button>Version 2<br><small>exemple</small></button><button>Version 1<br><small>exemple</small></button></div>
+    <div><p style="margin:0 0 6px;font-size:14px;color:var(--discret)">Comparaison du brouillon avec la version publiée (exemple) :</p>
+    <div class="diff">Introduction de l'article — <del>ancienne phrase</del> <ins>nouvelle phrase</ins>. Le mot <span class="ar" lang="ar">صَوْمًا</span>…</div>
+    <p style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn" data-toast="Version restaurée dans le brouillon (rien n'est publié) — maquette" data-fermer>Restaurer dans le brouillon</button><button class="btn">Voir cette version</button></p>
+    <p class="aide-pub">Une version à chaque « Enregistrer une version » et à chaque publication ; jamais modifiée ni supprimée.</p></div></div>`);
+}
+function fenetreDossier() {
+  const vv = ['19:26', '2:183', '2:184', '2:187'];
+  const txt = `# Dossier pour Claude — article « ${ARTICLES[0].titre} »
+Projet : Gestion des projets Amha · conversation [Blog]
+Famille : Racines (analyse de racine) · Libellés : Les mots du Coran
+Consignes : règle d'or (le sens se déduit uniquement des occurrences du Coran : occurrences, amis,
+amis contigus) ; définitions conformes au lexique, conflits signalés sans les trancher ; arabe seul sur
+sa ligne, translittération dans le texte ; ne citer aucun verset de mémoire : utiliser ceux ci-dessous.
+
+## Brouillon actuel (HTML)
+<h2>Le verset</h2> … (le brouillon complet est copié ici)
+
+## Versets du contexte — copiés de donnees/texte/ (Alfamous1, ${D.dateDonnees})
+${vv.map((r) => `### ${r}${['19:26', '2:183', '2:184'].includes(r) ? ' (cité)' : ''}\n<span class="ar">${V(r).ar}</span>\n${V(r).tr}`).join('\n\n')}
+
+## Racine صوم — donnees/racines.json
+${D.racine.n} occurrences dans ${D.racine.versets} versets : ${D.racine.refs.join(' ')}
+
+## Lexique — entrée صوم (définitions lues dans Firestore, avec signature et date)
+(aucune définition dans la maquette)
+
+## Sources · Vérification · Notes
+- Exemple de source (fictif)
+- [fait, vérifié] Nombre d'occurrences de صوم
+- [déduction, à vérifier] Point fictif à relire
+
+## Demande
+Relis le brouillon et propose une version révisée, au format HTML du blog…`;
+  fenetre('Dossier pour Claude', `<p style="margin:0 0 8px;font-size:14px;color:var(--discret)">Texte structuré à coller dans une conversation « [Blog] … ». Versets et chiffres <b>copiés des fichiers donnees/</b> au moment du clic (ici : vrais extraits). Puis recoller le HTML obtenu dans le mode HTML de l'éditeur.</p>
+    <div class="dossier">${txt.replace(/<(?!\/?span)/g, '&lt;')}</div>
+    <p style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px"><button class="btn principal" data-toast="Dossier copié dans le presse-papiers — maquette" data-fermer>Copier</button><button class="btn" data-toast="dossier-aberration-1-1926-et-le-sawm-fige-en.md téléchargé — maquette" data-fermer>Télécharger (.md)</button><button class="btn" disabled title="Étape 2, à discuter : clé dans Secret Manager, coût, plafond">Demander à Claude (plus tard)</button></p>`);
+}
+function fenetrePublier() {
+  fenetre(nouveau ? 'Publier l\'article' : 'Publier les modifications', `<p>${nouveau ? 'L\'article devient lisible par tous dans l\'onglet Articles ; son adresse est fixée :' : 'Le brouillon remplace la version en ligne ; une version publiée est enregistrée.'}</p>
+    ${nouveau ? '<p><code>/articles/le-sens-du-mot-sawm-suite/</code></p>' : ''}
+    <div class="note-maquette" style="margin:8px 0"><b>Avant de publier :</b> 2 points de vérification non cochés (déduction, hypothèse). 3 versets marqués « cités » s'afficheront sous 19:26, 2:183, 2:184.</div>
+    <p class="aide-pub">La page publique indexable sera mise à jour au prochain déploiement (deployerAlfamous1.bat).</p>
+    <p style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-toast="Publié (maquette)" data-fermer>Publier</button></p>`);
+}
+
+// ---------- Écran : sous un verset (lecture de la sourate 19) ----------
+function vueVerset() {
+  const ligne = (r) => `<div class="verset ${choisis.has(r) ? 'choisi' : ''}"><div class="verset-entete"><a class="ref" href="#">${r}</a><span><label class="choisir"><input type="checkbox" data-choisir="${r}" ${choisis.has(r) ? 'checked' : ''}> Choisir</label> · page ${V(r).p}</span></div>
+    <p class="ar" lang="ar">${V(r).ar}</p><p class="tr">${V(r).tr}</p>
+    ${r === '19:26' ? `<div class="ligne-articles">📝 Articles : <a href="#" data-e="article">${ARTICLES[0].titre}</a></div><div class="forum-verset">💬 Commentaires (0) · Forum : 1 fil</div>` : '<div class="forum-verset">💬 Commentaires (0)</div>'}</div>`;
+  return `<div class="note-maquette"><b>Lecture de la sourate 19</b> (versets copiés de <code>donnees/texte/019.json</code>). La ligne « Articles » apparaît sous un verset cité par un article publié (une seule requête par sourate). ${niveau >= 3 ? 'Cocher « Choisir » : la barre de sélection gagne « Ajouter au contexte… ».' : ''}</div>
+  <div class="titre"><h1>Sourate 19</h1><span class="resume">versets 25 à 27</span></div>
+  ${['19:25', '19:26', '19:27'].map(ligne).join('')}
+  ${choisis.size ? `<div class="barre-copie"><span>${choisis.size} verset${choisis.size > 1 ? 's' : ''} choisi${choisis.size > 1 ? 's' : ''}</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn">Aperçu</button><button class="btn">Copier</button>${niveau >= 3 ? '<button class="btn principal" data-ajouter>Ajouter au contexte…</button>' : ''}<button class="btn" data-vider>Vider</button></span></div>` : ''}`;
+}
+function fenetreAjouter() {
+  fenetre('Ajouter au contexte d\'un article', `<p>${[...choisis].join(', ')} → </p>
+    <div class="liste-fils">${ARTICLES.slice(0, 4).map((a, i) => `<label class="art-ligne" style="grid-template-columns:24px 1fr"><input type="radio" name="cible" ${i === 0 ? 'checked' : ''}><span>${a.titre} ${a.etat === 'brouillon' ? '<span class="etat brouillon">brouillon</span>' : ''}</span></label>`).join('')}</div>
+    <label class="choisir" style="margin-top:8px"><input type="checkbox" checked> marquer comme « cité »</label>
+    <p style="display:flex;gap:6px;justify-content:flex-end"><button class="btn" data-fermer>Annuler</button><button class="btn principal" data-toast="Ajouté au contexte (maquette)" data-fermer data-vider>Ajouter</button></p>`);
+}
+
+// ---------- Écran : fiche du lexique ----------
+function vueLexique() {
+  return `<a class="retour" href="#">← Lexique</a>
+  <div class="note-maquette"><b>Fiche du lexique</b> (<code>#/lexique/صوم</code>), telle qu'acceptée en phase 3, avec un bloc <b>Articles</b> après les définitions. Chiffres calculés sur <code>donnees/racines.json</code> ; définitions non montrées.</div>
+  <div class="entree-tete bloc"><p class="entree-cle" lang="ar">صوم</p><div class="chiffres"><span><b>${D.racine.n}</b> occurrences</span><span><b>${D.racine.versets}</b> versets</span></div></div>
+  <div class="bloc"><h2>Occurrences dans le Coran <small>${D.racine.versets} versets</small></h2><p class="petit" style="font-size:14px;color:var(--discret)">${D.racine.refs.join(' · ')}</p></div>
+  <div class="bloc"><h2>Définitions <small>(comme aujourd'hui)</small></h2><p class="vide">…</p></div>
+  <div class="bloc"><h2>Articles <small>qui étudient ou citent cette entrée</small></h2>
+    <div class="liste-fils"><div class="art-ligne" data-e="article"><div class="vignette">صوم</div><div><div class="art-titre">${ARTICLES[0].titre}</div><div class="art-meta">${fam('racines')}<span>24 févr. 2026</span></div></div><div class="art-droite">💬 2</div></div>
+    <div class="art-ligne"><div class="vignette">فطر</div><div><div class="art-titre">Iftar (إفطار) : L'infraction qui n'existe pas</div><div class="art-meta">${fam('racines')}<span>4 mars 2026</span><span class="etiquette">exemple</span></div></div><div class="art-droite"></div></div></div></div>
+  <div class="bloc"><h2>Racines proches · Forum <small>(comme aujourd'hui)</small></h2><p class="vide">…</p></div>`;
+}
+
+// ---------- Écran : page publique ----------
+function vuePublique() {
+  const a = ARTICLES[0];
+  return `<div class="note-maquette"><b>Page publique</b> générée au déploiement : du HTML statique, sans l'application, lisible par les moteurs de recherche. Adresse selon la question 8.</div>
+  <div class="publique"><div class="barre-nav">🔒 <span>blog.alfamous.ca/articles/aberration-1-1926-et-le-sawm-fige-en/</span></div>
+  <div class="pub-in"><header><b>Alfamous · Articles</b><span><a href="#">Toutes les familles</a> · <a href="#">Ouvrir l'atelier</a></span></header>
+    <div class="art-meta">${fam(a.f)}<span>Amha Nathali · 24 février 2026</span></div>
+    <h1 style="font-size:30px;line-height:1.25">${a.titre}</h1>
+    <div class="corps-art">${corpsArticle()}</div>
+    <p style="margin-top:20px;padding-top:12px;border-top:1px solid #e3ddd2;font-size:15px">💬 <a href="#" data-e="article">Lire les 2 commentaires et commenter dans l'atelier</a> · Versets cités : <a href="#">19:26</a>, <a href="#">2:183</a>, <a href="#">2:184</a> (ouvrent l'atelier)</p></div></div>
+  <h3 style="margin:18px 0 6px;font-size:15px">Dans l'en-tête de la page (extrait)</h3>
+  <div class="code-meta">${esc(`<title>${a.titre} — Alfamous</title>
+<meta name="description" content="(résumé de l'article)">
+<link rel="canonical" href="https://blog.alfamous.ca/articles/aberration-1-1926-et-le-sawm-fige-en/">
+<meta property="og:type" content="article"> <meta property="og:image" content="…/couverture.jpg">
+<script type="application/ld+json">{"@type":"Article","headline":"…","datePublished":"2026-02-24",…}<\/script>`)}</div>
+  <h3 style="margin:18px 0 6px;font-size:15px">Redirections le jour de la bascule (301)</h3>
+  <div class="code-meta">blog.alfamous.ca/2026/02/aberration-1-1926-et-le-sawm-fige-en.html → /articles/aberration-1-1926-et-le-sawm-fige-en/
+blog.alfamous.ca/search/label/Les%20mots%20du%20Coran → /articles/?libelle=Les%20mots%20du%20Coran
+blog.alfamous.ca/feeds/posts/default → /articles/flux.xml
+(tout le reste) → /articles/
++ /sitemap.xml, /robots.txt, /articles/flux.xml générés au déploiement</div>`;
+}
+
+// ---------- Écran : import ----------
+function vueImport() {
+  if (niveau < 3) return '<p class="message">L\'import se lance sur le PC (script admin) ; aucun écran pour les membres.</p>';
+  return `<div class="note-maquette"><b>Import</b> : pas d'écran dans l'application. Script <code>npm run importer:articles</code> sur le PC, à blanc par défaut, comme la phase 4. Ci-dessous : extrait de la <b>fiche de contrôle</b> à relire (familles proposées par la maquette, à valider).</div>
+  <div class="code-meta">Source : Blogger « Zoom-Coran » (flux public ou API v3)  ·  207 articles publiés
+Assainissement : 35 &lt;style&gt; et 1 &lt;script&gt; retirés · 6 &lt;iframe&gt; (question 6) · attributs style réduits à text-align et direction
+Images : copiées de blogger.googleusercontent.com vers Storage articles/{id}/images/
+Identifiants stables : imp-b-&lt;id Blogger&gt;  (relancer = remplacer, sans doublon)
+À expliquer avant l'import : 219 blocs dans articles-format-html.js contre 207 sur Blogger</div>
+  <div class="liste-fils" style="margin-top:12px;font-size:14px">
+  <div class="art-ligne" style="grid-template-columns:minmax(0,1fr) 140px 120px;font-weight:600;cursor:default"><span>Titre (Blogger)</span><span>Famille proposée</span><span>À relire</span></div>
+  ${ARTICLES.filter((a) => a.etat !== 'brouillon' && !a.titre.includes('exemple')).map((a) => `<div class="art-ligne" style="grid-template-columns:minmax(0,1fr) 140px 120px;cursor:default"><span>${a.titre}</span><select><option>${FAMILLES[a.f]}</option>${Object.values(FAMILLES).filter((x) => x !== FAMILLES[a.f]).map((x) => `<option>${x}</option>`).join('')}</select><span class="petit">${a.id === 'a2' || a.id === 'a3' ? '&lt;style&gt; retiré' : ''}</span></div>`).join('')}
+  </div>
+  <p class="aide-pub">Étapes : à blanc → relecture de la fiche (familles) → émulateurs → essai (alfamous-essai) → production le jour de la bascule.</p>`;
+}
+
+// ---------- Rendu ----------
+function rendre() {
+  menu();
+  document.querySelectorAll('#ecrans button').forEach((b) => b.classList.toggle('actif', b.dataset.e === ecran));
+  document.querySelectorAll('#roles button').forEach((b) => b.classList.toggle('actif', +b.dataset.n === niveau));
+  const vue = $('#vue');
+  vue.classList.toggle('large', ecran === 'editeur');
+  vue.innerHTML = { liste: vueListe, article: vueArticle, editeur: vueEditeur, verset: vueVerset, lexique: vueLexique, publique: vuePublique, import: vueImport }[ecran]();
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', (e) => {
+  const t = e.target;
+  const ec = t.closest('[data-e]');
+  if (ec) { e.preventDefault(); nouveau = !!ec.dataset.nouveau; ecran = ec.dataset.e; document.querySelectorAll('.voile').forEach((v) => v.remove()); rendre(); return; }
+  const r = t.closest('[data-n]'); if (r && r.closest('#roles')) { niveau = +r.dataset.n; rendre(); return; }
+  const o = t.closest('[data-ouvrir]'); if (o) { nouveau = false; ecran = o.dataset.ouvrir === 'a0' ? 'editeur' : 'article'; rendre(); return; }
+  const f = t.closest('[data-f]'); if (f) { filtreF = f.dataset.f; rendre(); return; }
+  const l = t.closest('[data-l]'); if (l) { filtreL = filtreL === l.dataset.l ? null : l.dataset.l; rendre(); return; }
+  const m = t.closest('[data-mode]'); if (m) { modeEd = m.dataset.mode; rendre(); return; }
+  if (t.closest('[data-histo]')) return fenetreHistorique();
+  if (t.closest('[data-dossier]')) return fenetreDossier();
+  if (t.closest('[data-publier]')) return fenetrePublier();
+  if (t.closest('[data-ajouter]')) return fenetreAjouter();
+  if (t.closest('[data-inserer]')) toast('Verset choisi dans le contexte inséré (arabe + translittération copiés de donnees/) — maquette');
+  const ts = t.closest('[data-toast]'); if (ts) toast(ts.dataset.toast);
+  if (t.closest('[data-vider]')) { choisis.clear(); if (ecran === 'verset') rendre(); }
+  if (t.closest('a[href="#"]')) e.preventDefault();
+});
+document.addEventListener('change', (e) => { const c = e.target.closest('[data-choisir]'); if (c) { c.checked ? choisis.add(c.dataset.choisir) : choisis.delete(c.dataset.choisir); rendre(); } });
+$('#theme').addEventListener('click', () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'sombre' ? 'clair' : 'sombre'; });
+rendre();
+</script>
+</body>
+</html>
