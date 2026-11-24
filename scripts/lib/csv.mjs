@@ -1,6 +1,6 @@
 // Lecteur CSV minimal (RFC 4180) : guillemets, guillemets doublés, retours à la ligne dans les cellules.
 // Aucune dépendance externe.
-export function lireCsv(texte) {
+export function lireCsv(texte, separateur = ',') {
   const lignes = [];
   let ligne = [];
   let cellule = '';
@@ -14,7 +14,7 @@ export function lireCsv(texte) {
         else entreGuillemets = false;
       } else cellule += c;
     } else if (c === '"') entreGuillemets = true;
-    else if (c === ',') { ligne.push(cellule); cellule = ''; }
+    else if (c === separateur) { ligne.push(cellule); cellule = ''; }
     else if (c === '\n' || c === '\r') {
       if (c === '\r' && texte[i + 1] === '\n') i++;
       ligne.push(cellule); lignes.push(ligne); ligne = []; cellule = '';

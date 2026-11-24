@@ -276,7 +276,9 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
    tout cela avec un panneau Contexte réduit (versets, sources, fichiers) ; **3b** (24 nov.) : panneau complet,
    « Ajouter au contexte… », articles sous les versets et dans le lexique, « Dossier pour Claude » (l'étape 4 est faite avec).
 4. Panneau Contexte, « Ajouter au contexte », encadrés sous les versets et dans le lexique, « Dossier pour Claude ».
-5. Import depuis Blogger (à blanc, relecture, émulateurs, essai).
+5. Import depuis Blogger (à blanc, relecture, émulateurs, essai) — script `npm run importer:articles` (24 nov.) :
+   à blanc sur la sauvegarde : 210 articles (207 publiés), 205 images, 51 commentaires + 14 dans le fil de la page,
+   2 écartés, 3 cadres non YouTube retirés ; rapport et fiche dans `import/articles/`.
 6. Pages publiques, plan du site, flux ; redirections préparées (activées le jour de la bascule).
 
 ## Décisions du 24 nov. 2026
