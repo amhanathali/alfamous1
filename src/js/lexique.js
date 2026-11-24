@@ -10,6 +10,7 @@ import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, messageErreur, TEXTE_MAX } from './commentaires-format.js';
 import { afficherCommentaires, publierCommentaire } from './commentaires.js';
+import { blocArticlesLexique } from './articles-liens.js';
 import { normaliserCle, estRacine, racinesProches, grouperEntrees, filtrerEntrees, CLE_MAX } from './lexique-outils.js';
 import { estArabe } from './arabe.js';
 
@@ -141,10 +142,12 @@ async function vueEntree(contenu, cleBrute) {
       <p class="rappel">Le sens d'un mot se déduit de ses occurrences dans le Coran ; les définitions ci-dessous sont celles des membres.</p>
     </section>
     <div class="lexique bloc"><section class="commentaires" data-com-type="lexique" data-com-cle="${echapper(cle)}"><p class="aide">Chargement…</p></section></div>
+    <section class="bloc" id="articles-entree"></section>
     ${proches ? `<section class="bloc" id="proches"></section>` : ''}`;
   await Promise.all([
     afficherCommentaires(contenu.querySelector('.commentaires')),
     proches ? dessinerProches(contenu.querySelector('#proches'), cle, racines) : null,
+    blocArticlesLexique(contenu.querySelector('#articles-entree'), cle, racine),
   ]);
 }
 

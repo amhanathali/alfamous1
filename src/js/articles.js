@@ -8,12 +8,12 @@ import { firebase, avecDelai, stockage } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, dateCourte, messageErreur } from './commentaires-format.js';
 import { afficherCommentaires } from './commentaires.js';
-import * as D from './donnees.js';
 import {
   FAMILLES, LIMITES, slugifier, slugValide, nettoyerLibelles, champsCites,
 } from './articles-outils.js';
 import { assainisseur, texteBrut } from './articles-assainir.js';
 import { versDocx, markdownVersHtml, texteVersHtml } from './articles-import.js';
+import { creerPanneau, normaliserContexte, developperRefs, verset, fenetreDossier } from './articles-contexte.js';
 
 const PAR_PAGE = 30;
 const LIBELLES_CONNUS = ['Les mots du Coran', 'Développement personnel', 'Société', 'Politique', 'Divers', 'Conférences',
@@ -147,10 +147,24 @@ async function vueLecture(contenu, cle) {
       ${(a.versets || []).length ? `<div class="pied-art"><span>Versets cités :</span>${a.versets.map((r) => `<a class="lien-cible" href="${lienRequete(r)}">${echapper(r)}</a>`).join('')}</div>` : ''}
       ${sources.length ? `<div class="pied-art sources-art"><b>Sources</b><ul>${sources.map((s) => `<li>${s.url && /^https?:/.test(s.url) ? `<a href="${echapper(s.url)}" target="_blank" rel="noopener noreferrer">${echapper(s.titre || s.url)}</a>` : echapper(s.titre)}${s.note ? ` — ${echapper(s.note)}` : ''}</li>`).join('')}</ul></div>` : ''}
     </article>
+    ${(a.liens || []).length ? '<div class="bloc articles-lies"><h2>Articles liés</h2><div class="liste-fils" data-lies></div></div>' : ''}
     ${a.statut === 'publie' ? `<div class="bloc article-coms"><section class="commentaires" data-com-type="article" data-com-cle="${echapper(a.id)}"><p class="aide">Chargement…</p></section></div>` : ''}`;
   lierVersets(contenu.querySelector('.corps-art'));
   if (a.statut === 'publie') afficherCommentaires(contenu.querySelector('.commentaires'));
+  if ((a.liens || []).length) articlesLies(contenu.querySelector('[data-lies]'), a.liens);
   contenu.querySelector('[data-historique]')?.addEventListener('click', () => fenetreHistorique(a, null));
+}
+
+// Articles liés (choisis dans le panneau Contexte) : seuls les publiés sont affichés.
+async function articlesLies(zone, ids) {
+  try {
+    const { db, F } = await firebase();
+    const docs = await Promise.all(ids.map((id) => F.getDoc(F.doc(db, `articles/${id}`)).catch(() => null)));
+    const liste = docs.filter((d) => d?.exists() && d.data().statut === 'publie').map((d) => ({ id: d.id, ...d.data() }));
+    zone.innerHTML = liste.map((x) => `<a class="art-ligne" href="${adresse(x)}"><span class="vignette">${echapper((String(x.titre).match(/\p{L}/u) || ['?'])[0])}</span>
+      <span class="art-centre"><span class="art-titre">${echapper(x.titre)}</span><span class="art-meta">${puceFamille(x.famille)}</span></span><span class="art-droite">${dateCourte(x.publieLe)}</span></a>`).join('');
+    if (!liste.length) zone.closest('.articles-lies').remove();
+  } catch { zone.closest('.articles-lies')?.remove(); }
 }
 
 // Blocs de versets insérés par l'éditeur (data-ref) : la référence ouvre la lecture du verset.
@@ -188,7 +202,7 @@ async function fenetreHistorique(a, surRestaurer) {
 // ---------- Éditeur ----------
 const MODELE = () => ({
   titre: '', famille: 'racines', libelles: [], resume: '', image: null, corps: '',
-  contexte: { versets: [], sources: [], fichiers: [] },
+  contexte: normaliserContexte(),
 });
 const cleLocale = (id) => `alfamous-article-${id || 'nouveau'}`;
 const lireLocal = (id) => { try { return JSON.parse(localStorage.getItem(cleLocale(id)) || 'null'); } catch { return null; } };
@@ -214,7 +228,7 @@ async function vueEditeur(contenu, id) {
       travail = s2.exists() ? { ...MODELE(), ...s2.data() }
         : { ...MODELE(), titre: a.titre, famille: a.famille, libelles: a.libelles || [], resume: a.resume || '', image: a.image, corps: a.corps || '',
           contexte: { versets: (a.versets || []).map((ref) => ({ ref, cite: true, note: '' })), sources: (a.sources || []).map((s) => ({ ...s, publique: true })), fichiers: [] } };
-      travail.contexte = { versets: [], sources: [], fichiers: [], ...(travail.contexte || {}) };
+      travail.contexte = normaliserContexte(travail.contexte);
     }
   } catch (e) { contenu.innerHTML = erreurHtml(e); return; }
 
@@ -270,6 +284,7 @@ async function vueEditeur(contenu, id) {
             <button type="button" class="btn" data-act="enregistrer">Enregistrer le brouillon</button>
             ${a ? '<button type="button" class="btn" data-act="version">Enregistrer une version</button><button type="button" class="btn" data-act="historique">Historique</button>' : ''}
             <button type="button" class="btn" data-act="apercu">Aperçu</button>
+            <button type="button" class="btn" data-act="dossier" title="Brouillon et contexte en texte structuré, versets copiés des données">Dossier pour Claude</button>
           </div>
           <div class="droite">
             ${publie ? '<button type="button" class="btn" data-act="retirer">Retirer</button>' : ''}
@@ -325,7 +340,7 @@ async function vueEditeur(contenu, id) {
   form.titre.addEventListener('input', () => { if (!slugTouche) form.slug.value = slugifier(form.titre.value); });
   form.slug.addEventListener('input', () => { slugTouche = true; });
   contenu.querySelector('[data-local="reprendre"]')?.addEventListener('click', (e) => {
-    travail = { ...travail, ...local, contexte: local.contexte || travail.contexte }; remplir(travail); dessinerContexte();
+    travail = { ...travail, ...local, contexte: normaliserContexte(local.contexte || travail.contexte) }; remplir(travail); dessinerContexte();
     e.target.closest('.bandeau-local').remove();
   });
   contenu.querySelector('[data-local="ignorer"]')?.addEventListener('click', (e) => { effacerLocal(a?.id); e.target.closest('.bandeau-local').remove(); });
@@ -455,66 +470,13 @@ async function vueEditeur(contenu, id) {
     } catch (err) { msg.textContent = `Import impossible : ${messageErreur(err)}`; }
   });
 
-  // ---------- Panneau Contexte (étape 3a : versets, sources, fichiers) ----------
-  const panneau = contenu.querySelector('.contexte');
-  function ajouterVerset(ref, cite) {
-    if (!travail.contexte.versets.some((v) => v.ref === ref)) travail.contexte.versets.push({ ref, cite, note: '' });
-    else if (cite) travail.contexte.versets.find((v) => v.ref === ref).cite = true;
-    dessinerContexte(); sauverLocal();
-  }
-  function dessinerContexte() {
-    const c = travail.contexte;
-    panneau.innerHTML = `<h2>Contexte <small>privé · sert à écrire</small></h2>
-      <details class="ctx" open><summary>Versets<span class="n">${c.versets.length}</span></summary><div class="ctx-corps">
-        ${c.versets.map((v, i) => `<div class="ctx-item"><div><a class="ref" href="${lienRequete(v.ref)}" target="_blank">${echapper(v.ref)}</a>
-          <label class="cite"><input type="checkbox" data-cite="${i}" ${v.cite ? 'checked' : ''}> cité (affiché sous le verset)</label>
-          <input class="note-ctx" type="text" data-note-v="${i}" value="${echapper(v.note || '')}" placeholder="note"></div>
-          <div class="actions"><button type="button" data-inserer-v="${i}">insérer</button><button type="button" data-retirer-v="${i}">retirer</button></div></div>`).join('') || '<p class="aide">Aucun verset. « + Verset » en insère un et l\'ajoute ici.</p>'}
-        <div class="ctx-ajout"><input type="text" data-ajout-v placeholder="2:183 ou 2:183-187"><button type="button" class="btn" data-ajout-v-ok>Ajouter</button></div>
-      </div></details>
-      <details class="ctx" ${c.sources.length ? 'open' : ''}><summary>Sources et liens<span class="n">${c.sources.length}</span></summary><div class="ctx-corps">
-        ${c.sources.map((s, i) => `<div class="ctx-item"><div>${s.url ? `<a href="${echapper(s.url)}" target="_blank" rel="noopener noreferrer">${echapper(s.titre || s.url)}</a>` : echapper(s.titre)}
-          ${s.note ? `<div class="petit">${echapper(s.note)}</div>` : ''}<label class="cite"><input type="checkbox" data-pub-s="${i}" ${s.publique ? 'checked' : ''}> publiée en bas de l'article</label></div>
-          <div class="actions"><button type="button" data-retirer-s="${i}">retirer</button></div></div>`).join('') || '<p class="aide">Aucune source.</p>'}
-        <div class="ctx-ajout ctx-source"><input type="text" data-s-titre placeholder="Titre"><input type="text" data-s-url placeholder="https://… (facultatif)"><input type="text" data-s-note placeholder="Note (facultative)"><button type="button" class="btn" data-ajout-s>Ajouter</button></div>
-      </div></details>
-      <details class="ctx" ${c.fichiers.length ? 'open' : ''}><summary>Fichiers<span class="n">${c.fichiers.length}</span></summary><div class="ctx-corps">
-        ${c.fichiers.map((f, i) => `<div class="ctx-item"><div>📄 <a href="#" data-ouvrir-f="${i}">${echapper(f.nom)}</a> <span class="petit">${Math.ceil((f.taille || 0) / 1024)} Ko · privé</span></div></div>`).join('') || '<p class="aide">Les fichiers importés (Word…) sont rangés ici.</p>'}
-      </div></details>
-      <p class="aide ctx-suite">Racines, lexique, forum, notes, vérification et « Dossier pour Claude » : étape suivante.</p>`;
-  }
-  dessinerContexte();
-  panneau.addEventListener('change', (e) => {
-    const t = e.target;
-    if (t.dataset.cite !== undefined) travail.contexte.versets[t.dataset.cite].cite = t.checked;
-    if (t.dataset.noteV !== undefined) travail.contexte.versets[t.dataset.noteV].note = t.value.slice(0, 500);
-    if (t.dataset.pubS !== undefined) travail.contexte.sources[t.dataset.pubS].publique = t.checked;
-    sauverLocal();
+  // ---------- Panneau Contexte (articles-contexte.js) ----------
+  const ctx = creerPanneau({
+    panneau: contenu.querySelector('.contexte'), ctx: () => travail.contexte, article: () => a,
+    sauver: () => sauverLocal(), inserer: (html) => inserer(html), blocVerset, msg,
   });
-  panneau.addEventListener('click', async (e) => {
-    const t = e.target;
-    if (t.dataset.retirerV !== undefined) { travail.contexte.versets.splice(Number(t.dataset.retirerV), 1); dessinerContexte(); sauverLocal(); }
-    if (t.dataset.retirerS !== undefined) { travail.contexte.sources.splice(Number(t.dataset.retirerS), 1); dessinerContexte(); sauverLocal(); }
-    if (t.dataset.insererV !== undefined) { const ref = travail.contexte.versets[t.dataset.insererV].ref; inserer(await blocVerset(ref)); }
-    if (t.dataset.ajoutVOk !== undefined) {
-      const champ = panneau.querySelector('[data-ajout-v]');
-      const refs = await developperRefs(champ.value);
-      if (!refs.length) { champ.setCustomValidity('Référence attendue : 2:183 ou 2:183-187'); champ.reportValidity(); return; }
-      for (const r of refs) ajouterVerset(r, true);
-    }
-    if (t.dataset.ajoutS !== undefined) {
-      const titre = panneau.querySelector('[data-s-titre]').value.trim(); const url = panneau.querySelector('[data-s-url]').value.trim();
-      if (!titre && !url) return;
-      if (url && !/^https?:\/\//.test(url)) { panneau.querySelector('[data-s-url]').setCustomValidity('Adresse https://…'); panneau.querySelector('[data-s-url]').reportValidity(); return; }
-      travail.contexte.sources.push({ titre: titre.slice(0, 300), url: url.slice(0, 500), note: panneau.querySelector('[data-s-note]').value.trim().slice(0, 500), publique: true });
-      dessinerContexte(); sauverLocal();
-    }
-    if (t.dataset.ouvrirF !== undefined) {
-      e.preventDefault();
-      try { const { st, S } = await stockage(); open(await S.getDownloadURL(S.ref(st, travail.contexte.fichiers[t.dataset.ouvrirF].chemin)), '_blank', 'noopener'); }
-      catch (err) { msg.textContent = messageErreur(err); }
-    }
-  });
+  const ajouterVerset = (ref, cite) => ctx.ajouterVerset(ref, cite);
+  const dessinerContexte = () => ctx.dessiner();
 
   // ---------- Enregistrer, versions, publier, retirer ----------
   const champsPublics = (d) => {
@@ -523,7 +485,7 @@ async function vueEditeur(contenu, id) {
       titre: d.titre, famille: d.famille, libelles: d.libelles, resume: d.resume, image: d.image, corps: d.corps,
       versets, sourates, racines: (d.contexte.racines || []).slice(0, 100), lexique: (d.contexte.lexique || []).slice(0, 100),
       sources: (d.contexte.sources || []).filter((s) => s.publique).map(({ titre, url, note }) => ({ titre, url, note })).slice(0, 50),
-      liens: (d.contexte.liens || []).slice(0, 20),
+      liens: (d.contexte.liens || []).map((l) => l.id).filter(Boolean).slice(0, 20),
     };
   };
   const occupe = (oui) => form.querySelectorAll('.actions-ed button').forEach((b) => { b.disabled = oui; });
@@ -606,6 +568,7 @@ async function vueEditeur(contenu, id) {
     });
     if (premiere) lot.set(F.doc(db, `slugs/${slug}`), { article: a.id });
     await avecDelai(lot.commit());
+    document.dispatchEvent(new CustomEvent('articles-changes'));
     return slug;
   }
 
@@ -622,13 +585,16 @@ async function vueEditeur(contenu, id) {
       lierVersets(document.querySelector('#fenetre .corps-art'));
       return;
     }
+    if (act === 'dossier') { fenetreDossier(lire(), a); return; }
     if (act === 'historique') { fenetreHistorique(a, (v) => { remplir({ ...lire(), titre: v.titre, corps: v.corps, resume: v.resume, famille: v.famille, libelles: v.libelles }); sauverLocal(); msg.textContent = `Version ${v.n} restaurée dans l'éditeur (pas encore enregistrée).`; }); return; }
     if (act === 'publier') {
       const nbCites = champsCites(travail.contexte).versets.length;
+      const nbAVerifier = (travail.contexte.verification || []).filter((v) => !v.verifie).length;
       ouvrirFenetre(`<h2>${publie ? 'Publier les modifications' : 'Publier l\'article'}</h2>
         <p>${publie ? 'Le brouillon remplace la version en ligne ; une version « publiée » est enregistrée.'
           : `L'article devient lisible par tous${jamaisPublie ? `, à l'adresse <code>#/article/${echapper(form.slug.value.trim())}</code>, qui ne changera plus` : ''}.`}</p>
-        ${nbCites ? `<p class="aide">${nbCites} verset${nbCites > 1 ? 's' : ''} marqué${nbCites > 1 ? 's' : ''} « cité » : affichage sous les versets à l'étape suivante.</p>` : ''}
+        ${nbCites ? `<p class="aide">${nbCites} verset${nbCites > 1 ? 's' : ''} marqué${nbCites > 1 ? 's' : ''} « cité » : l'article sera signalé sous ${nbCites > 1 ? 'ces versets' : 'ce verset'}.</p>` : ''}
+        ${nbAVerifier ? `<div class="bandeau-local"><b>Vérification :</b> ${nbAVerifier} point${nbAVerifier > 1 ? 's' : ''} non coché${nbAVerifier > 1 ? 's' : ''} « vérifié ». Vous pouvez publier quand même.</div>` : ''}
         <p class="aide">La page publique indexable sera produite au déploiement (étape 6).</p>
         <p class="form-msg" role="alert"></p>
         <div class="fenetre-bas"><button type="button" class="btn" data-fermer>Annuler</button><button type="button" class="btn principal" data-publier-ok>Publier</button></div>`);
@@ -648,6 +614,7 @@ async function vueEditeur(contenu, id) {
         try {
           const { db, F } = await firebase();
           await avecDelai(F.updateDoc(F.doc(db, `articles/${a.id}`), { statut: 'retire', modifieLe: F.serverTimestamp() }));
+          document.dispatchEvent(new CustomEvent('articles-changes'));
           fermerFenetre(); location.hash = `#/article/${encodeURIComponent(a.id)}`;
         } catch (err) { ev.target.disabled = false; ouvrirFenetre(`<h2>Retrait impossible</h2>${erreurHtml(err)}`); }
       });
@@ -668,18 +635,8 @@ async function vueEditeur(contenu, id) {
 }
 
 // ---------- Versets copiés des données (jamais tapés à la main) ----------
-async function developperRefs(texte) {
-  const m = String(texte).trim().match(/^(\d{1,3})\s*:\s*(\d{1,3})(?:\s*-\s*(\d{1,3}))?$/);
-  if (!m) return [];
-  const s = Number(m[1]); const de = Number(m[2]); const a = Number(m[3] || m[2]);
-  const sour = (await D.sourates()).find((x) => x.n === s);
-  if (!sour || de < 1 || a < de || a > sour.versets || a - de > 50) return [];
-  return Array.from({ length: a - de + 1 }, (_, i) => `${s}:${de + i}`);
-}
 async function blocVerset(ref) {
-  const [s, v] = ref.split(':').map(Number);
-  const x = (await D.texte(s)).versets.find((e) => e.v === v);
-  if (!x) throw new Error(`Verset ${ref} introuvable.`);
+  const x = await verset(ref);
   return `<div class="verset-bloc" data-ref="${ref}"><p class="ar" lang="ar" dir="rtl">${echapper(x.ar)}</p><p class="tr">${echapper(x.tr)}</p></div><p></p>`;
 }
 function fenetreVerset(surChoix) {

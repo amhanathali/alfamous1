@@ -1,6 +1,19 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles, étape 3b : panneau Contexte complet, liens, Dossier pour Claude
+- Panneau **Contexte** (`src/js/articles-contexte.js`) : versets, racines (occurrences et versets d'après
+  `racines.json`), entrées du lexique, sources, fichiers, discussions du forum (fils liés à l'article repérés
+  automatiquement, ou ajoutés par leur adresse), Mes Notes liées, **vérification** (fait / déduction / hypothèse,
+  « vérifié » ; rappel à la publication, sans bloquer), **définitions proposées** « à valider » (publiées au lexique
+  seulement sur décision, avec confirmation), recherches Alfamous, articles liés (affichés en bas de l'article).
+- **Dossier pour Claude** : brouillon et contexte en Markdown (consignes selon la famille, règle d'or, versets copiés
+  de `donnees/texte`, occurrences des racines, définitions publiées du lexique, vérification, sources, notes, fils,
+  articles liés, demande) ; modifiable, copier ou télécharger `.md`.
+- **Articles sous les versets** (`src/js/articles-liens.js`) : ligne « Articles : … » sous chaque verset cité par un
+  article publié (une requête par lot de 10 sourates affichées). **Fiche du lexique** : bloc « Articles ».
+- **Ajouter au contexte…** (rédacteurs) : depuis la barre de sélection des versets et depuis la fiche du lexique.
+
 ### Ajouté — onglet Articles, étape 3a : liste, lecture, éditeur, publication
 - Onglet **Articles** dans le menu (`src/js/articles.js`) : liste `#/articles` (familles, libellés, filtre des titres
   et résumés, 30 par page ; brouillons et articles retirés visibles des rédacteurs), lecture `#/article/<adresse>`
