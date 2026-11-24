@@ -26,7 +26,7 @@ service cloud.firestore {
             && get(/databases/$(database)/documents/articles/$(d.cle)).data.statut == 'publie');
     }
     function changes(cles) {
-      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(cles);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(cles.toSet());
     }
 
     match /{document=**} {
@@ -219,8 +219,9 @@ service cloud.firestore {
       // Créer : un brouillon jamais publié, sans adresse, signé du nom du compte.
       allow create: if niveau() >= 2
         && monNom().size() > 0
-        && request.resource.data.keys().hasOnly(champsArticle())
-        && request.resource.data.keys().hasAll(champsArticle())
+        // Comparaison d'ensembles : hasOnly + hasAll sur 21 clés dépassait la limite de 1 000 expressions
+        // évaluées par requête (test du 24 nov.).
+        && request.resource.data.keys().toSet() == champsArticle().toSet()
         && contenuArticleValide(request.resource.data)
         && request.resource.data.statut == 'brouillon'
         && request.resource.data.slug == null
