@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Crée dans les émulateurs un compte d'essai par niveau (docs/DROITS.md), des commentaires d'essai
-// sur 112:1, des définitions du lexique d'essai, et des notes et fils du forum d'essai : npm run emulateurs:peupler
+// sur 112:1, des définitions du lexique d'essai, des notes et fils du forum et des articles d'essai : npm run emulateurs:peupler
 // À lancer pendant que « npm run emulateurs » tourne. Ne touche jamais un vrai projet :
 // le script refuse de tourner si l'émulateur n'est pas visé.
 //
@@ -12,6 +12,7 @@
 import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { readFile } from 'node:fs/promises';
 
 process.env.FIREBASE_AUTH_EMULATOR_HOST ||= '127.0.0.1:9099';
 process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8085';
@@ -88,3 +89,38 @@ const rep = (auteurUid, auteurNom, texte, j) => ({ auteurUid, auteurNom, texte, 
 await db.doc('notes/essai-f1/reponses/1').set(rep(uids[3], 'Admin Essai', "[Texte d'essai] Première réponse.", 19));
 await db.doc('notes/essai-f1/reponses/2').set(rep(uids[1], 'Membre Essai', "[Texte d'essai] Réponse de l'auteur du fil.", 22));
 console.log('Notes et fils d\'essai prêts (Mes Notes : membre@essai.local ; forum : http://localhost:5050/#/forum).');
+
+// Articles d'essai (textes fictifs ; versets copiés de donnees/texte) : un publié par l'admin, un publié par le
+// modérateur, un brouillon du modérateur ; atelier, version, adresse réservée, commentaire.
+const t112 = JSON.parse(await readFile(new URL('../donnees/texte/112.json', import.meta.url), 'utf8')).versets[0];
+const blocVerset = `<div class="verset-bloc" data-ref="112:1"><p class="ar" lang="ar" dir="rtl">${t112.ar}</p><p class="tr">${t112.tr}</p></div>`;
+const art = (auteurUid, auteurNom, titre, famille, statut, j, extra = {}) => ({
+  titre, slug: null, famille, libelles: [], resume: "[Texte d'essai] Résumé de l'article.", image: null,
+  corps: `<p>[Texte d'essai] Introduction.</p><h2>Le verset</h2>${blocVerset}<p>[Texte d'essai] Analyse.</p>`,
+  statut, auteurUid, auteurNom, creeLe: jour(j), modifieLe: jour(j), publieLe: null, republieLe: null,
+  versets: ['112:1'], sourates: [112], racines: ['أحد'], lexique: [], sources: [{ titre: "Source d'essai", url: 'https://alfamous.ca', note: '' }],
+  liens: [], nbVersions: 0, ...extra,
+});
+const ARTICLES = {
+  'essai-a1': art(uids[3], 'Admin Essai', "[Essai] Le mot aḥad dans 112:1", 'racines', 'publie', 18,
+    { slug: 'essai-le-mot-ahad', publieLe: jour(18), nbVersions: 1, libelles: ['Les mots du Coran'] }),
+  'essai-a2': art(uids[2], 'Modo Essai', "[Essai] Article critique du modérateur", 'critiques', 'publie', 20,
+    { slug: 'essai-article-critique', publieLe: jour(20), nbVersions: 1, libelles: ['Société'] }),
+  'essai-a3': art(uids[2], 'Modo Essai', "[Essai] Brouillon du modérateur", 'reflexions', 'brouillon', 22, { corps: '' }),
+};
+for (const [id, a] of Object.entries(ARTICLES)) {
+  await db.recursiveDelete(db.doc(`articles/${id}`));
+  await db.doc(`articles/${id}`).set(a);
+  await db.doc(`articles/${id}/atelier/brouillon`).set({
+    titre: a.titre, famille: a.famille, libelles: a.libelles, resume: a.resume, image: null,
+    corps: a.statut === 'brouillon' ? "<p>[Texte d'essai] Brouillon en cours.</p>" : a.corps,
+    contexte: { versets: [{ ref: '112:1', cite: true, note: '' }], sources: a.sources.map((s) => ({ ...s, publique: true })), fichiers: [] },
+    majLe: a.modifieLe, majPar: a.auteurUid,
+  });
+  if (a.slug) {
+    await db.doc(`slugs/${a.slug}`).set({ article: id });
+    await db.doc(`articles/${id}/versions/1`).set({ titre: a.titre, corps: a.corps, resume: a.resume, famille: a.famille, libelles: a.libelles, le: a.publieLe, parUid: a.auteurUid, parNom: a.auteurNom, publiee: true });
+  }
+}
+await db.doc('commentaires/essai-art-1').set(com('essai-a1', uids[1], 'Membre Essai', "[Texte d'essai] Commentaire sur l'article.", 21, { type: 'article' }));
+console.log('Articles d\'essai prêts : 2 publiés, 1 brouillon (http://localhost:5050/#/articles ; rédiger : modo@ ou admin@essai.local).');

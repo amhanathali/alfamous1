@@ -22,7 +22,7 @@ async function initialiser() {
     import(`${SDK}/firebase-functions.js`),
   ]);
   const config = LOCAL
-    ? { projectId: 'demo-alfamous1', apiKey: 'cle-demo', authDomain: 'localhost' }
+    ? { projectId: 'demo-alfamous1', apiKey: 'cle-demo', authDomain: 'localhost', storageBucket: 'demo-alfamous1.appspot.com' }
     : await fetch('/__/firebase/init.json').then((r) => { if (!r.ok) throw new Error('configuration Firebase introuvable'); return r.json(); });
   const app = initializeApp(config);
   const auth = A.getAuth(app);
@@ -35,6 +35,19 @@ async function initialiser() {
     Fn.connectFunctionsEmulator(fonctions, location.hostname, Number(location.port) || 80); // relais vers 5001
   }
   return { auth, db, A, F, fonctions, Fn };
+}
+
+// Storage (images et fichiers des articles), chargé à part : seuls les rédacteurs en ont besoin.
+let pretStockage = null;
+export function stockage() {
+  if (!pretStockage) {
+    pretStockage = Promise.all([firebase(), import(`${SDK}/firebase-storage.js`)]).then(([{ auth }, S]) => {
+      const st = S.getStorage(auth.app);
+      if (LOCAL) S.connectStorageEmulator(st, location.hostname, Number(location.port) || 80); // relais vers 9199
+      return { st, S };
+    }).catch((e) => { pretStockage = null; throw e; });
+  }
+  return pretStockage;
 }
 
 // Promesse limitée dans le temps (émulateurs éteints : Firestore réessaie longtemps sans répondre).

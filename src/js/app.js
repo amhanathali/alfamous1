@@ -1,5 +1,5 @@
 // Alfamous1 — interface de lecture et de recherche ; comptes et commentaires (phase 2) ;
-// lexique, historique des recherches et copie de versets (phase 3).
+// lexique, historique des recherches et copie de versets (phase 3) ; onglet Articles.
 import * as D from './donnees.js';
 import {
   analyserRequete, chercherMots, chercherRacines, amisRacine, trierAmis,
@@ -13,6 +13,7 @@ import { routeLexique, initLexique, encadreLexique, clesLexique } from './lexiqu
 import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
+import { routeArticles } from './articles.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -368,6 +369,12 @@ async function router() {
     try { await routeMembres(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
+  // Articles (#/articles, #/article/<adresse>, #/articles/nouveau, #/article/<id>/modifier)
+  if (/^#\/articles?(\/|$|\?)/.test(location.hash)) {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeArticles(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
   // Lexique (#/lexique, #/lexique/<clé>)
   if (/^#\/lexique(\/|$)/.test(location.hash)) {
     $('#requete').value = ''; $('#effacer').hidden = true;
@@ -454,7 +461,7 @@ initHistorique({ lexique: clesLexique });
 initSelection({ traduction: () => traductionActive });
 initCompte();
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
-surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$)/.test(location.hash)) router(); });
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?))/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

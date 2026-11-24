@@ -40,6 +40,7 @@ function dessinerEntete() {
 const fenetre = () => $('#fenetre');
 export function ouvrirFenetre(html) {
   const f = fenetre();
+  f.classList.remove('large'); // fenêtres larges des articles (aperçu, historique)
   f.innerHTML = `<button type="button" class="fermer" data-fermer aria-label="Fermer">×</button>${html}`;
   if (!f.open) f.showModal();
   f.querySelector('input, textarea')?.focus();

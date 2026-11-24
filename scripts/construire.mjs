@@ -6,6 +6,7 @@ import { cpSync, rmSync, mkdirSync, existsSync, readdirSync, writeFileSync } fro
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MODULES_SDK, lireModuleSdk } from './lib/sdk-firebase.mjs';
+import { VENDOR, cheminVendor } from './lib/vendor.mjs';
 
 const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(RACINE, 'dist');
@@ -28,6 +29,12 @@ writeFileSync(join(D, 'traductions/disponibles.json'), JSON.stringify(traduction
 // SDK Firebase (comptes, commentaires) servi par l'application.
 mkdirSync(join(DIST, 'vendor/firebase'), { recursive: true });
 for (const m of MODULES_SDK) writeFileSync(join(DIST, 'vendor/firebase', m), lireModuleSdk(RACINE, m));
+
+// Bibliothèques tierces (articles) : DOMPurify, mammoth.js.
+for (const nom of Object.keys(VENDOR)) {
+  mkdirSync(dirname(join(DIST, 'vendor', nom)), { recursive: true });
+  cpSync(cheminVendor(RACINE, nom), join(DIST, 'vendor', nom));
+}
 
 writeFileSync(join(DIST, 'version.json'), JSON.stringify({ construit: new Date().toISOString() }) + '\n');
 if (existsSync(join(DIST, 'import'))) throw new Error('import/ ne doit pas être publié');
