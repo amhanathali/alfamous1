@@ -20,7 +20,10 @@ service cloud.firestore {
     function texteValide(t) { return t is string && t.size() >= 1 && t.size() <= 4000; }
     function cibleValide(d) {
       return (d.type == 'verset' && d.cle is string && d.cle.matches('^[0-9]{1,3}:[0-9]{1,3}$'))
-        || (d.type == 'lexique' && d.cle is string && d.cle.size() >= 1 && d.cle.size() <= 200);
+        || (d.type == 'lexique' && d.cle is string && d.cle.size() >= 1 && d.cle.size() <= 200)
+        // Article : on ne commente qu'un article publié (cle = identifiant de l'article).
+        || (d.type == 'article' && d.cle is string && d.cle.matches('^[A-Za-z0-9_-]{1,64}$')
+            && get(/databases/$(database)/documents/articles/$(d.cle)).data.statut == 'publie');
     }
     function changes(cles) {
       return request.resource.data.diff(resource.data).affectedKeys().hasOnly(cles);
@@ -178,13 +181,193 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Articles (docs/ARTICLES.md, docs/MODELE-DONNEES.md) ----------
+    // Rédacteurs = niveau ≥ 2. Un modérateur modifie ses propres articles ; l'admin, tous.
+    // Le document articles/{id} est la partie publique (lue par tous une fois publiée) ; la version de travail
+    // est privée (atelier/brouillon). Publier recopie le brouillon dans le document public et enregistre une version
+    // (versions/{n}) dans le même lot ; la première publication réserve l'adresse (slugs/{slug}).
+    function proprioArticle(a) { return niveau() >= 2 && (a.auteurUid == moi() || niveau() >= 3); }
+    function familleValide(f) { return f in ['racines', 'critiques', 'identite', 'reflexions']; }
+    function contenuArticleValide(d) {
+      return d.titre is string && d.titre.size() <= 200
+        && familleValide(d.famille)
+        && d.libelles is list && d.libelles.size() <= 10
+        && d.resume is string && d.resume.size() <= 500
+        && (d.image == null || (d.image is string && d.image.size() <= 300))
+        && d.corps is string && d.corps.size() <= 300000
+        && d.versets is list && d.versets.size() <= 300
+        && d.sourates is list && d.sourates.size() <= 114
+        && d.racines is list && d.racines.size() <= 100
+        && d.lexique is list && d.lexique.size() <= 100
+        && d.sources is list && d.sources.size() <= 50
+        && d.liens is list && d.liens.size() <= 20;
+    }
+    function champsArticle() {
+      return ['titre', 'slug', 'famille', 'libelles', 'resume', 'image', 'corps', 'statut', 'auteurUid', 'auteurNom',
+              'creeLe', 'modifieLe', 'publieLe', 'republieLe', 'versets', 'sourates', 'racines', 'lexique', 'sources',
+              'liens', 'nbVersions'];
+    }
+    function slugValide(s) { return s is string && s.size() >= 3 && s.size() <= 100 && s.matches('^[a-z0-9]+(-[a-z0-9]+)*$'); }
+
+    match /articles/{id} {
+      function cheminVersion(n) { return /databases/$(database)/documents/articles/$(id)/versions/$(string(n)); }
+
+      // Publié : lu par tous (les listes publiques filtrent statut == 'publie'). Brouillons et articles retirés :
+      // rédacteurs seulement (un modérateur lit les brouillons des autres sans pouvoir les modifier).
+      allow read: if resource.data.statut == 'publie' || niveau() >= 2;
+
+      // Créer : un brouillon jamais publié, sans adresse, signé du nom du compte.
+      allow create: if niveau() >= 2
+        && monNom().size() > 0
+        && request.resource.data.keys().hasOnly(champsArticle())
+        && request.resource.data.keys().hasAll(champsArticle())
+        && contenuArticleValide(request.resource.data)
+        && request.resource.data.statut == 'brouillon'
+        && request.resource.data.slug == null
+        && request.resource.data.auteurUid == moi()
+        && request.resource.data.auteurNom == monNom()
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.modifieLe == request.time
+        && request.resource.data.publieLe == null
+        && request.resource.data.republieLe == null
+        && request.resource.data.nbVersions == 0;
+
+      // Compteur de versions : inchangé, ou + 1 avec versions/{n} écrit dans le même lot.
+      function versionAjoutee() {
+        return request.resource.data.nbVersions == resource.data.nbVersions + 1
+          && existsAfter(cheminVersion(request.resource.data.nbVersions));
+      }
+      // Brouillon jamais publié : titre, famille… gardés à jour pour la liste des rédacteurs.
+      function editionBrouillon() {
+        return proprioArticle(resource.data)
+          && resource.data.statut == 'brouillon' && request.resource.data.statut == 'brouillon'
+          && changes(['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'versets', 'sourates', 'racines',
+                      'lexique', 'sources', 'liens', 'modifieLe', 'nbVersions'])
+          && contenuArticleValide(request.resource.data)
+          && request.resource.data.modifieLe == request.time
+          && (request.resource.data.nbVersions == resource.data.nbVersions || versionAjoutee());
+      }
+      // « Enregistrer une version » d'un article publié ou retiré : seul le compteur change.
+      function versionSeule() {
+        return proprioArticle(resource.data) && resource.data.statut != 'brouillon'
+          && changes(['nbVersions']) && versionAjoutee();
+      }
+      // Toute publication : contenu valide, titre obligatoire, version « publiée » enregistrée dans le lot.
+      function publicationCommune() {
+        return proprioArticle(resource.data)
+          && request.resource.data.statut == 'publie'
+          && contenuArticleValide(request.resource.data)
+          && request.resource.data.titre.size() >= 1
+          && request.resource.data.modifieLe == request.time
+          && versionAjoutee()
+          && getAfter(cheminVersion(request.resource.data.nbVersions)).data.publiee == true;
+      }
+      // Première publication : l'adresse est fixée et réservée (slugs/{slug}) dans le même lot.
+      function premierePublication() {
+        return resource.data.slug == null
+          && changes(['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'versets', 'sourates', 'racines',
+                      'lexique', 'sources', 'liens', 'statut', 'slug', 'modifieLe', 'publieLe', 'nbVersions'])
+          && publicationCommune()
+          && slugValide(request.resource.data.slug)
+          && request.resource.data.publieLe == request.time
+          && getAfter(/databases/$(database)/documents/slugs/$(request.resource.data.slug)).data.article == id;
+      }
+      // « Publier les modifications », ou republier un article retiré : l'adresse ne change plus.
+      function republication() {
+        return resource.data.slug != null
+          && changes(['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'versets', 'sourates', 'racines',
+                      'lexique', 'sources', 'liens', 'statut', 'modifieLe', 'republieLe', 'nbVersions'])
+          && publicationCommune()
+          && request.resource.data.republieLe == request.time;
+      }
+      // Retirer : l'article n'est plus lu que par les rédacteurs ; ses commentaires restent.
+      function retrait() {
+        return proprioArticle(resource.data) && resource.data.statut == 'publie'
+          && changes(['statut', 'modifieLe'])
+          && request.resource.data.statut == 'retire'
+          && request.resource.data.modifieLe == request.time;
+      }
+
+      allow update: if editionBrouillon() || versionSeule() || premierePublication() || republication() || retrait();
+
+      // Supprimer définitivement : admin seulement (sous-collections d'abord).
+      allow delete: if niveau() >= 3;
+
+      function art() { return get(/databases/$(database)/documents/articles/$(id)).data; }
+      function artApres() { return getAfter(/databases/$(database)/documents/articles/$(id)).data; }
+
+      // Version de travail (privée) : atelier/brouillon, avec le panneau Contexte.
+      match /atelier/{doc} {
+        allow read: if niveau() >= 2;
+        allow create, update: if doc == 'brouillon'
+          && proprioArticle(artApres())
+          && request.resource.data.keys().hasOnly(
+               ['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'contexte', 'majLe', 'majPar'])
+          && request.resource.data.keys().hasAll(
+               ['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'contexte', 'majLe', 'majPar'])
+          && request.resource.data.titre is string && request.resource.data.titre.size() <= 200
+          && familleValide(request.resource.data.famille)
+          && request.resource.data.libelles is list && request.resource.data.libelles.size() <= 10
+          && request.resource.data.resume is string && request.resource.data.resume.size() <= 500
+          && (request.resource.data.image == null || (request.resource.data.image is string && request.resource.data.image.size() <= 300))
+          && request.resource.data.corps is string && request.resource.data.corps.size() <= 300000
+          && request.resource.data.contexte is map
+          && request.resource.data.majLe == request.time
+          && request.resource.data.majPar == moi();
+        allow delete: if niveau() >= 3;
+      }
+
+      // Historique : versions/{n} (n = 1, 2, 3…), jamais modifiées ; lues par les rédacteurs.
+      match /versions/{n} {
+        allow read: if niveau() >= 2;
+        allow create: if proprioArticle(art())
+          && n == string(artApres().nbVersions)
+          && artApres().nbVersions == art().nbVersions + 1
+          && request.resource.data.keys().hasOnly(
+               ['titre', 'corps', 'resume', 'famille', 'libelles', 'le', 'parUid', 'parNom', 'publiee'])
+          && request.resource.data.keys().hasAll(
+               ['titre', 'corps', 'resume', 'famille', 'libelles', 'le', 'parUid', 'parNom', 'publiee'])
+          && request.resource.data.titre is string && request.resource.data.titre.size() <= 200
+          && request.resource.data.corps is string && request.resource.data.corps.size() <= 300000
+          && request.resource.data.resume is string && request.resource.data.resume.size() <= 500
+          && familleValide(request.resource.data.famille)
+          && request.resource.data.libelles is list
+          && request.resource.data.le == request.time
+          && request.resource.data.parUid == moi()
+          && request.resource.data.parNom == monNom()
+          && request.resource.data.publiee is bool
+          // Une version « publiée » est exactement ce qui est mis en ligne dans le même lot.
+          && (request.resource.data.publiee == false
+              || (artApres().statut == 'publie'
+                  && artApres().modifieLe == request.time
+                  && request.resource.data.titre == artApres().titre
+                  && request.resource.data.corps == artApres().corps));
+        allow delete: if niveau() >= 3;
+      }
+    }
+
+    // Adresses réservées : slugs/{slug} = { article }, créé à la première publication, jamais modifié.
+    match /slugs/{slug} {
+      allow read: if true;
+      allow create: if niveau() >= 2
+        && slugValide(slug)
+        && request.resource.data.keys().hasOnly(['article'])
+        && request.resource.data.article is string
+        && request.resource.data.article.matches('^[A-Za-z0-9_-]{1,64}$')
+        && get(/databases/$(database)/documents/articles/$(request.resource.data.article)).data.slug == null
+        && proprioArticle(getAfter(/databases/$(database)/documents/articles/$(request.resource.data.article)).data)
+        && getAfter(/databases/$(database)/documents/articles/$(request.resource.data.article)).data.slug == slug;
+      allow delete: if niveau() >= 3;
+    }
+
     // ---------- Mes Notes et forum (docs/MODELE-DONNEES.md) ----------
     // Une note privée (publie == false) n'est lue que par son auteur ; publiée, c'est un fil du forum lu par tous.
     function lienValide(l) {
       return l == null
         || (l.keys().hasOnly(['type', 'cle']) && l.cle is string
             && ((l.type == 'verset' && l.cle.matches('^[0-9]{1,3}:[0-9]{1,3}$'))
-              || ((l.type == 'racine' || l.type == 'lexique') && l.cle.size() >= 1 && l.cle.size() <= 200)));
+              || ((l.type == 'racine' || l.type == 'lexique') && l.cle.size() >= 1 && l.cle.size() <= 200)
+              || (l.type == 'article' && l.cle.matches('^[A-Za-z0-9_-]{1,64}$'))));
     }
     function titreValide(t, requis) { return t is string && t.size() <= 140 && (!requis || t.size() >= 1); }
     function texteNoteValide(t) { return t is string && t.size() >= 1 && t.size() <= 20000; }

@@ -1,6 +1,20 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Articles, étape 2 : données et règles (pas encore d'écran)
+- `firestore.rules` : `articles/{id}` (lu par tous une fois publié, par les rédacteurs sinon), `atelier/brouillon`
+  (version de travail privée), `versions/{n}` (historique), `slugs/{slug}` (adresses réservées) ; rédaction dès le
+  niveau 2, un modérateur sur ses articles, l'admin sur tous ; publication en un seul lot (version « publiée » +
+  adresse) ; un article publié n'est jamais modifié en direct. Commentaires de type `article` (article publié
+  seulement) ; fil du forum lié à un article (`lien.type = 'article'`).
+- `storage.rules` : `articles/{id}/images/` (lecture publique, images PNG/JPEG/GIF/WebP ≤ 5 Mo) et
+  `articles/{id}/fichiers/` (rédacteurs, ≤ 25 Mo) ; propriétaire lu dans Firestore ; le reste reste fermé.
+- `firestore.indexes.json` : 8 index pour les listes d'articles.
+- `src/js/articles-outils.js` (slug, slug depuis Blogger, versets repérés dans un texte, sourates, libellés, versets
+  cités) et 8 tests (`tests/articles.test.mjs`) ; 15 tests des règles (`tests/regles/articles.test.mjs`, à lancer sur
+  le PC avec `npm run test:regles`).
+- Sauvegarde Blogger examinée (`docs/ARTICLES.md` § 6) ; fiche `import/articles/controle-familles.csv` (hors Git).
+
 ### Ajouté — onglet Articles : cadrage (rien de codé)
 - `docs/ARTICLES.md` : modèle de données (`articles`, brouillon privé `atelier/brouillon`, `versions`, `slugs`,
   commentaires de type `article`, Storage), droits, éditeur, HTML assaini, import depuis Blogger, « Dossier pour

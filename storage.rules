@@ -1,10 +1,40 @@
 rules_version = '2';
 
 // Tout est fermé par défaut (les données du texte sont servies par Hosting).
+// Ouvert : les images et fichiers des articles (docs/ARTICLES.md), testés à l'émulateur (tests/regles/).
 service firebase.storage {
   match /b/{bucket}/o {
+    // Même calcul du niveau que firestore.rules (docs/DROITS.md).
+    function niveau() {
+      return request.auth == null || request.auth.token.email_verified != true
+        ? 0
+        : request.auth.token.get('niveau', 1);
+    }
+    // Rédacteur de l'article (niveau ≥ 2) ou admin : lu dans Firestore.
+    function proprioArticle(id) {
+      return niveau() >= 2
+        && (niveau() >= 3
+            || firestore.get(/databases/(default)/documents/articles/$(id)).data.auteurUid == request.auth.uid);
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
+    }
+
+    // Images du texte et de couverture : lecture publique ; images seulement (pas de SVG), 5 Mo au plus.
+    match /articles/{id}/images/{fichier} {
+      allow read: if true;
+      allow create, update: if proprioArticle(id)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/(png|jpeg|gif|webp)');
+      allow delete: if proprioArticle(id);
+    }
+
+    // Fichiers de travail du panneau Contexte (PDF, Word, captures…) : rédacteurs seulement, 25 Mo au plus.
+    match /articles/{id}/fichiers/{fichier} {
+      allow read: if niveau() >= 2;
+      allow create, update: if proprioArticle(id) && request.resource.size < 25 * 1024 * 1024;
+      allow delete: if proprioArticle(id);
     }
   }
 }

@@ -180,15 +180,17 @@ utilisé. Tous les articles du blog sont d'Amha Nathali : ils sont signés de so
   et 2 brouillons (« À propos du projet Alfamous.ca », « Zoom-Coran ») — ce ne sont pas des articles ;
 - **67 commentaires** : 65 publiés et 2 supprimés (`GHOSTED_COMMENT`, non importés) ; 40 anonymes sans nom,
   22 d'Amha NathAli, 1 chacun de Lynda, Yasmine, David Beaulieu ; 33 réponses (`inReplyTo`) ; **16 sont rattachés à
-  la page brouillon « Zoom-Coran »** et non à un article (décision à prendre) ;
+  la page brouillon « Zoom-Coran »** et non à un article : importés dans un fil du forum « Commentaires de
+  l'ancienne page Zoom-Coran » (décision de Claude, l'auteur lui ayant laissé le choix le 24 nov.) ;
 - dans les articles : 35 `<style>` (34 articles), 1 `<script>`, 6 `<iframe>`, 63 tableaux, 407 images sur
   `blogger.googleusercontent.com` (202 articles) ; plus gros texte 32 Ko.
 - **Écart 219 / 207 expliqué** : l'ancienne copie de `articles-format-html.js` contient des doublons (6 titres) et des
   titres renommés depuis (« Qui est ton rassoul » → « Qui est ton rassoul (رسل) », etc.) ; 2 titres n'existent plus
   sur Blogger (« L'islam perdu dans la narration historique… », « الكُفْر ↔ الشُّكْر… »). La sauvegarde fait foi.
 - Fiche de contrôle des familles (207 publiés + 3 brouillons) : `import/articles/controle-familles.csv`
-  (familles proposées par mots-clés : 94 racines, 92 autres réflexions, 11 critiques, 10 identité — à corriger dans
-  la colonne `famille_choisie` ; versets repérés automatiquement, à vérifier).
+  (familles relues titre par titre par Claude le 24 nov., à la demande de l'auteur : 92 racines, 54 autres
+  réflexions, 50 critiques, 11 identité ; la colonne `famille_choisie` permet à l'auteur d'en corriger une ;
+  versets repérés automatiquement, à vérifier).
 
 **Fichier lu : la sauvegarde complète du blog** (Blogger › Paramètres › Gérer le blog › « Sauvegarder le contenu »,
 fichier `.xml` au format Atom). Contrairement au flux public et à l'API avec clé, elle contient **tout** : articles
