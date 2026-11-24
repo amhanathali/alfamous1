@@ -571,17 +571,8 @@ textarea.zone-ed { width: 100%; font: 13px/1.5 ui-monospace, Consolas, monospace
 
 <div style="max-width:920px;margin:0 auto;padding:0 16px 24px">
   <section class="questions">
-    <h2>Décisions du 24 nov. et questions restantes</h2>
-    <p style="font-size:14px;color:var(--discret);margin:0">Décidé : rédaction dès le <b>niveau 2</b> ; <b>éditeur maison</b> simple + import de fichiers Word ; <b>commentaires Blogger importés</b> ; panneau Contexte : éléments retenus par Claude (marqués « ajouté »). Détail dans <code>docs/ARTICLES.md</code>. Répondre « ok » pour accepter une proposition.</p>
-    <ol>
-      <li value="2"><b>Article publié.</b> Les modifications restent dans le brouillon jusqu'à « Publier les modifications » (proposé), ou passent en ligne tout de suite ?</li>
-      <li value="3"><b>Versions.</b> Une version à chaque « Enregistrer une version » et à chaque publication, plus une copie locale automatique (proposé) ?</li>
-      <li value="5"><b>Mise en forme.</b> 35 articles ont leur propre feuille <code>&lt;style&gt;</code>, retirée à l'import : feuille commune des articles + relecture de ces 35 (proposé) ?</li>
-      <li value="6"><b>Vidéos.</b> 6 cadres intégrés : garder les vidéos YouTube (proposé) ou les remplacer par un lien ?</li>
-      <li value="8"><b>Adresse publique.</b> <code>blog.alfamous.ca/articles/…</code> (proposé) ou <code>atelier.alfamous.ca/articles/…</code> ?</li>
-      <li value="9"><b>Sous les versets.</b> Afficher l'article sous les seuls versets marqués « cité » (proposé) ou sous tous les versets de son contexte ?</li>
-      <li value="10"><b>Nouvelle.</b> Un modérateur modifie seulement ses propres articles ; l'admin peut modifier tous les articles (proposé) ?</li>
-    </ol>
+    <h2>Cadrage accepté (24 nov. 2026)</h2>
+    <p style="font-size:14px;color:var(--discret);margin:0">Rédaction dès le niveau 2 (un modérateur modifie ses articles, l'admin tous) ; éditeur maison + import Word ; modifications d'un article publié en brouillon jusqu'à « Publier les modifications » ; versions à l'enregistrement d'une version et à chaque publication ; feuille commune des articles ; vidéos YouTube gardées ; pages sur <code>blog.alfamous.ca/articles/…</code> ; article sous les versets « cités » ; <b>tous les articles et commentaires importés depuis la sauvegarde complète de Blogger</b>, articles signés Amha Nathali. Détail : <code>docs/ARTICLES.md</code>.</p>
   </section>
 </div>
 
@@ -876,7 +867,7 @@ blog.alfamous.ca/feeds/posts/default → /articles/flux.xml
 function vueImport() {
   if (niveau < 3) return '<p class="message">L\'import se lance sur le PC (script admin) ; aucun écran pour les membres.</p>';
   return `<div class="note-maquette"><b>Import</b> : pas d'écran dans l'application. Script <code>npm run importer:articles</code> sur le PC, à blanc par défaut, comme la phase 4. Ci-dessous : extrait de la <b>fiche de contrôle</b> à relire (familles proposées par la maquette, à valider).</div>
-  <div class="code-meta">Source : Blogger « Zoom-Coran » (flux public ou API v3)  ·  207 articles publiés
+  <div class="code-meta">Source : sauvegarde complète de Blogger « Zoom-Coran » (.xml : publiés, brouillons, programmés, pages, commentaires)  ·  207 publiés au 24 nov.
 Assainissement : 35 &lt;style&gt; et 1 &lt;script&gt; retirés · 6 &lt;iframe&gt; (question 6) · attributs style réduits à text-align et direction
 Images : copiées de blogger.googleusercontent.com vers Storage articles/{id}/images/
 Identifiants stables : imp-b-&lt;id Blogger&gt;  (relancer = remplacer, sans doublon)

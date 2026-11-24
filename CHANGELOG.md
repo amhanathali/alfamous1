@@ -11,6 +11,8 @@
 - Décisions de l'auteur du 24 nov. reportées (cadrage, maquette, `docs/DECISIONS.md`) : rédaction dès le niveau 2 ;
   éditeur maison simple avec « Importer un fichier » (Word `.docx`, HTML, Markdown, texte) ; commentaires Blogger
   importés (67 annoncés) ; éléments du panneau Contexte retenus. 7 questions restent ouvertes.
+- Cadrage accepté par l'auteur (« ok pour tout ») ; import de tous les articles et commentaires depuis la sauvegarde
+  complète de Blogger (.xml), articles signés Amha Nathali.
 
 ### Ajouté — phase 4 : import des commentaires de l'ancienne application
 - `npm run importer` (`scripts/importer.mjs`) : lit les exports CSV de Versets1 et Lexique1 (dossier `import/`, hors Git)

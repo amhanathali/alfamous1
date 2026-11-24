@@ -4,7 +4,7 @@ Chantier : un onglet **Articles** dans Alfamous1, prolongement du lexique, pour 
 « Zoom-Coran » (blog.alfamous.ca). Branche `articles/onglet`. Maquette : `docs/maquettes/articles.html`.
 **Rien n'est codé** tant que ce cadrage et la maquette ne sont pas acceptés. Décisions de l'auteur du 24 nov. :
 droits dès le niveau 2, éditeur maison simple avec import de fichiers Word, commentaires Blogger importés, éléments
-du panneau Contexte choisis par Claude (§ 2). Les points encore marqués **[Q n]** attendent une décision (liste à la fin).
+du panneau Contexte choisis par Claude (§ 2). Le 24 nov., l'auteur a accepté toutes les autres propositions : le cadrage est accepté (décisions à la fin).
 
 Constats de départ (vérifiés le 24 nov.) :
 - Blogger : **207 articles** publiés (flux public `blog.alfamous.ca/feeds/posts/summary?alt=json`), 9 libellés :
@@ -60,7 +60,7 @@ statut + libelles + publieLe, statut + sourates, statut + versets, statut + raci
 
 ### `articles/{id}/atelier/brouillon` — la version de travail (privée)
 `{ titre, famille, libelles, resume, image, corps, contexte, majLe, majPar }`. C'est elle que l'éditeur modifie.
-Un article publié n'est **pas** modifié en direct **[Q2]** : « Publier les modifications » recopie le brouillon dans
+Un article publié n'est **pas** modifié en direct  : « Publier les modifications » recopie le brouillon dans
 le document public (et crée une version) dans un seul lot. Lisible et modifiable par les rédacteurs seulement.
 
 ### Le panneau « Contexte » (`contexte` dans le brouillon)
@@ -91,7 +91,7 @@ lecture, mais ne doivent pas entrer dans le dossier qui sert à déduire le sens
 
 ### `articles/{id}/versions/{n}` — historique
 `{ titre, corps, resume, famille, libelles, le, parUid, parNom, publiee }`. Une version à chaque
-« Enregistrer une version » et à chaque publication (`publiee: true`) **[Q3]** ; l'éditeur garde en plus une copie
+« Enregistrer une version » et à chaque publication (`publiee: true`)  ; l'éditeur garde en plus une copie
 locale du brouillon toutes les 30 s (perte de connexion). Écran : liste, aperçu, comparaison avec la version
 actuelle, « Restaurer dans le brouillon ». Versions jamais modifiées ni supprimées (sauf suppression de l'article,
 niveau 3).
@@ -121,7 +121,7 @@ Un article est un texte d'auteur, pas une contribution de la communauté. Écrit
 | Modifier, publier, retirer l'article d'un autre | — | — | — | ✓ |
 | Supprimer définitivement un article | — | — | — | ✓ |
 
-Proposition de détail (Claude) : un modérateur ne modifie que ses articles, l'admin peut intervenir sur tous ; les
+Décidé : un modérateur ne modifie que ses articles, l'admin peut intervenir sur tous ; les
 articles importés de Blogger appartiennent au compte d'Amha Nathali. Aucune revendication nouvelle : les règles
 lisent le niveau déjà en place (`request.auth.token.niveau >= 2`).
 La règle d'or du Blog s'applique à tout contenu coranique, quel que soit l'auteur.
@@ -152,15 +152,16 @@ pages publiques (DOMPurify, servi par l'application ; côté Node avec jsdom) :
 - retirés : `<style>`, `<script>`, `<link>`, `<meta>`, `<form>`, attributs `on…`, liens `javascript:` ;
 - attributs `style=""` : seules `text-align` et `direction` gardées (les couleurs et fonds codés en dur rendaient
   des passages illisibles en thème sombre, chantier 7 de l'ancienne application) ;
-- `<iframe>` : retirés, sauf vidéos YouTube converties en `youtube-nocookie.com` **[Q6]** ;
+- `<iframe>` : retirés, sauf vidéos YouTube converties en `youtube-nocookie.com` ;
 - liens externes : `rel="noopener"`, ouverture dans un nouvel onglet.
 
 Effet à connaître : les **35 articles avec une feuille `<style>`** perdent leur mise en forme propre. Proposition :
 une feuille commune des articles dans l'application (titres, encadrés, citations, versets, tableaux), lisible en
-clair et en sombre ; la fiche de contrôle de l'import liste ces 35 articles pour une relecture **[Q5]**.
+clair et en sombre ; la fiche de contrôle de l'import liste ces 35 articles pour une relecture.
 
 ## 6. Import des articles existants
-**Source recommandée : Blogger** (pas `articles-format-html.js`).
+**Source : Blogger, pour tous les articles** (décision de l'auteur, 24 nov.) ; `articles-format-html.js` n'est pas
+utilisé. Tous les articles du blog sont d'Amha Nathali : ils sont signés de son nom et reliés à son compte.
 
 | | Blogger | articles-format-html.js |
 | --- | --- | --- |
@@ -170,8 +171,14 @@ clair et en sombre ; la fiche de contrôle de l'import liste ces 35 articles pou
 | Contenu complet | ✓ | modifié (image de tête sortie du texte, liens d'images retirés) |
 | À jour | ✓ | copie dérivée (écart 219 / 207) |
 
-Lecture par le flux public (`/feeds/posts/default?alt=json`, sans clé) ou par l'API Blogger v3 avec la clé déjà
-utilisée par LexData (gardée hors du dépôt). Les brouillons Blogger ne sont pas lus.
+**Fichier lu : la sauvegarde complète du blog** (Blogger › Paramètres › Gérer le blog › « Sauvegarder le contenu »,
+fichier `.xml` au format Atom). Contrairement au flux public et à l'API avec clé, elle contient **tout** : articles
+publiés, brouillons et articles programmés, pages statiques, et tous les commentaires avec le commentaire parent des
+réponses. Le fichier est rangé dans `import/articles/` (hors Git). Le flux public sert seulement de contrôle (nombre
+d'articles publiés : 207 le 24 nov.).
+- Articles publiés → `statut: 'publie'` ; brouillons et articles programmés Blogger → `statut: 'brouillon'`
+  (privés dans l'atelier, à reprendre) ; pages statiques Blogger → listées dans la fiche de contrôle (décision au cas
+  par cas). L'écart 219 / 207 avec `articles-format-html.js` sera expliqué par cette sauvegarde.
 
 Étapes (script `npm run importer:articles`, sur le modèle de la phase 4, lancé sur le PC) :
 1. **À blanc** (par défaut) : lecture de Blogger, assainissement, slug repris de l'URL Blogger
@@ -182,15 +189,15 @@ utilisée par LexData (gardée hors du dépôt). Les brouillons Blogger ne sont 
    famille proposée, libellés, versets repérés, images, `<style>` retirés, iframes).
 2. **Relecture par l'auteur** de la fiche : famille de chaque article (colonne à remplir), versets à garder.
 3. **Écriture** (`--ecrire`) : images téléchargées de `blogger.googleusercontent.com` vers
-   `articles/{id}/images/`, `src` réécrits ; articles écrits avec `statut: 'publie'`, dates Blogger, signés
+   `articles/{id}/images/`, `src` réécrits ; articles écrits avec leur statut (§ ci-dessus), dates Blogger, signés
    Amha Nathali (relié à son compte), champ `import` ; identifiants stables (`imp-b-<id Blogger>`) pour relancer
    sans doublon.
 4. **Vérification** (`--verifier`) : nombre d'articles, titres, images toutes copiées, aucun `<style>`/`<script>`.
 5. Émulateurs, puis `--projet essai`, puis `--projet prod` (confirmation PROD) le jour de la bascule.
 
-**Commentaires Blogger (décidé le 24 nov. : importés).** Flux public `/feeds/comments/default` : 67 commentaires
-annoncés le 24 nov. (sur 60 lisibles : 29 « Anonymous », 13 « Amha NathAli », 16 sans nom — supprimés sur Blogger —,
-2 autres noms ; 30 portent un lien vers un autre commentaire). Règles proposées, comme la phase 4 :
+**Commentaires Blogger (décidé le 24 nov. : importés).** Lus dans la même sauvegarde. Le flux public
+`/feeds/comments/default` en annonçait 67 le 24 nov. (sur 60 lisibles : 29 « Anonymous », 13 « Amha NathAli », 16 sans nom — supprimés sur Blogger —,
+2 autres noms ; 30 portent un lien vers un autre commentaire). Règles (acceptées le 24 nov.), comme la phase 4 :
 - écrits dans `commentaires/` avec `type: 'article'`, `cle` = identifiant de l'article, date Blogger, champ
   `import: { source: 'Blogger', bloggerId, parentId }`, identifiant stable `imp-bc-<id Blogger>` ;
 - signatures harmonisées : « Amha NathAli » → « Amha Nathali » (relié à son compte) ; « Anonymous » → « Anonyme » ;
@@ -229,12 +236,12 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
   générées une fois depuis l'import et inscrites dans `firebase.json` : chaque `/AAAA/MM/<slug>.html` →
   `/articles/<slug>/` ; `/search/label/<libellé>` → `/articles/?libelle=…` ; `/feeds/posts/default` →
   `/articles/flux.xml` ; le reste → `/articles/`. Le blog Blogger reste en archive (privé), jamais supprimé.
-  Domaine des pages : `atelier.alfamous.ca/articles/…` ou `blog.alfamous.ca/articles/…` **[Q8]**.
+  Domaine des pages : `blog.alfamous.ca/articles/…` (décidé le 24 nov.) ; l'atelier reste sur `atelier.alfamous.ca`.
 
 ## 9. Affichage dans le reste de l'application
 - **Sous un verset cité** (lecture d'une sourate, résultats) : ligne « Articles : <titre> » à côté de la ligne du
   forum. Une requête par sourate affichée (`sourates array-contains n`), puis tri par verset côté navigateur ; pour les
-  résultats de recherche, une requête par lot de 30 versets. Seuls les versets marqués « cité » comptent **[Q9]**.
+  résultats de recherche, une requête par lot de 30 versets. Seuls les versets marqués « cité » comptent.
 - **Fiche du lexique** : bloc « Articles » (articles dont `lexique` ou `racines` contient la clé), après les
   définitions.
 - **Sélection de versets** : la barre Aperçu · Copier · Vider gagne « Ajouter au contexte… » (choix de l'article,
@@ -256,11 +263,11 @@ déposée dans le brouillon (jamais publiée directement). Coût à chiffrer ava
 - **Panneau Contexte** : Vérification, Définition proposée, Recherches Alfamous, Articles liés, Mes Notes liées
   ajoutés ; commentaires traditionnels et résumé court écartés (§ 2).
 
-## Questions encore ouvertes
-- **Q2** Article publié : modifications en brouillon jusqu'à « Publier les modifications » (proposé), ou en direct ?
-- **Q3** Versions : à chaque « Enregistrer une version » et à chaque publication (proposé), ou à chaque enregistrement ?
-- **Q5** Les 35 articles à `<style>` : feuille commune + relecture (proposé) ?
-- **Q6** Vidéos YouTube intégrées : garder (proposé) ou remplacer par un lien ?
-- **Q8** Adresse des pages publiques : `blog.alfamous.ca/articles/…` (proposé) ou `atelier.alfamous.ca/articles/…` ?
-- **Q9** Sous les versets : seulement les versets marqués « cité » (proposé), ou tous les versets du contexte ?
-- **Q10** (nouvelle) Un modérateur modifie seulement ses articles, l'admin tous (proposé) ?
+- **Questions 2 à 10** : propositions acceptées (« ok pour tout », 24 nov.) — modifications d'un article publié en
+  brouillon jusqu'à « Publier les modifications » ; une version à chaque « Enregistrer une version » et à chaque
+  publication, plus une copie locale ; feuille commune des articles et relecture des 35 articles à `<style>` ;
+  vidéos YouTube gardées (`youtube-nocookie.com`) ; pages publiques sur `blog.alfamous.ca/articles/…` ; article
+  affiché sous les versets marqués « cité » ; un modérateur modifie ses articles, l'admin tous.
+- **Import** : tous les articles depuis Blogger (sauvegarde complète), tous signés Amha Nathali.
+
+Cadrage accepté. Plus aucune question ouverte.
