@@ -171,6 +171,27 @@ utilisé. Tous les articles du blog sont d'Amha Nathali : ils sont signés de so
 | Contenu complet | ✓ | modifié (image de tête sortie du texte, liens d'images retirés) |
 | À jour | ✓ | copie dérivée (écart 219 / 207) |
 
+**Sauvegarde reçue le 24 nov.** (export Google Takeout de Blogger, `Takeout/Blogger/Blogs/Zoom-Coran/feed.atom`,
+2,6 Mo, rangé dans `Desktop\Alfamous1\import\articles`, hors Git) — contenu constaté :
+- **210 articles** (`POST`) : 207 publiés (du 24 nov. 2022 au 4 août 2026) et 3 brouillons ; aucun dans la corbeille ;
+  tous signés « Amha NathAli » ; 70 portent un libellé (Les mots du Coran 41, Développement personnel 21, Société 10,
+  Politique 7, Divers 5, Conférences 4, Livres 3, Outils 3, Sciences & Philosophie 2) ;
+- **8 pages** (`PAGE`) : Bienvenue, Contact, Iqra, Abonnement, 🔍 (recherche), une page sans titre (modèle de fiche),
+  et 2 brouillons (« À propos du projet Alfamous.ca », « Zoom-Coran ») — ce ne sont pas des articles ;
+- **67 commentaires** : 65 publiés et 2 supprimés (`GHOSTED_COMMENT`, non importés) ; 40 anonymes sans nom,
+  22 d'Amha NathAli, 1 chacun de Lynda, Yasmine, David Beaulieu ; 33 réponses (`inReplyTo`) ; **16 sont rattachés à
+  la page brouillon « Zoom-Coran »** et non à un article : importés dans un fil du forum « Commentaires de
+  l'ancienne page Zoom-Coran » (décision de Claude, l'auteur lui ayant laissé le choix le 24 nov.) ;
+- dans les articles : 35 `<style>` (34 articles), 1 `<script>`, 6 `<iframe>`, 63 tableaux, 407 images sur
+  `blogger.googleusercontent.com` (202 articles) ; plus gros texte 32 Ko.
+- **Écart 219 / 207 expliqué** : l'ancienne copie de `articles-format-html.js` contient des doublons (6 titres) et des
+  titres renommés depuis (« Qui est ton rassoul » → « Qui est ton rassoul (رسل) », etc.) ; 2 titres n'existent plus
+  sur Blogger (« L'islam perdu dans la narration historique… », « الكُفْر ↔ الشُّكْر… »). La sauvegarde fait foi.
+- Fiche de contrôle des familles (207 publiés + 3 brouillons) : `import/articles/controle-familles.csv`
+  (familles relues titre par titre par Claude le 24 nov., à la demande de l'auteur : 92 racines, 54 autres
+  réflexions, 50 critiques, 11 identité ; la colonne `famille_choisie` permet à l'auteur d'en corriger une ;
+  versets repérés automatiquement, à vérifier).
+
 **Fichier lu : la sauvegarde complète du blog** (Blogger › Paramètres › Gérer le blog › « Sauvegarder le contenu »,
 fichier `.xml` au format Atom). Contrairement au flux public et à l'API avec clé, elle contient **tout** : articles
 publiés, brouillons et articles programmés, pages statiques, et tous les commentaires avec le commentaire parent des

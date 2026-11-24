@@ -111,3 +111,52 @@ plus un champ `import` : `{ source: 'Lexique-Coran', origine, ordre, dateBrute, 
 et `imp-l-<empreinte de la clé d'origine>-<ordre>`. `creeLe` = date de la signature (heure de Montréal), ou 1er janvier
 2024 si elle manque (`dateEstimee: true`). `auteurUid` = compte de l'auteur pour Amha Nathali, sinon null.
 Le champ `import` n'est jamais modifié : les règles (modification, masquage) ne contrôlent que les champs changés.
+
+## Articles (onglet Articles, docs/ARTICLES.md)
+Rédacteurs = niveau ≥ 2 ; un modérateur modifie ses articles, l'admin tous. Règles : `firestore.rules`,
+`storage.rules` ; tests : `tests/regles/articles.test.mjs`.
+
+### `articles/{id}` — partie publique
+`{ titre, slug, famille, libelles, resume, image, corps, statut, auteurUid, auteurNom, creeLe, modifieLe, publieLe,
+republieLe, versets, sourates, racines, lexique, sources, liens, nbVersions }` (+ `import` pour les articles importés
+de Blogger, écrit par le script). `statut` : `brouillon` (jamais publié) · `publie` · `retire`. `famille` : `racines`,
+`critiques`, `identite`, `reflexions`. Limites : titre 200, résumé 500, 10 libellés, corps 300 000 caractères,
+300 versets. Lecture : tous si publié, rédacteurs sinon (les listes publiques filtrent `statut == 'publie'`).
+
+Opérations (en un seul lot, sauf la création) :
+- **Créer** (niveau ≥ 2) : brouillon sans adresse, `nbVersions` 0, **puis** `atelier/brouillon` dans une seconde
+  requête (dans un même lot, les deux règles dépassent la limite de 1 000 expressions par requête de Firestore ;
+  l'éditeur recrée l'atelier s'il manque).
+- **Brouillon jamais publié** : contenu du document public modifiable par son auteur (liste des rédacteurs).
+- **Enregistrer une version** : `versions/{n}` (`publiee: false`) + `nbVersions + 1`.
+- **Première publication** : contenu + `statut: 'publie'`, `slug`, `publieLe` + `versions/{n}` (`publiee: true`,
+  même titre et texte) + `slugs/{slug}` (`{ article }`).
+- **Publier les modifications** ou republier un article retiré : contenu + `republieLe` + `versions/{n}` ; l'adresse
+  ne change plus. Un article publié n'est jamais modifié en direct.
+- **Retirer** : `statut: 'retire'`. **Supprimer** : admin.
+
+### `articles/{id}/atelier/brouillon` — version de travail (privée)
+`{ titre, famille, libelles, resume, image, corps, contexte, majLe, majPar }` ; `contexte` = panneau Contexte (objet
+libre : versets `{ ref, note, cite }`, racines, lexique, fichiers, sources, fils, notes, vérification, définition
+proposée, recherches, articles liés). Lu par les rédacteurs, écrit par l'auteur ou l'admin.
+
+### `articles/{id}/versions/{n}` — historique
+`{ titre, corps, resume, famille, libelles, le, parUid, parNom, publiee }`, n = 1, 2, 3… ; lu par les rédacteurs ;
+jamais modifié (supprimé par l'admin avec l'article). Une version `publiee` est identique à ce qui est mis en ligne.
+
+### `slugs/{slug}` — adresses réservées
+`{ article }`, créé à la première publication, jamais modifié ni réattribué. Lecture publique.
+
+### Commentaires et forum
+Commentaires d'articles : `commentaires/{id}` avec `type: 'article'`, `cle` = identifiant de l'article (publié).
+Fil du forum lié à un article : `lien: { type: 'article', cle }`.
+
+### Storage
+- `articles/{id}/images/{fichier}` : lecture publique ; envoi par l'auteur de l'article ou l'admin ; PNG, JPEG, GIF,
+  WebP (pas de SVG), 5 Mo au plus.
+- `articles/{id}/fichiers/{fichier}` : lus par les rédacteurs ; envoyés par l'auteur ou l'admin ; 25 Mo au plus.
+- L'auteur est lu dans Firestore par les règles Storage (`firestore.get`) : au premier déploiement, accepter le rôle
+  « Firebase Rules Firestore Service Agent » proposé par la CLI.
+
+Index : `firestore.indexes.json` (statut + publieLe ; famille ; libellés, sourates, versets, racines, lexique en
+`array-contains` ; statut + modifieLe).
