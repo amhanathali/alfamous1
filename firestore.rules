@@ -289,7 +289,11 @@ service cloud.firestore {
           && request.resource.data.modifieLe == request.time;
       }
 
-      allow update: if editionBrouillon() || versionSeule() || premierePublication() || republication() || retrait();
+      // « resource != null » d'abord : dans un lot, la règle de modification est aussi évaluée pour un document
+      // nouveau ; sans ce garde-fou, chaque condition produit une erreur (pas « faux »), tout est évalué et la limite
+      // de 1 000 expressions par requête est atteinte (test du 24 nov.).
+      allow update: if resource != null
+        && (editionBrouillon() || versionSeule() || premierePublication() || republication() || retrait());
 
       // Supprimer définitivement : admin seulement (sous-collections d'abord).
       allow delete: if niveau() >= 3;
@@ -301,6 +305,7 @@ service cloud.firestore {
       match /atelier/{doc} {
         allow read: if niveau() >= 2;
         allow create, update: if doc == 'brouillon'
+          && artApres() != null
           && proprioArticle(artApres())
           && request.resource.data.keys().hasOnly(
                ['titre', 'famille', 'libelles', 'resume', 'image', 'corps', 'contexte', 'majLe', 'majPar'])
