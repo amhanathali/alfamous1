@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — champ de recherche (clavier arabe, loupe, 16 px)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Extrait de src/css/app.css (en-tête), puis les nouveautés proposées. */
+:root {
+  --fond: #f7f4ee; --surface: #ffffff; --texte: #1f2328; --discret: #5f6670; --bordure: #e3ddd2;
+  --accent: #8a4b16; --accent-doux: #f3e5d6; --surligne: #fbe3a6; --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d; --ombre: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--fond); color: var(--texte); font: 17px/1.55 var(--latin); }
+a { color: var(--lien); }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+select, input, button { font: inherit; color: inherit; }
+select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
+
+.entete { background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
+.menu { display: flex; gap: 4px; margin: 8px 0 0; border-bottom: 1px solid var(--bordure); }
+.menu a { padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 15px; }
+.menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.exemples a { margin: 0 3px; }
+
+/* ---------- Nouveau : champ, icônes dans le champ, bouton loupe ---------- */
+.recherche { display: flex; gap: 8px; margin-top: 12px; }
+.recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
+.recherche input {
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 80px 10px 14px; border-radius: 10px;
+  border: 1px solid var(--bordure); background: var(--surface);
+}
+.recherche input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.dans-champ { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: flex; gap: 2px; align-items: center; }
+.dans-champ button {
+  width: 34px; height: 34px; padding: 0; border: 0; border-radius: 8px; background: transparent;
+  color: var(--discret); cursor: pointer; display: grid; place-items: center;
+}
+.dans-champ button:hover, .dans-champ button:focus-visible { color: var(--accent); background: var(--accent-doux); outline: none; }
+.dans-champ .effacer { font-size: 22px; line-height: 1; }
+.bouton-clavier[aria-expanded='true'] { color: var(--accent); background: var(--accent-doux); }
+.dans-champ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bouton-chercher {
+  flex: none; width: 46px; border: 0; border-radius: 10px; padding: 0; background: var(--accent); color: #fff;
+  cursor: pointer; display: grid; place-items: center;
+}
+:root[data-theme='sombre'] .bouton-chercher { color: #1d2024; }
+.bouton-chercher svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.bouton-chercher:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- Nouveau : clavier arabe à l'écran ---------- */
+.clavier {
+  max-width: 560px; margin: 8px 0 0 auto; background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px;
+  padding: 6px; box-shadow: var(--ombre); user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+.clavier .rangee { display: flex; gap: 5px; margin-bottom: 5px; direction: rtl; }
+.clavier .rangee:last-child { margin-bottom: 0; }
+.clavier button {
+  flex: 1 1 0; min-width: 0; height: 46px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--fond);
+  color: var(--texte); cursor: pointer; padding: 0; -webkit-tap-highlight-color: transparent;
+}
+.clavier .lettre { font: 26px/1 var(--arabe); }
+.clavier .lettre.chiffre { font: 22px/1 var(--arabe); }
+.clavier .ajout { background: var(--surface); }
+.clavier button:hover { border-color: var(--accent); }
+.clavier button.appui, .clavier button:active { background: var(--accent-doux); border-color: var(--accent); }
+.clavier .rangee.bas { direction: ltr; }
+.clavier .commande { font: 600 14px/1 var(--latin); color: var(--discret); display: grid; place-items: center; }
+.clavier .commande svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.clavier .espace { flex: 4 1 0; }
+.clavier .effacer-arriere, .clavier .fermer-clavier { flex: 1.5 1 0; }
+
+/* ---------- Maquette seulement ---------- */
+.bandeau { background: #fff4d6; color: #5c4300; border-bottom: 1px solid #f0d58a; padding: 8px 16px; font-size: 14px; }
+.bandeau b { color: #3b2a00; }
+.page { max-width: 980px; margin: 0 auto; padding: 16px; }
+.outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; font-size: 14px; }
+.outils button { border: 1px solid var(--bordure); background: var(--surface); border-radius: 999px; padding: 3px 12px; cursor: pointer; font-size: 14px; }
+.outils button.actif { border-color: var(--accent); color: var(--accent); background: var(--accent-doux); font-weight: 600; }
+.cadre { margin: 0 auto; border: 1px solid var(--bordure); border-radius: 14px; overflow: hidden; background: var(--fond); max-width: 920px; transition: max-width .2s; }
+.cadre.iphone { max-width: 375px; }
+.cadre main { padding: 16px; min-height: 120px; color: var(--discret); font-size: 15px; }
+.journal { font: 13px/1.4 ui-monospace, Consolas, monospace; background: var(--surface); border: 1px dashed var(--bordure); border-radius: 8px; padding: 6px 10px; margin-top: 8px; color: var(--texte); white-space: pre-wrap; }
+section.bloc { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin-top: 16px; }
+section.bloc h2 { font-size: 18px; margin: 0 0 8px; }
+.questions { border: 2px solid var(--accent); }
+.questions ol > li { margin: 12px 0; }
+.choix { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 4px; font-size: 15px; }
+.choix label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.reco { font-size: 14px; color: var(--discret); margin: 4px 0 0; }
+.reco b { color: var(--texte); }
+table.champs { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.champs th, table.champs td { border-bottom: 1px solid var(--bordure); padding: 5px 8px; text-align: left; vertical-align: top; }
+table.champs th { color: var(--discret); font-weight: 600; font-size: 13px; }
+.taille { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.taille.non { color: #b42318; font-weight: 600; }
+.taille.ok { color: #1f6b35; font-weight: 600; }
+.comparer { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .comparer { grid-template-columns: 1fr; } }
+.comparer h3 { font-size: 14px; margin: 0 0 6px; color: var(--discret); }
+.ancien-btn { border: 0; border-radius: 10px; padding: 0 18px; background: var(--accent); color: #fff; font-weight: 600; cursor: pointer; }
+.demo-champs input, .demo-champs select, .demo-champs textarea { display: block; width: 100%; margin: 4px 0 10px; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--bordure); background: var(--fond); color: var(--texte); }
+.demo-champs label { font-size: 13px; color: var(--discret); }
+code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="bandeau"><b>Maquette</b> — champ de recherche d'Alfamous1 (branche <code>interface/recherche</code>). Rien n'est enregistré ; la recherche n'est pas branchée. Les questions sont en bas de la page. <b>24 nov. : clavier remis à plus tard par l'auteur ; seuls la loupe et les champs à 16 px sont codés.</b></div>
+
+<div class="page">
+  <div class="outils">
+    Largeur :
+    <button type="button" data-largeur="iphone" class="actif">iPhone (375 px)</button>
+    <button type="button" data-largeur="ordi">Ordinateur</button>
+    <span style="flex:1"></span>
+    <button type="button" id="theme-maquette">Thème clair / sombre</button>
+  </div>
+
+  <div class="cadre iphone" id="cadre">
+    <header class="entete">
+      <div class="entete-haut">
+        <a class="logo" href="#">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+        <button class="bouton-icone" type="button" aria-label="Changer de thème" tabindex="-1">◐</button>
+      </div>
+      <nav class="menu"><a class="actif" href="#">Lecture</a><a href="#">Lexique</a><a href="#">Articles</a><a href="#">Forum</a></nav>
+
+      <form id="formulaire" class="recherche" role="search">
+        <div class="champ">
+          <input id="requete" type="text" autocomplete="off" spellcheck="false" dir="auto"
+            placeholder="2:255 · p 50 · رحم غفر · sabr" aria-label="Rechercher">
+          <div class="dans-champ">
+            <button id="effacer" type="button" class="effacer" aria-label="Effacer la recherche" title="Effacer" hidden>×</button>
+            <button id="bouton-clavier" type="button" class="bouton-clavier" aria-label="Clavier arabe à l'écran"
+              title="Clavier arabe à l'écran" aria-expanded="false" aria-controls="clavier-arabe">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 9.5h.01M9 9.5h.01M12 9.5h.01M15 9.5h.01M18 9.5h.01M6 12.2h.01M9 12.2h.01M12 12.2h.01M15 12.2h.01M18 12.2h.01M8 15h8"/></svg>
+            </button>
+          </div>
+        </div>
+        <button type="submit" class="bouton-chercher" aria-label="Chercher" title="Chercher">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg>
+        </button>
+      </form>
+      <div id="clavier-arabe" class="clavier" role="group" aria-label="Clavier arabe" hidden></div>
+
+      <div class="options">
+        <label><input type="checkbox"> Mot entier</label>
+        <label><input type="checkbox"> Mots contigus</label>
+        <span class="exemples">Exemples : <a href="#">2:255</a> <a href="#" lang="ar">رحم</a></span>
+      </div>
+    </header>
+    <main>
+      Résultats de la recherche (non branchés dans la maquette).
+      <div class="journal" id="journal">Tapez des lettres, puis Entrée ou la loupe.</div>
+    </main>
+  </div>
+
+  <section class="bloc questions">
+    <h2>Questions (réponds par le numéro, ou « ok pour les recommandations »)</h2>
+    <p class="reco">Chaque choix change le clavier en direct ci-dessus. L'ancienne application n'a <b>pas</b> de clavier à l'écran (seulement <code>FR-AR.js</code>, une table de translittération latin → arabe) : il n'y a donc pas de disposition à reprendre.</p>
+    <ol>
+      <li><b>Disposition des lettres</b>
+        <div class="choix">
+          <label><input type="radio" name="dispo" value="alpha" checked> Ordre alphabétique (ا ب ت ث…), 7 touches par rangée</label>
+          <label><input type="radio" name="dispo" value="pc"> Clavier arabe d'ordinateur (ض ص ث ق…), 12 touches par rangée</label>
+        </div>
+        <p class="reco"><b>Recommandé : ordre alphabétique.</b> Sur iPhone, les touches font environ 45 px de large au lieu de 25 px ; c'est plus sûr au doigt, et plus simple pour qui ne connaît pas le clavier arabe. Qui le connaît garde son propre clavier.</p></li>
+      <li><b>Chiffres arabes-indiens (٠١٢٣٤٥٦٧٨٩)</b>
+        <div class="choix">
+          <label><input type="radio" name="chiffres" value="non" checked> Non</label>
+          <label><input type="radio" name="chiffres" value="oui"> Oui (une rangée de plus)</label>
+        </div>
+        <p class="reco"><b>Recommandé : non.</b> Aujourd'hui la recherche ne comprend que 0-9 : « ٢:٢٥٥ » ne trouve pas le verset 2:255. Avec « oui », je convertirais ces chiffres en 0-9 avant la recherche (petit changement dans <code>recherche.js</code>, avec un test).</p></li>
+      <li><b>Lettres avec hamza (أ إ آ ؤ ئ ء), ة et ى</b>
+        <div class="choix">
+          <label><input type="radio" name="hamza" value="oui" checked> Oui (une rangée de plus)</label>
+          <label><input type="radio" name="hamza" value="non"> Non</label>
+        </div>
+        <p class="reco"><b>Recommandé : oui.</b> Pour la recherche, أ إ آ → ا, ؤ → و, ئ ى → ي et ة → ت (règle de l'ancienne application, dans <code>arabe.js</code>) : taper l'une ou l'autre donne le même résultat. Mais <b>ء</b> reste une lettre à part, et on écrit naturellement « أمن » ou « صلاة ».</p></li>
+    </ol>
+    <p class="reco"><b>Choix déjà faits</b> (dis-moi si tu veux autre chose) : sur iPhone, quand le clavier à l'écran est ouvert, le clavier du téléphone ne s'ouvre pas (le champ passe en <code>inputmode="none"</code>) ; on le retrouve en fermant le clavier à l'écran. La liste des recherches récentes et du lexique sous le champ est cachée tant que le clavier à l'écran est ouvert (sinon elle le recouvre). Échap ferme le clavier. Le retour arrière se répète si on le garde appuyé. Une touche efface la sélection si du texte est sélectionné.</p>
+  </section>
+
+  <section class="bloc">
+    <h2>Bouton « Chercher » → loupe</h2>
+    <div class="comparer">
+      <div><h3>Aujourd'hui</h3>
+        <div class="recherche" style="margin:0"><div class="champ"><input value="رحم غفر" dir="auto" style="padding-right:14px" tabindex="-1" readonly></div><button class="ancien-btn" type="button" tabindex="-1">Chercher</button></div>
+        <p class="reco">Bouton d'environ 96 px.</p></div>
+      <div><h3>Proposé</h3>
+        <div class="recherche" style="margin:0"><div class="champ"><input value="رحم غفر" dir="auto" tabindex="-1" readonly><div class="dans-champ"><button type="button" class="effacer" tabindex="-1">×</button><button type="button" tabindex="-1"><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M6 9.5h.01M9 9.5h.01M12 9.5h.01M15 9.5h.01M18 9.5h.01M6 12.2h.01M9 12.2h.01M12 12.2h.01M15 12.2h.01M18 12.2h.01M8 15h8"/></svg></button></div></div><button class="bouton-chercher" type="button" tabindex="-1"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg></button></div>
+        <p class="reco">Bouton de 46 px : environ 50 px de plus pour le champ, même sur iPhone. Nom accessible « Chercher » (lecteur d'écran et info-bulle). La touche Entrée valide toujours.</p></div>
+    </div>
+  </section>
+
+  <section class="bloc">
+    <h2>Police des champs : tous à 16 px au moins</h2>
+    <p class="reco">En dessous de 16 px, Safari sur iPhone agrandit la page quand on touche le champ. Correction par la taille de police ; le zoom reste permis (pas de <code>maximum-scale</code> ni de <code>user-scalable=no</code>). Relevé fait dans <code>src/css/app.css</code> et les écrans en JavaScript ; je le revérifierai écran par écran dans le navigateur (tailles calculées).</p>
+    <table class="champs">
+      <thead><tr><th>Champ</th><th>Où</th><th>Règle CSS</th><th>Aujourd'hui</th><th>Proposé</th></tr></thead>
+      <tbody>
+        <tr><td>« Comparer avec » (commentaire traditionnel)</td><td>en-tête</td><td><code>.choix-trad</code></td><td class="taille non">14 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>« Chercher le latin dans »</td><td>en-tête (options)</td><td><code>.options</code></td><td class="taille non">14 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Niveau d'un membre (liste)</td><td>Membres</td><td><code>.membres select</code></td><td class="taille non">14 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Ajouter : verset, racine, lexique, fil, point à vérifier, recherche ; source (titre, adresse, note) ; définition (clé, texte) — 11 champs</td><td>Articles · panneau Contexte</td><td><code>.ctx-ajout input</code></td><td class="taille non">14 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Type de point à vérifier (fait / déduction / hypothèse)</td><td>Articles · panneau Contexte</td><td><code>.ctx-ajout select</code></td><td class="taille non">13 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Note d'un verset</td><td>Articles · panneau Contexte</td><td><code>.note-ctx</code></td><td class="taille non">13 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Code HTML de l'article (mode HTML)</td><td>Articles · éditeur</td><td><code>.zone-html</code></td><td class="taille non">13 px</td><td class="taille ok">16 px</td></tr>
+        <tr><td>Dossier pour Claude</td><td>Articles · fenêtre</td><td><code>textarea.dossier</code></td><td class="taille non">13 px</td><td class="taille ok">16 px</td></tr>
+      </tbody>
+    </table>
+    <p class="reco"><b>Déjà conformes</b> : recherche principale (18 px) ; filtres du lexique, des membres et des articles (16 px) ; toutes les fenêtres — connexion, création de compte, nouvelle entrée du lexique, insérer un verset, motif de masquage, choix dans une liste (16 px) ; éditeurs de note et d'article — titre, famille, libellés, résumé, image, adresse (16 px) ; écriture et modification des commentaires et des réponses (17 px) ; zone de rédaction de l'article (17 px). Les cases à cocher et boutons radio ne provoquent pas de zoom.</p>
+    <p class="reco">En plus, une règle de sécurité en fin de feuille : tout champ de saisie ajouté plus tard reste à 16 px au moins sur les écrans tactiles, même si sa classe dit moins.</p>
+    <div class="comparer demo-champs">
+      <div><h3>Panneau Contexte aujourd'hui (14 px)</h3><label>Ajouter un verset<input style="font-size:14px" placeholder="2:183 ou 2:183-187"></label><label>Note<input style="font-size:13px" placeholder="note"></label></div>
+      <div><h3>Proposé (16 px)</h3><label>Ajouter un verset<input style="font-size:16px" placeholder="2:183 ou 2:183-187"></label><label>Note<input style="font-size:16px" placeholder="note"></label></div>
+    </div>
+  </section>
+</div>
+
+<script>
+// ---------- Clavier arabe à l'écran (le même code ira dans src/js/clavier.js) ----------
+const DISPOSITIONS = {
+  alpha: [
+    ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ'],
+    ['د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص'],
+    ['ض', 'ط', 'ظ', 'ع', 'غ', 'ف', 'ق'],
+    ['ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي'],
+  ],
+  pc: [
+    ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د'],
+    ['ش', 'س', 'ي', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ك', 'ط'],
+    ['ذ', 'ر', 'و', 'ز', 'ظ'],
+  ],
+};
+const HAMZA = ['ء', 'أ', 'إ', 'آ', 'ؤ', 'ئ', 'ة', 'ى'];
+const CHIFFRES = ['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '٠'];
+const reglages = { dispo: 'alpha', chiffres: 'non', hamza: 'oui' };
+
+const $ = (s) => document.querySelector(s);
+const champ = $('#requete');
+const clavier = $('#clavier-arabe');
+const boutonClavier = $('#bouton-clavier');
+const tactile = matchMedia('(pointer: coarse)').matches;
+
+const touche = (l, cls = '') => `<button type="button" class="lettre ${cls}" data-lettre="${l}" aria-label="${l}">${l}</button>`;
+function dessinerClavier() {
+  const r = [];
+  if (reglages.chiffres === 'oui') r.push(CHIFFRES.map((c) => touche(c, 'chiffre')).join(''));
+  for (const rangee of DISPOSITIONS[reglages.dispo]) r.push(rangee.map((l) => touche(l)).join(''));
+  if (reglages.hamza === 'oui') r.push(HAMZA.map((l) => touche(l, 'ajout')).join(''));
+  clavier.innerHTML = r.map((x) => `<div class="rangee">${x}</div>`).join('')
+    + `<div class="rangee bas">
+        <button type="button" class="commande effacer-arriere" data-commande="arriere" aria-label="Retour arrière" title="Retour arrière"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11v12H9l-6-6z"/><path d="m12.5 9.5 5 5m0-5-5 5"/></svg></button>
+        <button type="button" class="commande espace" data-commande="espace" aria-label="Espace">espace</button>
+        <button type="button" class="commande fermer-clavier" data-commande="fermer" aria-label="Fermer le clavier arabe" title="Fermer le clavier"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="10" rx="2"/><path d="m8 18 4 3 4-3"/></svg></button>
+      </div>`;
+}
+
+// Garder la position du curseur même quand le champ n'a plus le focus.
+let selection = { debut: 0, fin: 0 };
+const noterSelection = () => { selection = { debut: champ.selectionStart ?? champ.value.length, fin: champ.selectionEnd ?? champ.value.length }; };
+['select', 'keyup', 'click', 'input', 'focus'].forEach((t) => champ.addEventListener(t, noterSelection));
+
+function modifier(texte, effacerAvant = false) {
+  let { debut, fin } = document.activeElement === champ
+    ? { debut: champ.selectionStart, fin: champ.selectionEnd } : selection;
+  debut = Math.min(debut, champ.value.length); fin = Math.min(fin, champ.value.length);
+  if (effacerAvant && debut === fin) {
+    if (debut === 0) return;
+    const avant = [...champ.value.slice(0, debut)];
+    debut -= avant.pop().length;
+  }
+  champ.setRangeText(texte, debut, fin, 'end');
+  champ.dispatchEvent(new Event('input', { bubbles: true }));
+  if (!tactile || champ.inputMode === 'none') champ.focus({ preventScroll: true });
+  noterSelection();
+}
+
+function ouvrir() {
+  dessinerClavier();
+  clavier.hidden = false;
+  boutonClavier.setAttribute('aria-expanded', 'true');
+  champ.inputMode = 'none'; // iPhone : pas de clavier du téléphone par-dessus
+  champ.focus({ preventScroll: true });
+  const n = champ.value.length; champ.setSelectionRange(selection.fin || n, selection.fin || n);
+}
+function fermer({ rendreFocus = false } = {}) {
+  clavier.hidden = true;
+  boutonClavier.setAttribute('aria-expanded', 'false');
+  champ.removeAttribute('inputmode');
+  if (rendreFocus) boutonClavier.focus();
+}
+
+boutonClavier.addEventListener('click', () => (clavier.hidden ? ouvrir() : fermer()));
+champ.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !clavier.hidden) { e.stopPropagation(); fermer(); } });
+clavier.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermer({ rendreFocus: true }); });
+
+// pointerdown + preventDefault : le champ garde le focus (et le curseur) pendant la frappe.
+let repetition = null;
+const arreter = () => { clearTimeout(repetition); clearInterval(repetition); repetition = null; clavier.querySelectorAll('.appui').forEach((b) => b.classList.remove('appui')); };
+clavier.addEventListener('pointerdown', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  e.preventDefault();
+  b.classList.add('appui');
+  action(b);
+  if (b.dataset.commande === 'arriere') repetition = setTimeout(() => { repetition = setInterval(() => action(b), 70); }, 450);
+});
+['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => clavier.addEventListener(t, arreter));
+// Clavier physique (Tab puis Entrée / Espace sur une touche) : le clic sans pointeur.
+clavier.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && e.detail === 0) action(b); });
+function action(b) {
+  if (b.dataset.lettre) modifier(b.dataset.lettre);
+  else if (b.dataset.commande === 'espace') modifier(' ');
+  else if (b.dataset.commande === 'arriere') modifier('', true);
+  else if (b.dataset.commande === 'fermer') { arreter(); fermer(); }
+}
+
+// Croix d'effacement, envoi
+const majCroix = () => { $('#effacer').hidden = !champ.value; };
+champ.addEventListener('input', majCroix);
+$('#effacer').addEventListener('click', () => { champ.value = ''; majCroix(); selection = { debut: 0, fin: 0 }; champ.focus(); });
+$('#formulaire').addEventListener('submit', (e) => {
+  e.preventDefault();
+  $('#journal').textContent = `Recherche envoyée : « ${champ.value.trim() || '(vide)'} »`;
+});
+
+// ---------- Commandes de la maquette ----------
+document.querySelectorAll('[data-largeur]').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-largeur]').forEach((x) => x.classList.toggle('actif', x === b));
+  $('#cadre').classList.toggle('iphone', b.dataset.largeur === 'iphone');
+}));
+$('#theme-maquette').addEventListener('click', () => {
+  const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'sombre' ? 'clair' : 'sombre';
+});
+document.querySelectorAll('.questions input[type=radio]').forEach((i) => i.addEventListener('change', () => {
+  reglages[i.name] = i.value;
+  if (clavier.hidden) ouvrir(); else dessinerClavier();
+}));
+</script>
+</body>
+</html>

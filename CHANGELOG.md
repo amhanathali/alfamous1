@@ -4,6 +4,28 @@
 ### Ajouté — sous-domaine forum.alfamous.ca
 - Sur `forum.alfamous.ca` (même site Hosting que l'atelier), l'accueil ouvre directement l'onglet Forum (`/#/forum`), comme `blog.alfamous.ca` ouvre les articles. Aucun effet sur les autres domaines.
 
+### Modifié — champ de recherche et champs de saisie (branche `interface/recherche`, maquette `docs/maquettes/recherche.html`)
+- Bouton de recherche : une loupe (SVG intégré) au lieu du texte « Chercher » ; nom accessible « Chercher »
+  (`aria-label`, info-bulle), la touche Entrée valide toujours. Bouton de 46 px au lieu de 102 px : le champ gagne
+  56 px sur iPhone (233 → 289 px en largeur 375 px).
+- Police d'au moins 16 px dans tous les champs de saisie (en dessous, l'iPhone zoome quand on touche le champ ; le zoom
+  reste permis, pas de `maximum-scale` ni de `user-scalable=no`). Champs corrigés : « Comparer avec » et « Chercher
+  le latin dans » (en-tête, 14 px), niveau d'un membre (14 px), panneau Contexte des articles — 11 champs « Ajouter »
+  (14 px), type de point à vérifier et note d'un verset (13 px) —, code HTML de l'article et Dossier pour Claude
+  (13 px), texte d'une note dans l'éditeur de Mes Notes (14 px : `font: inherit` reprenait la taille du libellé ; trouvé
+  par le relevé dans le navigateur). Règle de base `input, select, textarea { font-size: max(16px, 1em) }` : un champ
+  prend la taille de son parent, jamais moins de 16 px (couvre aussi les champs ajoutés plus tard). Les autres champs
+  étaient déjà à 16, 17 ou 18 px.
+- Thème sombre : la croix d'effacement du champ de recherche était de la couleur du fond (règle qui visait tous les
+  boutons de la recherche) ; la règle ne vise plus que la loupe.
+- Test `tests/champs-16px.test.mjs` : aucune règle de `app.css` ne met un champ sous 16 px, zoom non bloqué, loupe
+  avec son nom accessible, champ en `font: inherit` sans taille ; `npm test` 77/77.
+- Relevé dans le navigateur intégré sur les émulateurs du PC, connecté en admin d'essai : 82 champs en largeur 375 px
+  et 65 en largeur ordinateur (lecture et commentaires, lexique et entrée, nouvelle entrée, articles, éditeur et
+  panneau Contexte, Dossier pour Claude, insérer un verset, Mes Notes et nouvelle note, forum et fil, membres), tous à
+  16 px ou plus. Recherche lancée par Entrée et par la loupe.
+- Clavier arabe à l'écran : maquette faite, mise en œuvre remise à plus tard à la demande de l'auteur.
+
 ### Ajouté — onglet Articles, étape 6 : pages publiques, plan du site, flux, redirections de l'ancien blog
 - `npm run construire -- --articles --projet essai|prod` : lit les articles publiés (clé de service hors dépôt) et écrit
   dans `dist/` une page par article (`/articles/<slug>/` : HTML assaini de nouveau, canonical, Open Graph, données
