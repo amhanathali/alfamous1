@@ -1,6 +1,9 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — sous-domaine forum.alfamous.ca
+- Sur `forum.alfamous.ca` (même site Hosting que l'atelier), l'accueil ouvre directement l'onglet Forum (`/#/forum`), comme `blog.alfamous.ca` ouvre les articles. Aucun effet sur les autres domaines.
+
 ### Ajouté — onglet Articles, étape 6 : pages publiques, plan du site, flux, redirections de l'ancien blog
 - `npm run construire -- --articles --projet essai|prod` : lit les articles publiés (clé de service hors dépôt) et écrit
   dans `dist/` une page par article (`/articles/<slug>/` : HTML assaini de nouveau, canonical, Open Graph, données
