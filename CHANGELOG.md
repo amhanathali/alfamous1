@@ -17,8 +17,10 @@
   boutons de la recherche) ; la règle ne vise plus que la loupe.
 - Test `tests/champs-16px.test.mjs` : aucune règle de `app.css` ne met un champ sous 16 px, zoom non bloqué, loupe
   avec son nom accessible, champ en `font: inherit` sans taille ; `npm test` 77/77.
-- Relevé dans le navigateur intégré sur les émulateurs du PC (375 px et ordinateur) : 80 champs mesurés sur tous les
-  écrans et fenêtres, tous à 16 px ou plus.
+- Relevé dans le navigateur intégré sur les émulateurs du PC, connecté en admin d'essai : 82 champs en largeur 375 px
+  et 65 en largeur ordinateur (lecture et commentaires, lexique et entrée, nouvelle entrée, articles, éditeur et
+  panneau Contexte, Dossier pour Claude, insérer un verset, Mes Notes et nouvelle note, forum et fil, membres), tous à
+  16 px ou plus. Recherche lancée par Entrée et par la loupe.
 - Clavier arabe à l'écran : maquette faite, mise en œuvre remise à plus tard à la demande de l'auteur.
 
 ### Ajouté — onglet Articles, étape 6 : pages publiques, plan du site, flux, redirections de l'ancien blog
