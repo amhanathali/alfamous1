@@ -1,6 +1,10 @@
 # Journal des changements
 
 ## [Non publié]
+### En préparation — écouter et suivre la lecture (branche `lecture/ecouter-suivre`)
+- Cadrage `docs/LECTURE-AUDIO.md` (ce que fait l'ancienne application, décisions de l'auteur : un audio par verset,
+  suivi de la sourate, vitesses 0,75 à 1,5) et maquette cliquable `docs/maquettes/lecteur.html`. Rien de codé.
+
 ### Ajouté — sous-domaine forum.alfamous.ca
 - Sur `forum.alfamous.ca` (même site Hosting que l'atelier), l'accueil ouvre directement l'onglet Forum (`/#/forum`), comme `blog.alfamous.ca` ouvre les articles. Aucun effet sur les autres domaines.
 
