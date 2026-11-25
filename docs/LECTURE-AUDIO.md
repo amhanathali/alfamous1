@@ -26,13 +26,15 @@ récitation de Ghamidi : un audio par verset s'aligne donc sans conversion.
    sourate → sourate suivante) ; depuis des résultats de recherche, la liste reste à l'écran et la fenêtre affiche le
    verset avec « Aller au verset ».
 3. **Vitesses** : 0,75 · 1 · 1,25 · 1,5 (hauteur de la voix conservée).
-4. **Source pour l'essai** : EveryAyah (Ghamidi) en streaming. À terme, l'auteur préférait une récitation du complexe
-   du roi Fahd (seule source trouvée avec une autorisation écrite), mais voir § 3 bis.
+4. **Récitateur pour l'essai** : Muhammad Ayyoub, récitateur du complexe du roi Fahd, lu sur EveryAyah
+   (`Muhammad_Ayyoub_128kbps`), car les fichiers du Complexe ne sont plus téléchargeables (§ 3 bis). Mêmes voix,
+   mais EveryAyah ne cite pas le Complexe comme source : son autorisation écrite ne couvre pas forcément ces
+   fichiers. Pour la production : fichiers du Complexe quand ils reviendront, ou confirmation écrite du Complexe.
 
 ## 3. Source audio retenue (option A)
 
-- Récitation de Saad al-Ghamidi verset par verset, publiée par EveryAyah : dossier `Ghamadi_40kbps`
-  (seul débit disponible pour ce récitateur), fichiers `SSSVVV.mp3` (ex. `003014.mp3`).
+- Première idée : Saad al-Ghamidi (EveryAyah, `Ghamadi_40kbps`, seul débit disponible). Remplacé le 25 nov. par
+  Muhammad Ayyoub (`Muhammad_Ayyoub_128kbps`, décision 4). Fichiers `SSSVVV.mp3` (ex. `003014.mp3`).
 - **Lue sur place** : rien n'est copié dans le dépôt ni dans Storage, rien n'est déplacé d'`alfamous-amha`.
 - **Droits** : la page d'EveryAyah n'affiche aucune licence. À vérifier par l'auteur avant la mise en production
   (contact EveryAyah, ou autre source dont la licence est connue). La source est isolée dans une seule fonction

@@ -5,13 +5,14 @@ import { analyserRequete } from './recherche.js';
 export const VITESSES = [0.75, 1, 1.25, 1.5];
 
 // ---------- Source audio (une seule fonction à changer pour une autre source ou un autre récitateur) ----------
-// Essai : récitation de Saad al-Ghamidi verset par verset, publiée par EveryAyah (lue sur place, rien copié).
-// Droits à vérifier avant la production (docs/LECTURE-AUDIO.md § 3).
+// Essai (choix de l'auteur, 25 nov.) : Muhammad Ayyoub, récitateur du complexe du roi Fahd, verset par verset,
+// 128 kbps, publié par EveryAyah (lu sur place, rien copié). Les fichiers du Complexe lui-même ne sont plus
+// téléchargeables pour l'instant ; droits à vérifier avant la production (docs/LECTURE-AUDIO.md § 3 bis).
 export const RECITATION = {
-  id: 'ghamidi',
-  nom: 'Saad al-Ghamidi',
+  id: 'ayyoub',
+  nom: 'Muhammad Ayyoub',
   source: 'EveryAyah',
-  base: 'https://everyayah.com/data/Ghamadi_40kbps/',
+  base: 'https://everyayah.com/data/Muhammad_Ayyoub_128kbps/',
 };
 const trois = (n) => String(n).padStart(3, '0');
 export function urlAudio(s, v, recitation = RECITATION) {

@@ -40,8 +40,8 @@ test('données : numérotation Hafs (6 236 versets), alignée sur un audio par v
 });
 
 test('adresse audio : SSSVVV.mp3', () => {
-  assert.equal(urlAudio(3, 14), 'https://everyayah.com/data/Ghamadi_40kbps/003014.mp3');
-  assert.equal(urlAudio(114, 6), 'https://everyayah.com/data/Ghamadi_40kbps/114006.mp3');
+  assert.equal(urlAudio(3, 14), 'https://everyayah.com/data/Muhammad_Ayyoub_128kbps/003014.mp3');
+  assert.equal(urlAudio(114, 6), 'https://everyayah.com/data/Muhammad_Ayyoub_128kbps/114006.mp3');
   assert.equal(urlAudio(1, 1, { base: 'https://exemple.test/r/' }), 'https://exemple.test/r/001001.mp3');
 });
 

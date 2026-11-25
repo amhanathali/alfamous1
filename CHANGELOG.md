@@ -5,8 +5,9 @@
 - Bouton « écouter » rond à côté de la référence de chaque verset (onglet Lecture) : lit à partir de ce verset.
   Nom accessible « Écouter à partir du verset 3:14 », zone de toucher de 44 px.
 - Lecture continue, un audio par verset : verset suivant à la fin de chaque verset, y compris d'une sourate à
-  l'autre ; arrêt avec « Fin du texte » après 114:6 ; verset suivant préchargé. Récitation de Saad al-Ghamidi
-  publiée par EveryAyah (`Ghamadi_40kbps`), lue sur place, rien copié dans le dépôt ni dans Storage ; source isolée
+  l'autre ; arrêt avec « Fin du texte » après 114:6 ; verset suivant préchargé. Récitation de Muhammad Ayyoub
+  (récitateur du complexe du roi Fahd, choix de l'auteur), 128 kbps, publiée par EveryAyah
+  (`Muhammad_Ayyoub_128kbps`), lue sur place, rien copié dans le dépôt ni dans Storage ; source isolée
   dans `urlAudio` (`src/js/lecteur-outils.js`) pour pouvoir en changer. Droits à vérifier avant la production.
 - Suivi dans la page : le verset en cours est encadré et surligné, et placé entre l'en-tête et la fenêtre. Lecture
   lancée depuis une sourate ou une page : la page suit (versets de plus chargés, sourate ou page suivante ouverte,

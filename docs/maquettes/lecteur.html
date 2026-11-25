@@ -133,7 +133,7 @@ button, input, select { font: inherit; color: inherit; }
   <button type="button" data-largeur="mobile" aria-pressed="true">iPhone 375 px</button>
   <button type="button" data-largeur="ordi" aria-pressed="false">Ordinateur</button>
   <button type="button" id="b-theme">Thème clair / sombre</button>
-  <label><input type="checkbox" id="son-reel" checked> Son réel (EveryAyah, Ghamidi 40 kbps)</label>
+  <label><input type="checkbox" id="son-reel" checked> Son réel (EveryAyah, Muhammad Ayyoub 128 kbps)</label>
   <span>Écrans :</span>
   <button type="button" data-ecran="lecture">Lecture en cours</button>
   <button type="button" data-ecran="reduit">Fenêtre réduite</button>
@@ -260,7 +260,7 @@ function jouer() {
   const x = VERSETS[idx];
   enLecture = true; majBoutons(); $('#l-etat').textContent = '';
   if ($('#son-reel').checked) {
-    if (audio.dataset.cle !== `${x.s}:${x.v}`) { audio.src = `https://everyayah.com/data/Ghamadi_40kbps/${pad(x.s)}${pad(x.v)}.mp3`; audio.dataset.cle = `${x.s}:${x.v}`; }
+    if (audio.dataset.cle !== `${x.s}:${x.v}`) { audio.src = `https://everyayah.com/data/Muhammad_Ayyoub_128kbps/${pad(x.s)}${pad(x.v)}.mp3`; audio.dataset.cle = `${x.s}:${x.v}`; }
     audio.playbackRate = vitesse;
     audio.play().catch(() => { $('#l-etat').textContent = 'Son indisponible : lecture simulée.'; $('#son-reel').checked = false; jouer(); });
   } else {
