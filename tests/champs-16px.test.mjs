@@ -48,8 +48,25 @@ test('aucune règle ne met un champ de saisie sous 16 px', () => {
   assert.deepEqual(fautifs, []);
 });
 
-test('les listes de l\'en-tête (dans des libellés à 14 px) sont remises à 16 px', () => {
-  assert.match(css, /\.choix-trad select,\s*\.options select\s*\{\s*font-size:\s*16px/);
+test('règle de base : un champ prend la taille de son parent, jamais moins de 16 px', () => {
+  // Cas des listes de l'en-tête, placées dans des libellés à 14 px.
+  assert.match(css, /\ninput, select, textarea \{ font-size: max\(16px, 1em\); \}/);
+});
+
+// « font: inherit » sur un champ reprend la taille du parent et annule la règle de base : il faut alors une taille
+// de 16 px au moins dans la même règle. Exceptions vérifiées : la règle de base elle-même, et .ecrire textarea
+// (commentaires et réponses), qui hérite des 17 px du corps de page.
+test('un champ en « font: inherit » fixe aussi sa taille', () => {
+  const EXCEPTIONS = ['select, input, button', '.ecrire textarea'];
+  const fautifs = [];
+  for (const { selecteurs, corps } of regles(css)) {
+    if (!/(^|;)\s*font\s*:\s*inherit/.test(corps)) continue;
+    if (EXCEPTIONS.includes(selecteurs.join(', '))) continue;
+    const t = taillePolice(corps);
+    if (t !== null && t >= 16) continue;
+    for (const s of selecteurs) if (visseUnChamp(s)) fautifs.push(s);
+  }
+  assert.deepEqual(fautifs, []);
 });
 
 test('le zoom n\'est pas bloqué', () => {

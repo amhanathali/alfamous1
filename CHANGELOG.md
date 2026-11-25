@@ -9,11 +9,16 @@
   reste permis, pas de `maximum-scale` ni de `user-scalable=no`). Champs corrigés : « Comparer avec » et « Chercher
   le latin dans » (en-tête, 14 px), niveau d'un membre (14 px), panneau Contexte des articles — 11 champs « Ajouter »
   (14 px), type de point à vérifier et note d'un verset (13 px) —, code HTML de l'article et Dossier pour Claude
-  (13 px). Les autres champs étaient déjà à 16, 17 ou 18 px.
+  (13 px), texte d'une note dans l'éditeur de Mes Notes (14 px : `font: inherit` reprenait la taille du libellé ; trouvé
+  par le relevé dans le navigateur). Règle de base `input, select, textarea { font-size: max(16px, 1em) }` : un champ
+  prend la taille de son parent, jamais moins de 16 px (couvre aussi les champs ajoutés plus tard). Les autres champs
+  étaient déjà à 16, 17 ou 18 px.
 - Thème sombre : la croix d'effacement du champ de recherche était de la couleur du fond (règle qui visait tous les
   boutons de la recherche) ; la règle ne vise plus que la loupe.
 - Test `tests/champs-16px.test.mjs` : aucune règle de `app.css` ne met un champ sous 16 px, zoom non bloqué, loupe
-  avec son nom accessible ; `npm test` 76/76.
+  avec son nom accessible, champ en `font: inherit` sans taille ; `npm test` 77/77.
+- Relevé dans le navigateur intégré sur les émulateurs du PC (375 px et ordinateur) : 80 champs mesurés sur tous les
+  écrans et fenêtres, tous à 16 px ou plus.
 - Clavier arabe à l'écran : maquette faite, mise en œuvre remise à plus tard à la demande de l'auteur.
 
 ### Ajouté — onglet Articles, étape 6 : pages publiques, plan du site, flux, redirections de l'ancien blog

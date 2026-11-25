@@ -44,9 +44,10 @@ a { color: var(--lien); }
 .logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
 .entete-actions { display: flex; align-items: center; gap: 10px; }
 .choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
-/* Champs de saisie : 16 px au moins partout, sinon l'iPhone zoome quand on les touche (tests/champs-16px.test.mjs). */
-.choix-trad select, .options select { font-size: 16px; }
 select, input, button { font: inherit; color: inherit; }
+/* Champs de saisie : 16 px au moins partout, sinon l'iPhone zoome quand on les touche (le zoom reste permis).
+   Un champ prend la taille de son parent, mais jamais moins de 16 px ; tests/champs-16px.test.mjs. */
+input, select, textarea { font-size: max(16px, 1em); }
 select { background: var(--surface); border: 1px solid var(--bordure); border-radius: 8px; padding: 4px 8px; }
 .bouton-icone { background: none; border: 1px solid var(--bordure); border-radius: 50%; width: 36px; height: 36px; cursor: pointer; font-size: 18px; }
 
@@ -296,7 +297,7 @@ a.btn { text-decoration: none; display: inline-block; }
 .editeur { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 14px 16px; box-shadow: var(--ombre); }
 .editeur label { display: block; font-size: 14px; color: var(--discret); margin: 10px 0 4px; }
 .editeur input[type=text], .editeur textarea, .editeur select { display: block; width: 100%; margin-top: 4px; font-size: 16px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--fond); color: var(--texte); }
-.editeur textarea { min-height: 180px; resize: vertical; font: inherit; }
+.editeur textarea { min-height: 180px; resize: vertical; font: inherit; font-size: 16px; }
 .editeur input:disabled { opacity: .5; }
 .ligne-lien { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px; }
 .ligne-lien select, .ligne-lien input { margin-top: 0 !important; }
