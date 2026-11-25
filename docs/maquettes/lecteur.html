@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette — écouter et suivre la lecture</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Jetons repris de src/css/app.css. */
+:root {
+  --fond: #f7f4ee; --surface: #ffffff; --texte: #1f2328; --discret: #5f6670; --bordure: #e3ddd2;
+  --accent: #8a4b16; --accent-doux: #f3e5d6; --surligne: #fbe3a6; --lien: #8a4b16;
+  --ombre: 0 1px 2px rgba(0, 0, 0, .05), 0 4px 16px rgba(0, 0, 0, .04);
+  --ombre-fenetre: 0 8px 32px rgba(0, 0, 0, .18);
+  --arabe: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+  --latin: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: light;
+}
+:root[data-theme='sombre'] {
+  --fond: #15171a; --surface: #1d2024; --texte: #e8e6e1; --discret: #a3a8b0; --bordure: #30343a;
+  --accent: #e0a46c; --accent-doux: #3a2b1d; --surligne: #6b4f12; --lien: #e8b27d; --ombre: none;
+  --ombre-fenetre: 0 8px 32px rgba(0, 0, 0, .6); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #d9d4ca; color: var(--texte); font: 17px/1.55 var(--latin); }
+:root[data-theme='sombre'] body { background: #0b0c0e; }
+[lang='ar'], .ar { font-family: var(--arabe); direction: rtl; }
+button, input, select { font: inherit; color: inherit; }
+
+/* ---------- Barre de la maquette (hors application) ---------- */
+.barre-maquette { position: sticky; top: 0; z-index: 50; background: #222; color: #eee; font-size: 14px; padding: 8px 12px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.barre-maquette b { color: #fff; }
+.barre-maquette button { background: #3a3a3a; border: 1px solid #555; border-radius: 6px; padding: 3px 10px; cursor: pointer; color: #eee; }
+.barre-maquette button[aria-pressed='true'] { background: #8a4b16; border-color: #8a4b16; color: #fff; }
+.barre-maquette label { display: flex; gap: 4px; align-items: center; }
+.notes { max-width: 980px; margin: 14px auto; padding: 0 12px; font-size: 15px; color: #333; }
+:root[data-theme='sombre'] .notes { color: #ccc; }
+.notes li { margin: 2px 0; }
+
+/* ---------- Cadre de l'application (largeur simulée) ---------- */
+.ecran { margin: 0 auto 40px; background: var(--fond); position: relative; min-height: 900px; overflow: hidden; transition: width .2s; }
+.ecran.mobile { width: 375px; border: 10px solid #111; border-radius: 34px; }
+.ecran.ordi { width: min(1100px, 100%); border: 1px solid var(--bordure); }
+.entete { border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
+.logo { font: 700 22px/1 var(--latin); }
+.logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
+.menu { display: flex; gap: 4px; margin: 8px 0 0; }
+.menu a { padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; font-size: 15px; cursor: pointer; }
+.menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+.defile { height: 820px; overflow-y: auto; padding: 12px 16px 220px; scroll-behavior: smooth; }
+.titre h1 { font-size: 22px; margin: 6px 0 2px; }
+.titre .resume { color: var(--discret); font-size: 14px; }
+.liste { max-width: 860px; margin: 0 auto; }
+.ecran.mobile .defile { padding-left: 10px; padding-right: 10px; }
+
+/* ---------- Carte de verset (existante) + bouton écouter (nouveau) ---------- */
+.verset { background: var(--surface); border: 1px solid var(--bordure); border-radius: 12px; padding: 12px 16px; margin: 10px 0; box-shadow: var(--ombre); transition: border-color .2s, box-shadow .2s, background .2s; scroll-margin: 90px 0 200px; }
+.verset-entete { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--discret); }
+.ref-groupe { display: inline-flex; align-items: center; gap: 4px; }
+.ref { font-weight: 600; color: var(--accent); text-decoration: none; background: var(--accent-doux); padding: 1px 8px; border-radius: 999px; }
+/* NOUVEAU : bouton écouter, collé à la référence. Zone de toucher de 44 px, cercle visible de 28 px. */
+.ecouter {
+  position: relative; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--bordure);
+  background: var(--surface); color: var(--accent); cursor: pointer; display: inline-grid; place-items: center;
+}
+.ecouter::after { content: ''; position: absolute; inset: -8px; } /* agrandit la zone de toucher à 44 px */
+.ecouter:hover, .ecouter:focus-visible { border-color: var(--accent); background: var(--accent-doux); outline: none; }
+.ecouter:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.ecouter svg { width: 14px; height: 14px; fill: currentColor; }
+.verset.en-lecture .ecouter { background: var(--accent); color: #fff; border-color: var(--accent); }
+:root[data-theme='sombre'] .verset.en-lecture .ecouter { color: #15171a; }
+/* NOUVEAU : verset en cours de lecture. */
+.verset.en-lecture { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--ombre); }
+.verset.en-lecture .ar { background: linear-gradient(transparent 0, var(--accent-doux) 0); border-radius: 8px; }
+.verset .ar { font-size: 28px; line-height: 2.1; margin: 6px 0 4px; text-align: right; padding: 0 6px; }
+.verset .tr { color: var(--discret); font-style: italic; margin: 0; font-size: 15px; }
+.ecran.mobile .verset .ar { font-size: 24px; }
+.basmala { text-align: center; font-size: 26px; }
+
+/* ---------- NOUVEAU : fenêtre de lecture ---------- */
+.lecteur {
+  position: absolute; right: 16px; bottom: 16px; width: 360px; z-index: 20;
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: 14px; box-shadow: var(--ombre-fenetre);
+  font-size: 15px; overflow: hidden;
+}
+.ecran.mobile .lecteur { left: 0; right: 0; bottom: 0; width: auto; border-radius: 16px 16px 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); }
+.lecteur-tete { display: flex; align-items: center; gap: 8px; padding: 8px 8px 4px 14px; }
+.lecteur-tete .ref-lecture { font-weight: 600; color: var(--accent); }
+.lecteur-tete .sourate { color: var(--discret); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icone { width: 44px; height: 44px; border: 0; background: transparent; border-radius: 10px; cursor: pointer; color: var(--discret); display: grid; place-items: center; flex: none; }
+.icone:hover, .icone:focus-visible { color: var(--accent); background: var(--accent-doux); outline: none; }
+.icone svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lecteur-texte { padding: 0 14px; max-height: 150px; overflow-y: auto; }
+.lecteur-texte .ar { font-size: 22px; line-height: 1.9; margin: 0; text-align: right; }
+.lecteur-texte .tr { font-size: 14px; color: var(--discret); font-style: italic; margin: 2px 0 4px; }
+.progression { height: 3px; background: var(--bordure); margin: 6px 14px 0; border-radius: 2px; overflow: hidden; }
+.progression span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s linear; }
+.commandes { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px; }
+.commandes .icone svg { width: 22px; height: 22px; }
+.jouer { width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; cursor: pointer; display: grid; place-items: center; }
+:root[data-theme='sombre'] .jouer { color: #15171a; }
+.jouer:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.jouer svg { width: 24px; height: 24px; fill: currentColor; }
+.vitesse { min-width: 52px; height: 36px; border: 1px solid var(--bordure); border-radius: 18px; background: var(--surface); cursor: pointer; font-size: 15px; font-weight: 600; padding: 0 10px; }
+.vitesse:hover, .vitesse:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.reprendre { display: flex; gap: 6px; padding: 4px 14px 12px; align-items: center; }
+.reprendre label { font-size: 14px; color: var(--discret); white-space: nowrap; }
+.reprendre input { flex: 1; min-width: 0; font-size: 16px; padding: 6px 10px; border: 1px solid var(--bordure); border-radius: 8px; background: var(--fond); }
+.reprendre input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.reprendre button { height: 36px; padding: 0 12px; border: 1px solid var(--accent); color: var(--accent); background: var(--surface); border-radius: 8px; cursor: pointer; font-size: 15px; }
+.erreur-saisie { color: #b3261e; font-size: 13px; padding: 0 14px 8px; margin-top: -6px; }
+:root[data-theme='sombre'] .erreur-saisie { color: #f2b8b5; }
+.hors-page { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--discret); padding: 0 14px 6px; }
+.hors-page button { border: 0; background: none; color: var(--lien); text-decoration: underline; cursor: pointer; font-size: 14px; padding: 6px 0; }
+.etat { font-size: 13px; color: var(--discret); text-align: center; padding: 0 14px 4px; min-height: 18px; }
+/* Fenêtre réduite : une pastille. */
+.lecteur.reduit { width: auto; left: auto; right: 16px; bottom: 16px; border-radius: 999px; border: 1px solid var(--bordure); }
+.ecran.mobile .lecteur.reduit { right: 12px; bottom: 12px; left: auto; }
+.lecteur.reduit .lecteur-plein { display: none; }
+.lecteur-pastille { display: none; align-items: center; gap: 2px; padding: 4px 6px 4px 4px; }
+.lecteur.reduit .lecteur-pastille { display: flex; }
+.lecteur-pastille .jouer { width: 40px; height: 40px; }
+.lecteur-pastille .jouer svg { width: 18px; height: 18px; }
+.lecteur-pastille .ref-lecture { font-weight: 600; color: var(--accent); padding: 0 6px; font-size: 15px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="barre-maquette" role="toolbar" aria-label="Réglages de la maquette">
+  <b>Maquette</b>
+  <span>Largeur :</span>
+  <button type="button" data-largeur="mobile" aria-pressed="true">iPhone 375 px</button>
+  <button type="button" data-largeur="ordi" aria-pressed="false">Ordinateur</button>
+  <button type="button" id="b-theme">Thème clair / sombre</button>
+  <label><input type="checkbox" id="son-reel" checked> Son réel (EveryAyah, Muhammad Ayyoub 128 kbps)</label>
+  <span>Écrans :</span>
+  <button type="button" data-ecran="lecture">Lecture en cours</button>
+  <button type="button" data-ecran="reduit">Fenêtre réduite</button>
+  <button type="button" data-ecran="erreur">Saisie refusée</button>
+  <button type="button" data-ecran="horspage">Verset hors de la page</button>
+</div>
+
+<div class="notes">
+  <p><b>Ce que montre la maquette</b> (textes des versets copiés des données du dépôt : <code>donnees/texte/002.json</code> et <code>003.json</code>) :</p>
+  <ul>
+    <li>Bouton ▶ rond juste à droite de la référence (2:285). Il lance la lecture à partir de ce verset.</li>
+    <li>Le verset lu est encadré et son texte arabe surligné ; la page défile pour le garder à l'écran (au-dessus de la fenêtre).</li>
+    <li>Fin de 2:286 → passage à 3:1 sans arrêt (dans l'appli : la page ouvre la sourate 3, comme décidé).</li>
+    <li>Fenêtre : référence et sourate, ⌄ réduire, × fermer (arrêt), texte du verset, ⏮ ⏯ ⏭, vitesse (0,75 · 1 · 1,25 · 1,5 au clic), champ « Reprendre à » (p3, 3, 3.14).</li>
+    <li>Sur iPhone, la fenêtre est un panneau en bas de l'écran ; sur ordinateur, une carte en bas à droite. Réduite, elle devient une pastille ⏯ + référence.</li>
+    <li>Dans la maquette, « Reprendre à » ne connaît que 2:285 à 3:4 ; l'appli connaîtra tout le texte. Sans son réel, chaque verset dure 4 s.</li>
+  </ul>
+</div>
+
+<div class="ecran mobile" id="ecran">
+  <header class="entete">
+    <div class="logo">Alfamous<span class="logo-sous">l'atelier du codex</span></div>
+    <nav class="menu"><a class="actif" data-onglet="lecture">Lecture</a><a data-onglet="articles">Articles</a><a data-onglet="forum">Forum</a></nav>
+  </header>
+  <div class="defile" id="defile">
+    <div id="vue-lecture">
+      <div class="titre"><h1>2. al-Baqara <span class="ar" lang="ar">البقرة</span></h1><span class="resume">versets 285–286 sur 286</span></div>
+      <div class="liste" id="liste"></div>
+    </div>
+    <div id="vue-autre" hidden><p style="color:var(--discret)">Autre onglet : la fenêtre de lecture reste ouverte et la lecture continue.</p></div>
+  </div>
+
+  <!-- NOUVEAU : fenêtre de lecture -->
+  <section class="lecteur" id="lecteur" role="region" aria-label="Lecture audio" hidden>
+    <div class="lecteur-plein">
+      <div class="lecteur-tete">
+        <span class="ref-lecture" id="l-ref">2:285</span>
+        <span class="sourate" id="l-sourate">al-Baqara · البقرة</span>
+        <button type="button" class="icone" id="b-reduire" aria-label="Réduire la fenêtre de lecture" title="Réduire">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <button type="button" class="icone" id="b-fermer" aria-label="Fermer et arrêter la lecture" title="Fermer (arrête la lecture)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+      <div class="lecteur-texte"><p class="ar" lang="ar" id="l-ar"></p><p class="tr" id="l-tr"></p></div>
+      <div class="progression" aria-hidden="true"><span id="l-prog"></span></div>
+      <div class="hors-page" id="hors-page" hidden><span>Ce verset n'est pas affiché dans la page.</span><button type="button" id="b-aller">Aller au verset</button></div>
+      <div class="commandes">
+        <button type="button" class="icone" id="b-prec" aria-label="Verset précédent" title="Verset précédent">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6v12M18 6l-8 6 8 6z"/></svg></button>
+        <button type="button" class="jouer" id="b-jouer" aria-label="Pause" title="Pause"></button>
+        <button type="button" class="icone" id="b-suiv" aria-label="Verset suivant" title="Verset suivant">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 6v12M6 6l8 6-8 6z"/></svg></button>
+        <button type="button" class="vitesse" id="b-vitesse" aria-label="Vitesse de lecture : 1 fois" title="Vitesse (clic pour changer)">1×</button>
+      </div>
+      <div class="etat" id="l-etat" aria-hidden="true"></div>
+      <form class="reprendre" id="f-reprendre">
+        <label for="i-reprendre">Reprendre à</label>
+        <input id="i-reprendre" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="3.14 · 3 · p 3" aria-describedby="erreur-saisie">
+        <button type="submit">Lire</button>
+      </form>
+      <div class="erreur-saisie" id="erreur-saisie" role="alert" hidden></div>
+    </div>
+    <div class="lecteur-pastille">
+      <button type="button" class="jouer" id="b-jouer2" aria-label="Pause"></button>
+      <span class="ref-lecture" id="l-ref2">2:285</span>
+      <button type="button" class="icone" id="b-agrandir" aria-label="Agrandir la fenêtre de lecture" title="Agrandir">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg></button>
+      <button type="button" class="icone" id="b-fermer2" aria-label="Fermer et arrêter la lecture" title="Fermer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <p class="sr" aria-live="polite" id="annonce"></p>
+  </section>
+</div>
+
+<script>
+const VERSETS = [{"s": 2, "v": 285, "ar": "ءَامَنَ ٱلرَّسُولُ بِمَآ أُنزِلَ إِلَيْهِ مِن رَّبِّهِۦ وَٱلْمُؤْمِنُونَ كُلٌّ ءَامَنَ بِٱللَّهِ وَمَلَـٰٓئِكَتِهِۦ وَكُتُبِهِۦ وَرُسُلِهِۦ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِۦ وَقَالُوا۟ سَمِعْنَا وَأَطَعْنَا غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ ٱلْمَصِيرُ", "tr": "āmana ar-rasūlu bimā unzila ilayhi min rabbihī wa-l-muʾminūna kullun āmana bi-llāhi wamalāʾikatihī wakutubihī warusulihī lā nufarriqu bayna aḥadin min rusulihī waqālū samiʿnā waʾaṭaʿnā ġufrānaka rabbanā waʾilayka al-maṣīru", "page": 49}, {"s": 2, "v": 286, "ar": "لَا يُكَلِّفُ ٱللَّهُ نَفْسًا إِلَّا وُسْعَهَا لَهَا مَا كَسَبَتْ وَعَلَيْهَا مَا ٱكْتَسَبَتْ رَبَّنَا لَا تُؤَاخِذْنَآ إِن نَّسِينَآ أَوْ أَخْطَأْنَا رَبَّنَا وَلَا تَحْمِلْ عَلَيْنَآ إِصْرًا كَمَا حَمَلْتَهُۥ عَلَى ٱلَّذِينَ مِن قَبْلِنَا رَبَّنَا وَلَا تُحَمِّلْنَا مَا لَا طَاقَةَ لَنَا بِهِۦ وَٱعْفُ عَنَّا وَٱغْفِرْ لَنَا وَٱرْحَمْنَآ أَنتَ مَوْلَىٰنَا فَٱنصُرْنَا عَلَى ٱلْقَوْمِ ٱلْكَـٰفِرِينَ", "tr": "lā yukallifu allāhu nafsan illā wusʿahā lahā mā kasabat waʿalayhā mā iktasabat rabbanā lā tuʾāḫiḏnā in nasīnā aw aḫṭaʾnā rabbanā walā taḥmil ʿalaynā iṣran kamā ḥamaltahū ʿalā allaḏīna min qablinā rabbanā walā tuḥammilnā mā lā ṭāqata lanā bihī waʿfu ʿannā waġfir lanā warḥamnā anta mawlānā fanṣurnā ʿalā al-qawmi al-kāfirīna", "page": 49}, {"s": 3, "v": 1, "ar": "الٓمٓ", "tr": "alif-lām-mīm", "page": 50}, {"s": 3, "v": 2, "ar": "ٱللَّهُ لَآ إِلَـٰهَ إِلَّا هُوَ ٱلْحَىُّ ٱلْقَيُّومُ", "tr": "allāhu lā ilāha illā huwa al-ḥayyu al-qayyūmu", "page": 50}, {"s": 3, "v": 3, "ar": "نَزَّلَ عَلَيْكَ ٱلْكِتَـٰبَ بِٱلْحَقِّ مُصَدِّقًا لِّمَا بَيْنَ يَدَيْهِ وَأَنزَلَ ٱلتَّوْرَىٰةَ وَٱلْإِنجِيلَ", "tr": "nazzala ʿalayka al-kitāba bi-l-ḥaqqi muṣaddiqan limā bayna yadayhi waʾanzala at-tawrāta wa-l-ʾinǧīla", "page": 50}, {"s": 3, "v": 4, "ar": "مِن قَبْلُ هُدًى لِّلنَّاسِ وَأَنزَلَ ٱلْفُرْقَانَ إِنَّ ٱلَّذِينَ كَفَرُوا۟ بِـَٔايَـٰتِ ٱللَّهِ لَهُمْ عَذَابٌ شَدِيدٌ وَٱللَّهُ عَزِيزٌ ذُو ٱنتِقَامٍ", "tr": "min qablu hudan lilnnāsi waʾanzala al-furqāna inna allaḏīna kafarū biʾāyāti allāhi lahum ʿaḏābun šadīdun wa-llāhu ʿazīzun ḏū intiqāmin", "page": 50}];
+const NOMS = { 2: ['البقرة', 'al-Baqara'], 3: ['آل عمران', 'Āl ʿImrān'] };
+const VITESSES = [0.75, 1, 1.25, 1.5];
+const ICONE_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>';
+const ICONE_PAUSE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>';
+const $ = (s) => document.querySelector(s);
+const echapper = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = (n) => String(n).padStart(3, '0');
+
+let idx = 0, enLecture = false, vitesse = 1, minuterie = null, debut = 0, ecoule = 0;
+const audio = new Audio(); audio.preload = 'auto';
+
+function carte(x, avecTitre) {
+  return `${avecTitre ? `<div class="titre" style="margin-top:22px"><h1>${x.s}. ${NOMS[x.s][1]} <span class="ar" lang="ar">${NOMS[x.s][0]}</span></h1><span class="resume">versets 1–4 (extrait)</span></div><p class="basmala ar" lang="ar">بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ</p>` : ''}
+  <article class="verset" data-cle="${x.s}:${x.v}">
+    <div class="verset-entete">
+      <span class="ref-groupe"><a class="ref" href="#">${x.s}:${x.v}</a>
+        <button type="button" class="ecouter" data-ecouter="${x.s}:${x.v}" aria-label="Écouter à partir du verset ${x.s}:${x.v}" title="Écouter à partir de ce verset">${ICONE_PLAY}</button></span>
+      <span>${NOMS[x.s][1]} · page ${x.page}</span>
+    </div>
+    <p class="ar" lang="ar">${echapper(x.ar)}</p>
+    <p class="tr">${echapper(x.tr)}</p>
+  </article>`;
+}
+$('#liste').innerHTML = VERSETS.map((x, i) => carte(x, i > 0 && x.s !== VERSETS[i - 1].s)).join('');
+
+function majBoutons() {
+  for (const b of [$('#b-jouer'), $('#b-jouer2')]) {
+    b.innerHTML = enLecture ? ICONE_PAUSE : ICONE_PLAY;
+    b.setAttribute('aria-label', enLecture ? 'Pause' : 'Lecture');
+    b.title = enLecture ? 'Pause' : 'Lecture';
+  }
+  $('#b-prec').disabled = idx === 0; $('#b-suiv').disabled = idx === VERSETS.length - 1;
+}
+function afficher(horsPage = false) {
+  const x = VERSETS[idx];
+  $('#l-ref').textContent = $('#l-ref2').textContent = `${x.s}:${x.v}`;
+  $('#l-sourate').textContent = `${NOMS[x.s][1]} · ${NOMS[x.s][0]}`;
+  $('#l-ar').textContent = x.ar; $('#l-tr').textContent = x.tr;
+  $('#annonce').textContent = `Verset ${x.s}:${x.v}`;
+  document.querySelectorAll('.verset.en-lecture').forEach((c) => c.classList.remove('en-lecture'));
+  $('#hors-page').hidden = !horsPage;
+  if (horsPage) return;
+  const c = document.querySelector(`.verset[data-cle="${x.s}:${x.v}"]`);
+  if (c && !$('#vue-lecture').hidden) { c.classList.add('en-lecture'); c.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+}
+function arreterMinuterie() { clearInterval(minuterie); minuterie = null; }
+function jouer() {
+  const x = VERSETS[idx];
+  enLecture = true; majBoutons(); $('#l-etat').textContent = '';
+  if ($('#son-reel').checked) {
+    if (audio.dataset.cle !== `${x.s}:${x.v}`) { audio.src = `https://everyayah.com/data/Muhammad_Ayyoub_128kbps/${pad(x.s)}${pad(x.v)}.mp3`; audio.dataset.cle = `${x.s}:${x.v}`; }
+    audio.playbackRate = vitesse;
+    audio.play().catch(() => { $('#l-etat').textContent = 'Son indisponible : lecture simulée.'; $('#son-reel').checked = false; jouer(); });
+  } else {
+    debut = performance.now() - ecoule; arreterMinuterie();
+    minuterie = setInterval(() => {
+      ecoule = performance.now() - debut; const duree = 4000 / vitesse;
+      $('#l-prog').style.width = `${Math.min(100, ecoule / duree * 100)}%`;
+      if (ecoule >= duree) { arreterMinuterie(); fin(); }
+    }, 100);
+  }
+}
+function pause() { enLecture = false; majBoutons(); audio.pause(); arreterMinuterie(); }
+function aller(i, lancer = true) {
+  idx = i; ecoule = 0; $('#l-prog').style.width = '0'; audio.removeAttribute('data-cle');
+  afficher(); if (lancer) jouer(); else majBoutons();
+}
+function fin() {
+  if (idx < VERSETS.length - 1) aller(idx + 1);
+  else { pause(); $('#l-etat').textContent = 'Fin de l’extrait de la maquette.'; }
+}
+audio.addEventListener('timeupdate', () => { if (audio.duration) $('#l-prog').style.width = `${audio.currentTime / audio.duration * 100}%`; });
+audio.addEventListener('ended', fin);
+audio.addEventListener('waiting', () => { $('#l-etat').textContent = 'Chargement…'; });
+audio.addEventListener('playing', () => { $('#l-etat').textContent = ''; });
+
+function ouvrir(i) { $('#lecteur').hidden = false; $('#lecteur').classList.remove('reduit'); aller(i); }
+function fermer() { pause(); $('#lecteur').hidden = true; document.querySelectorAll('.verset.en-lecture').forEach((c) => c.classList.remove('en-lecture')); }
+
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-ecouter]');
+  if (b) ouvrir(VERSETS.findIndex((x) => `${x.s}:${x.v}` === b.dataset.ecouter));
+});
+for (const b of [$('#b-jouer'), $('#b-jouer2')]) b.onclick = () => (enLecture ? pause() : jouer());
+$('#b-prec').onclick = () => idx > 0 && aller(idx - 1, enLecture);
+$('#b-suiv').onclick = () => idx < VERSETS.length - 1 && aller(idx + 1, enLecture);
+$('#b-vitesse').onclick = () => {
+  vitesse = VITESSES[(VITESSES.indexOf(vitesse) + 1) % VITESSES.length];
+  const t = String(vitesse).replace('.', ',');
+  $('#b-vitesse').textContent = `${t}×`; $('#b-vitesse').setAttribute('aria-label', `Vitesse de lecture : ${t} fois`);
+  audio.playbackRate = vitesse; if ('preservesPitch' in audio) audio.preservesPitch = true;
+};
+$('#b-reduire').onclick = () => { $('#lecteur').classList.add('reduit'); $('#b-agrandir').focus(); };
+$('#b-agrandir').onclick = () => { $('#lecteur').classList.remove('reduit'); $('#b-reduire').focus(); };
+$('#b-fermer').onclick = fermer; $('#b-fermer2').onclick = fermer;
+$('#b-aller').onclick = () => { showOnglet('lecture'); afficher(); };
+
+// « Reprendre à » : même règles que le champ de recherche (dans l'appli : analyserRequete de recherche.js).
+$('#f-reprendre').onsubmit = (e) => {
+  e.preventDefault();
+  const q = $('#i-reprendre').value.trim(); let m; let cible = -1; let msg = '';
+  if ((m = q.match(/^(\d{1,3})\s*[:.]\s*(\d{1,3})$/))) cible = VERSETS.findIndex((x) => x.s === +m[1] && x.v === +m[2]);
+  else if ((m = q.match(/^(\d{1,3})$/))) cible = VERSETS.findIndex((x) => x.s === +m[1] && x.v === 1);
+  else if ((m = q.match(/^p(?:age)?\s*(\d{1,3})$/i))) cible = VERSETS.findIndex((x) => x.page === +m[1]);
+  else msg = 'Saisissez un verset (3.14), une sourate (3) ou une page (p 3).';
+  if (!msg && cible < 0) msg = 'Introuvable dans cet extrait de maquette (2:285 à 3:4, pages 49–50).';
+  $('#erreur-saisie').textContent = msg; $('#erreur-saisie').hidden = !msg;
+  if (!msg) { $('#i-reprendre').value = ''; aller(cible); }
+};
+
+function showOnglet(o) {
+  document.querySelectorAll('.menu a').forEach((a) => a.classList.toggle('actif', a.dataset.onglet === o));
+  $('#vue-lecture').hidden = o !== 'lecture'; $('#vue-autre').hidden = o === 'lecture';
+}
+document.querySelectorAll('.menu a').forEach((a) => { a.onclick = () => { showOnglet(a.dataset.onglet); if (a.dataset.onglet === 'lecture' && !$('#lecteur').hidden) afficher(); }; });
+
+// Réglages de la maquette
+document.querySelectorAll('[data-largeur]').forEach((b) => b.onclick = () => {
+  document.querySelectorAll('[data-largeur]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  $('#ecran').className = `ecran ${b.dataset.largeur}`;
+});
+$('#b-theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'sombre' ? 'clair' : 'sombre'; };
+document.querySelectorAll('[data-ecran]').forEach((b) => b.onclick = () => {
+  const e = b.dataset.ecran; pause(); showOnglet('lecture');
+  $('#lecteur').hidden = false; $('#lecteur').classList.toggle('reduit', e === 'reduit');
+  $('#erreur-saisie').hidden = true;
+  idx = e === 'horspage' ? 4 : 1; afficher(); majBoutons(); $('#l-prog').style.width = '35%';
+  if (e === 'erreur') { $('#i-reprendre').value = 'رحم'; $('#f-reprendre').requestSubmit(); }
+  if (e === 'horspage') { showOnglet('autre'); afficher(true); $('#vue-lecture').hidden = true; }
+});
+majBoutons();
+</script>
+</body>
+</html>

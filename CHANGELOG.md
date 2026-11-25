@@ -1,6 +1,32 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — écouter et suivre la lecture (branche `lecture/ecouter-suivre`, cadrage `docs/LECTURE-AUDIO.md`)
+- Bouton « écouter » rond à côté de la référence de chaque verset (onglet Lecture) : lit à partir de ce verset.
+  Nom accessible « Écouter à partir du verset 3:14 », zone de toucher de 44 px.
+- Lecture continue, un audio par verset : verset suivant à la fin de chaque verset, y compris d'une sourate à
+  l'autre ; arrêt avec « Fin du texte » après 114:6 ; verset suivant préchargé. Récitation de Muhammad Ayyoub
+  (récitateur du complexe du roi Fahd, choix de l'auteur), 128 kbps, publiée par EveryAyah
+  (`Muhammad_Ayyoub_128kbps`), lue sur place, rien copié dans le dépôt ni dans Storage ; source isolée
+  dans `urlAudio` (`src/js/lecteur-outils.js`) pour pouvoir en changer. Droits à vérifier avant la production.
+- Suivi dans la page : le verset en cours est encadré et surligné, et placé entre l'en-tête et la fenêtre. Lecture
+  lancée depuis une sourate ou une page : la page suit (versets de plus chargés, sourate ou page suivante ouverte,
+  sans noter ces changements dans l'historique des recherches), seulement si elle suivait déjà (on peut consulter
+  autre chose pendant l'écoute). Depuis une recherche : la liste reste, la fenêtre propose « Aller au verset ».
+- Fenêtre de lecture (`src/js/lecteur.js`) attachée à la page entière : reste ouverte d'un onglet à l'autre.
+  Référence et sourate, texte arabe et translittération (données du dépôt), lecture/pause, précédent/suivant,
+  vitesse 0,75 · 1 · 1,25 · 1,5 (retenue dans le navigateur), réduire (pastille, aussi par Échap), fermer (= arrêt).
+  Carte en bas à droite sur ordinateur, panneau en bas sur téléphone ; thèmes clair et sombre ; masquée à l'impression.
+- « Reprendre à » : `p3` → premier verset de la page 3, `3` → 3:1, `3.14` → 3:14, analysés par `analyserRequete`
+  (la même fonction que le champ de recherche) ; autre saisie refusée avec un message.
+- Erreurs : fichier ou réseau indisponible → pause et message (pas de saut silencieux) ; lecture refusée par le
+  navigateur → « Appuyez sur lecture pour démarrer ». Annonce du verset au lecteur d'écran (`aria-live`).
+- `versetVoisin` partagé entre les boutons ⌃/⌄ des versets et le lecteur (plus de copie dans `app.js`).
+- Tests `tests/lecteur.test.mjs` (14) : saisie, enchaînement, changement de sourate, fin du texte, pause, précédent/
+  suivant, arrêt, erreurs, vitesse ; `npm test` 91/91. Essai dans Chrome (ordinateur et 375 px, sons de remplacement) :
+  2:284 → 3:1 avec ouverture de la sourate 3, au-delà du 50e verset, onglet Forum, retour à Lecture, recherche puis
+  « Aller au verset », Échap, fermeture sans son résiduel.
+
 ### Ajouté — sous-domaine forum.alfamous.ca
 - Sur `forum.alfamous.ca` (même site Hosting que l'atelier), l'accueil ouvre directement l'onglet Forum (`/#/forum`), comme `blog.alfamous.ca` ouvre les articles. Aucun effet sur les autres domaines.
 

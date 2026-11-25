@@ -15,6 +15,8 @@ import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
 import { routeArticles } from './articles.js';
 import { initArticlesLiens } from './articles-liens.js';
+import { initLecteur, boutonEcouter } from './lecteur.js';
+import { versetVoisin } from './lecteur-outils.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -35,10 +37,9 @@ let traductionActive = null; // { id, nom, carte: Map « s:v » → texte }
 let nbVersets = []; // nombre de versets par sourate (index = numéro de sourate)
 
 // Verset voisin (précédent : sens = -1, suivant : sens = 1), en passant d'une sourate à l'autre.
-function voisin(s, v, sens) {
-  if (sens < 0) return v > 1 ? [s, v - 1] : s > 1 ? [s - 1, nbVersets[s - 1]] : null;
-  return v < nbVersets[s] ? [s, v + 1] : s < 114 ? [s + 1, 1] : null;
-}
+const voisin = (s, v, sens) => versetVoisin(nbVersets, s, v, sens);
+// Changement de page demandé par la lecture audio (la page suit la sourate) : pas noté dans l'historique.
+let sansHistorique = false;
 const ICONE_HAUT = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6"/></svg>';
 const ICONE_BAS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
 const options = () => ({
@@ -100,7 +101,7 @@ function carteVerset(s, x, motsVerset, resultat, contexte = false) {
   const trad = traductionActive?.carte.get(`${s}:${x.v}`);
   const tradHtml = trad ? (resultat?.dansTraduction ? surlignerMots(trad, resultat.positions) : echapper(trad)) : '';
   return `<article class="verset${contexte ? ' contexte' : ''}" data-cle="${s}:${x.v}">
-    <div class="verset-entete"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a><span class="verset-infos"><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span>${caseChoisir(`${s}:${x.v}`)}</span></div>
+    <div class="verset-entete"><span class="ref-groupe"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a>${boutonEcouter(s, x.v)}</span><span class="verset-infos"><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span>${caseChoisir(`${s}:${x.v}`)}</span></div>
     <p class="ar" lang="ar">${ar}</p>
     <p class="tr">${echapper(x.tr)}</p>
     ${trad ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${tradHtml}</p>` : ''}
@@ -390,7 +391,7 @@ async function router() {
   try {
     if (!q) { document.title = "Alfamous — l'atelier du codex"; return await vueAccueil(); }
     document.title = `${q} — Alfamous`;
-    noterRecherche(q);
+    if (sansHistorique) sansHistorique = false; else noterRecherche(q);
     const r = analyserRequete(q, new Set(Object.keys(await D.racines())));
     if (r.type === 'versets') return await vueSourate(r.sourate, r.de, r.a);
     if (r.type === 'sourate') return await vueSourate(r.sourate);
@@ -462,6 +463,8 @@ initHistorique({ lexique: clesLexique });
 initSelection({ traduction: () => traductionActive });
 initArticlesLiens(contenu);
 initCompte();
+initLecteur({ contenu, naviguer: (hash) => { if (location.hash === hash) return; sansHistorique = true; location.hash = hash; } })
+  .catch((e) => console.error('Lecteur audio :', e));
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
 surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?))/.test(location.hash)) router(); });
 Promise.all([

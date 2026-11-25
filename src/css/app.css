@@ -528,3 +528,94 @@ main:has(.atelier) { max-width: 1180px; }
 .fenetre textarea.dossier { min-height: 55vh; font: 16px/1.5 ui-monospace, Consolas, monospace; white-space: pre; }
 .fenetre [data-filtre-choix] { margin-bottom: 8px; }
 .articles-lies h2 { font-size: 16px; margin: 0 0 8px; }
+
+/* ---------- Écouter et suivre la lecture (maquette docs/maquettes/lecteur.html) ---------- */
+.ref-groupe { display: inline-flex; align-items: center; gap: 6px; }
+/* Bouton écouter : cercle visible de 28 px, zone de toucher agrandie à 44 px. */
+.ecouter {
+  position: relative; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--bordure);
+  background: var(--surface); color: var(--accent); cursor: pointer; display: inline-grid; place-items: center; flex: none;
+}
+.ecouter::after { content: ''; position: absolute; inset: -8px; }
+.ecouter:hover, .ecouter:focus-visible { border-color: var(--accent); background: var(--accent-doux); outline: none; }
+.ecouter:focus-visible { box-shadow: 0 0 0 2px var(--accent); }
+.ecouter svg { width: 14px; height: 14px; fill: currentColor; }
+.verset.en-lecture { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--ombre); scroll-margin: var(--marge-haut-lecture, 90px) 0 var(--marge-bas-lecture, 240px); }
+.verset.en-lecture .ar { background: var(--accent-doux); border-radius: 8px; padding: 0 6px; }
+.verset.en-lecture .ecouter { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme='sombre'] .verset.en-lecture .ecouter { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .verset.en-lecture .ecouter { color: #1d2024; } }
+
+/* Fenêtre de lecture : carte en bas à droite (ordinateur), panneau en bas (téléphone). */
+body.lecteur-ouvert { padding-bottom: 300px; }
+body.lecteur-ouvert.lecteur-reduit { padding-bottom: 80px; }
+.lecteur {
+  position: fixed; right: 16px; bottom: 16px; width: 360px; max-width: calc(100vw - 32px); z-index: 900;
+  background: var(--surface); color: var(--texte); border: 1px solid var(--bordure); border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, .18); font-size: 15px;
+}
+.lecteur-tete { display: flex; align-items: center; gap: 6px; padding: 6px 6px 2px 14px; }
+.lecteur-ref { font-weight: 600; color: var(--accent); }
+.lecteur-sourate { color: var(--discret); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lecteur-icone {
+  width: 44px; height: 44px; border: 0; background: transparent; border-radius: 10px; cursor: pointer;
+  color: var(--discret); display: grid; place-items: center; flex: none; padding: 0;
+}
+.lecteur-icone:hover, .lecteur-icone:focus-visible { color: var(--accent); background: var(--accent-doux); outline: none; }
+.lecteur-icone:disabled { opacity: .35; cursor: default; background: transparent; }
+.lecteur-icone svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lecteur-texte { padding: 0 14px; max-height: 150px; overflow-y: auto; }
+.lecteur-texte .ar { font-size: 22px; line-height: 1.9; margin: 0; text-align: right; }
+.lecteur-texte .tr { font-size: 14px; margin: 2px 0 4px; }
+.lecteur-hors-page { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--discret); padding: 2px 14px; }
+.lecteur-hors-page button { border: 0; background: none; color: var(--lien); text-decoration: underline; cursor: pointer; font-size: 14px; padding: 8px 0; }
+.lecteur-commandes { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px 2px; }
+.lecteur-commandes .lecteur-icone svg { width: 22px; height: 22px; }
+.lecteur-jouer {
+  width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--accent); color: #fff;
+  cursor: pointer; display: grid; place-items: center; padding: 0; flex: none;
+}
+.lecteur-jouer:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.lecteur-jouer svg { width: 24px; height: 24px; fill: currentColor; }
+:root[data-theme='sombre'] .lecteur-jouer { color: #1d2024; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .lecteur-jouer { color: #1d2024; } }
+.lecteur-vitesse {
+  min-width: 56px; height: 36px; border: 1px solid var(--bordure); border-radius: 18px; background: var(--surface);
+  color: var(--texte); cursor: pointer; font-size: 15px; font-weight: 600; padding: 0 10px;
+}
+.lecteur-vitesse:hover, .lecteur-vitesse:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.lecteur-etat { font-size: 13px; color: var(--discret); text-align: center; margin: 0; padding: 0 14px; min-height: 18px; }
+.lecteur-reprendre { display: flex; gap: 6px; padding: 4px 14px 6px; align-items: center; }
+.lecteur-reprendre label { font-size: 14px; color: var(--discret); white-space: nowrap; }
+.lecteur-reprendre input {
+  flex: 1; min-width: 0; font-size: 16px; padding: 6px 10px; border: 1px solid var(--bordure); border-radius: 8px;
+  background: var(--fond); color: var(--texte);
+}
+.lecteur-reprendre input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.lecteur-reprendre button {
+  height: 36px; padding: 0 12px; border: 1px solid var(--accent); color: var(--accent); background: var(--surface);
+  border-radius: 8px; cursor: pointer; font-size: 15px;
+}
+.lecteur-erreur { color: #b42318; font-size: 13px; margin: 0; padding: 0 14px 6px; }
+:root[data-theme='sombre'] .lecteur-erreur { color: #f2b8b5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .lecteur-erreur { color: #f2b8b5; } }
+.lecteur-source { font-size: 12px; color: var(--discret); margin: 0; padding: 0 14px 10px; }
+.lecteur-annonce { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; margin: 0; }
+/* Fenêtre réduite : pastille lecture/pause + référence. */
+.lecteur-pastille { display: none; align-items: center; gap: 2px; padding: 4px 4px 4px 4px; }
+.lecteur.reduit { width: auto; border-radius: 999px; }
+.lecteur.reduit .lecteur-plein { display: none; }
+.lecteur.reduit .lecteur-pastille { display: flex; }
+.lecteur-pastille .lecteur-jouer { width: 40px; height: 40px; }
+.lecteur-pastille .lecteur-jouer svg { width: 18px; height: 18px; }
+.lecteur-pastille .lecteur-ref { padding: 0 6px; }
+@media (max-width: 600px) {
+  .lecteur:not(.reduit) {
+    left: 0; right: 0; bottom: 0; width: auto; max-width: none; border-radius: 16px 16px 0 0; border-bottom: 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .lecteur.reduit { right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+  .lecteur-texte .ar { font-size: 20px; }
+  .lecteur-texte { max-height: 120px; }
+}
+@media print { .lecteur, .ecouter { display: none !important; } }
