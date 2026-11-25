@@ -2,7 +2,8 @@
 
 Chantier : reprendre de l'ancienne application la fonction « écouter et suivre la lecture », avec une interface
 adaptée à Alfamous1. Branche `lecture/ecouter-suivre`. Maquette : `docs/maquettes/lecteur.html`.
-**Rien n'est codé** tant que ce cadrage et la maquette ne sont pas acceptés.
+Le 25 nov., l'auteur a demandé de coder l'essentiel (§ 4) avec EveryAyah sur `alfamous-essai` : c'est fait sur cette
+branche (voir CHANGELOG). Rien n'est fusionné ni déployé.
 
 ## 1. Ce que fait l'ancienne application (lecture seule, dépôt `amhanathali/alfamous`)
 
@@ -25,6 +26,8 @@ récitation de Ghamidi : un audio par verset s'aligne donc sans conversion.
    sourate → sourate suivante) ; depuis des résultats de recherche, la liste reste à l'écran et la fenêtre affiche le
    verset avec « Aller au verset ».
 3. **Vitesses** : 0,75 · 1 · 1,25 · 1,5 (hauteur de la voix conservée).
+4. **Source pour l'essai** : EveryAyah (Ghamidi) en streaming. À terme, l'auteur préférait une récitation du complexe
+   du roi Fahd (seule source trouvée avec une autorisation écrite), mais voir § 3 bis.
 
 ## 3. Source audio retenue (option A)
 
@@ -36,6 +39,15 @@ récitation de Ghamidi : un audio par verset s'aligne donc sans conversion.
   (`urlAudio(s, v)` de `lecteur-outils.js`) : changer de source ou de récitateur ne touche pas au lecteur.
 - Pas de règle Firestore ni Storage à modifier. Le site n'a pas de Content-Security-Policy : l'audio externe est
   permis sans changer `firebase.json`.
+
+## 3 bis. Sources de récitations humaines verset par verset (recherche du 25 nov.)
+
+| Source | Droits constatés |
+| --- | --- |
+| Complexe du roi Fahd (qurancomplex.gov.sa) | Seule autorisation écrite trouvée : usage général gratuit dans les applications et sites, sans attribution exigée (page « Audios », archive du 3 sept. 2025). **Mais** le site refait annonce les récitations « bientôt » (قريباً التلاوات الصوتية) : anciennes pages en 404, serveur `download.qurancomplex.gov.sa` sans réponse le 25 nov. L'archive listait 5 récitateurs Hafs avec un paquet verset par verset : Mohammed Ayyoub (916,75 Mo), Ali Al-Huthaify (803,55 Mo), Maher Al-Muaiqly (724,25 Mo), Ibrahim Al-Akhdar (1,18 Go), Khalid Al-Muhanna (1,04 Go). **Ghamidi n'y figure pas.** |
+| EveryAyah | Aucune licence affichée. Source de presque tous les autres sites (AlQuran.cloud, Tanzil, Ayat de l'université du roi Saoud). |
+| AlQuran.cloud (cdn.islamic.network) | Récitations « propriété des récitateurs » ; écoute, intégration et téléchargement admis pour un usage personnel et éducatif ; fichiers venus d'EveryAyah. |
+| Quran Foundation (Quran.com) | Licence de développeur, mais API avec identifiants secrets côté serveur (Cloud Function à prévoir) ; horaires mot à mot disponibles. |
 
 ## 4. Périmètre essentiel (codé après acceptation de la maquette)
 
