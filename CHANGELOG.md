@@ -1,6 +1,9 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — sous-domaine forum.alfamous.ca
+- Sur `forum.alfamous.ca` (même site Hosting que l'atelier), l'accueil ouvre directement l'onglet Forum (`/#/forum`), comme `blog.alfamous.ca` ouvre les articles. Aucun effet sur les autres domaines.
+
 ### Modifié — champ de recherche et champs de saisie (branche `interface/recherche`, maquette `docs/maquettes/recherche.html`)
 - Bouton de recherche : une loupe (SVG intégré) au lieu du texte « Chercher » ; nom accessible « Chercher »
   (`aria-label`, info-bulle), la touche Entrée valide toujours. Bouton de 46 px au lieu de 102 px : le champ gagne
