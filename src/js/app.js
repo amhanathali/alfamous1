@@ -185,19 +185,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fiche.hidd
 // ---------- Vues simples ----------
 async function vueAccueil() {
   const liste = await D.sourates();
-  contenu.innerHTML = `<div class="intro">
-      <p>Cherchez un verset (<a href="${lienRequete('2:255')}">2:255</a>), une sourate, une page (<a href="${lienRequete('p 50')}">p 50</a>),
-      un ou plusieurs mots en arabe ou en lettres latines, ou une ou plusieurs racines.</p>
-      <ul>
-        <li><b>Plusieurs termes</b> : séparez-les par un espace ou « + ». Les versets affichés contiennent <b>tous</b> les termes.
-          Exemples : <a href="${lienRequete('رحم غفر')}" lang="ar">رحم غفر</a> (deux racines), <a href="${lienRequete('رحمن رحيم')}" lang="ar">رحمن رحيم</a> (deux mots).</li>
-        <li><b>MC</b> (mots contigus) : les termes doivent se suivre (dans n'importe quel ordre).</li>
-        <li><b>ME</b> (mot entier) : le mot doit être exactement le terme, et pas seulement le contenir.</li>
-        <li>Préfixes : <code>r:</code> force la recherche par racine, <code>m:</code> par mot.
-          Les lettres ا و ي non tapées sont ignorées, comme dans l'ancienne application (« كتب » trouve ٱلْكِتَـٰبُ).</li>
-        <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens. <a href="#/stats">Statistiques des racines</a>. Plus de détails : <a href="#/aide">Aide</a>.</li>
-      </ul></div>
-    <div class="grille-sourates">${liste.map((x) => `<a href="${lienRequete(String(x.n))}">
+  // Les explications et exemples de saisie sont dans l'onglet Aide (#/aide) : l'accueil ne montre que les sourates.
+  contenu.innerHTML = `<div class="grille-sourates">${liste.map((x) => `<a href="${lienRequete(String(x.n))}">
       <span class="n">${x.n}</span><span>${echapper(nomSourate(x.n)[1])}</span><span class="ar" lang="ar">${echapper(nomSourate(x.n)[0])}</span></a>`).join('')}</div>`;
 }
 
@@ -388,8 +377,8 @@ async function vueStats() {
 }
 
 // ---------- Aide (#/aide) ----------
-// Page tenue à jour au fil de l'avancement de l'application. Elle reprend les explications de l'accueil
-// (onglet Lecture), les exemples de saisie et la note sur la recherche en lettres latines, retirés de l'en-tête.
+// Page tenue à jour au fil de l'avancement de l'application. Seule place des explications : celles de l'ancien
+// encadré de l'accueil (onglet Lecture), les exemples de saisie et la note sur la recherche en lettres latines.
 function vueAide() {
   const ex = (q, ar = false) => `<a href="${lienRequete(q)}"${ar ? ' lang="ar"' : ''}>${echapper(q)}</a>`;
   contenu.innerHTML = `<div class="titre"><h1>Aide</h1><span class="resume">mise à jour au fil de l'application</span></div>
