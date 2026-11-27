@@ -19,13 +19,6 @@ if not exist "%ALFAMOUS1%package.json" set "ALFAMOUS1=%USERPROFILE%\Desktop\Alfa
 cd /d "%ALFAMOUS1%" || goto pas_alfamous1
 findstr /c:"\"name\": \"alfamous1\"" package.json >nul || goto pas_alfamous1
 if "%~1"=="suite" goto suite
-echo Fermeture des emulateurs, du serveur local et des autres fenetres cmd...
-REM --- Fermeture de ce qui peut bloquer : processus qui ecoutent sur les ports %FERMER_PORTS% ;
-REM     node/java d Alfamous1 ou de Firebase ; autres fenetres cmd (celle-ci et ses parents sont gardees).
-set "FERMER_PORTS=4000,4400,4500,5001,5005,8085,9099,9150,9199,5050"
-set "FERMER_TOUT=1"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$garder = @(); $p = (Get-CimInstance Win32_Process -Filter ('ProcessId=' + $PID)).ParentProcessId; while ($p) { $garder += $p; $q = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $p); if (-not $q) { break }; $p = $q.ParentProcessId; if ($garder -contains $p) { break } }; $ports = $env:FERMER_PORTS -split ','; Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { ($ports -contains [string]$_.LocalPort) -and ($garder -notcontains $_.OwningProcess) -and ($_.OwningProcess -gt 4) } | ForEach-Object { 'port ' + $_.LocalPort + ' : ferme ' + $_.OwningProcess; Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; if ($env:FERMER_TOUT -eq '1') { Get-CimInstance Win32_Process | Where-Object { ($_.Name -in 'node.exe','java.exe') -and ($_.CommandLine -match 'Alfamous1|firebase|emulat') -and ($garder -notcontains $_.ProcessId) } | ForEach-Object { 'ferme ' + $_.Name + ' ' + $_.ProcessId; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Get-Process cmd -ErrorAction SilentlyContinue | Where-Object { $garder -notcontains $_.Id } | ForEach-Object { 'ferme cmd ' + $_.Id; Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue } }"
-timeout /t 2 /nobreak >nul
 REM Bloc lu en entier avant execution : git pull peut modifier ce fichier sans risque,
 REM puis la nouvelle version est relancee pour la suite.
 (
@@ -42,6 +35,14 @@ REM puis la nouvelle version est relancee pour la suite.
 )
 
 :suite
+REM Fermeture ici (et non avant la mise a jour) : elle sert aussi au premier lancement apres une mise a jour du fichier.
+echo Fermeture des emulateurs, du serveur local et des autres fenetres cmd...
+REM --- Fermeture de ce qui peut bloquer : processus qui ecoutent sur les ports %FERMER_PORTS% ;
+REM     node/java d Alfamous1 ou de Firebase ; autres fenetres cmd (celle-ci et ses parents sont gardees).
+set "FERMER_PORTS=4000,4400,4500,5001,5005,8085,9099,9150,9199,5050"
+set "FERMER_TOUT=1"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$garder = @(); $p = (Get-CimInstance Win32_Process -Filter ('ProcessId=' + $PID)).ParentProcessId; while ($p) { $garder += $p; $q = Get-CimInstance Win32_Process -Filter ('ProcessId=' + $p); if (-not $q) { break }; $p = $q.ParentProcessId; if ($garder -contains $p) { break } }; $ports = $env:FERMER_PORTS -split ','; Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object { ($ports -contains [string]$_.LocalPort) -and ($garder -notcontains $_.OwningProcess) -and ($_.OwningProcess -gt 4) } | ForEach-Object { 'port ' + $_.LocalPort + ' : ferme ' + $_.OwningProcess; Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; if ($env:FERMER_TOUT -eq '1') { Get-CimInstance Win32_Process | Where-Object { ($_.Name -in 'node.exe','java.exe') -and ($_.CommandLine -match 'Alfamous1|firebase|emulat') -and ($garder -notcontains $_.ProcessId) } | ForEach-Object { 'ferme ' + $_.Name + ' ' + $_.ProcessId; Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; Get-Process cmd -ErrorAction SilentlyContinue | Where-Object { $garder -notcontains $_.Id } | ForEach-Object { 'ferme cmd ' + $_.Id; Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue } }"
+timeout /t 2 /nobreak >nul
 set CIBLE=essai
 set SITE=https://alfamous-essai.web.app
 set CLE=%USERPROFILE%\cles\alfamous-essai.json
