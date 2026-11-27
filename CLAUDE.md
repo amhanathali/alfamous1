@@ -23,3 +23,16 @@ ne doit JAMAIS être modifiée depuis ce dépôt.
    cmd, puis essaie la branche modifiée le plus récemment sur GitHub. Avant de demander un essai, Claude pousse
    sa branche (et la remet à jour sur `main` si nécessaire) pour qu'elle soit la plus récente, et dit à l'auteur
    quelle version le script affichera.
+
+## Répartition du travail
+- **Claude Code (VS Code)** : tout le code d'Alfamous1. Chantiers, tests, émulateurs, essais locaux, branches,
+  commits, push et PR ; journal du hub Notion « Alfamous.ca — application (hub) », tableau « Journal Alfamous1 »,
+  une ligne par chantier en fin de conversation (Notion = source de vérité ; ne rien modifier d'autre dans Notion
+  sans accord).
+- **Claude sur claude.ai** (projet « Gestion des projets Amha ») : blog, livres, courriels, pilotage Notion,
+  vérifications en ligne dans le navigateur, cadrage d'une idée avant de la coder, deuxième avis sur une PR si
+  l'auteur le demande. Il ne modifie pas le dépôt.
+- Les deux ne se parlent pas : l'auteur fait le lien. Une demande cadrée sur claude.ai arrive ici sous forme de
+  prompt « Chantier … ».
+- Inchangé : fusion dans `main` et déploiements seulement avec l'accord explicite de l'auteur ; jamais de secret
+  dans Git ; `fTabVersets1.js` et `fTabLexique1.js` intouchables ; une conversation = un chantier.
