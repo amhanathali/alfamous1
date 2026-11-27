@@ -1,6 +1,17 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — filtre de recherche dans Notes (branche `notes/filtre`)
+- Champ **« Filtrer mes notes »** sous les boutons Toutes / Privées / Publiées : cherche dans le titre, le texte et la
+  cible (verset, racine, entrée du lexique), sans tenir compte des majuscules, des accents ni des voyelles arabes
+  (`surligner.js`, comme Forum et Témoignages). Se combine avec Toutes / Privées / Publiées.
+- Terme surligné dans le titre et l'extrait ; quand il n'est pas dans le titre, l'extrait montre le passage trouvé.
+  Compteur « n notes sur N ». Seule la liste est redessinée pendant la frappe (le champ garde le focus et le clavier
+  arabe reste ouvert) ; le filtre est gardé au retour d'une note.
+- Aide : Notes ajouté à la ligne « Filtres des listes ».
+- Note : l'en-tête (PR n° 32) a été déployé sur `alfamous-essai` puis `alfamous-atelier` le 27 nov. 2026, avec
+  l'accord de l'auteur (tests 124/124, règles 68/68, 207 pages d'articles).
+
 ### Modifié — en-tête affiné : logo, onglet Lecture en loupe, recherche seulement dans Lecture (branche `interface/entete-logo`)
 - **Logo** : médaillon de `ZC2.png` (ancienne application, fichier seulement lu) recadré sans le texte « AL Famous »,
   réduit à 96 × 96 (`src/img/logo.png`, 25 Ko), affiché à 40 px devant « Alfamous » ; sert aussi d'icône d'onglet
