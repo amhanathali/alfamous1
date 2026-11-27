@@ -1,4 +1,6 @@
 // Noms des 114 sourates (arabe et translittération usuelle).
+import { normaliserArabe, normaliserLatin, estArabe } from './arabe.js';
+
 export const NOMS_SOURATES = [
   ['الفاتحة', 'al-Fātiḥa'], ['البقرة', 'al-Baqara'], ['آل عمران', 'Āl ʿImrān'], ['النساء', 'an-Nisāʾ'],
   ['المائدة', 'al-Māʾida'], ['الأنعام', 'al-Anʿām'], ['الأعراف', 'al-Aʿrāf'], ['الأنفال', 'al-Anfāl'],
@@ -30,3 +32,29 @@ export const NOMS_SOURATES = [
   ['الكافرون', 'al-Kāfirūn'], ['النصر', 'an-Naṣr'], ['المسد', 'al-Masad'], ['الإخلاص', 'al-Iḫlāṣ'],
   ['الفلق', 'al-Falaq'], ['الناس', 'an-Nās'],
 ];
+
+// Filtre de l'accueil : numéros des sourates qui correspondent à la saisie.
+//   chiffres → numéros qui commencent par eux (« 1 » : 1, 10 à 19, 100 à 114) ;
+//   arabe → nom arabe sans voyelles ni formes d'alif (« كهف » trouve الكهف) ;
+//   latin → translittération sans accents, tirets ni ʿ ʾ (« fatiha » trouve al-Fātiḥa, « al imran » Āl ʿImrān),
+//           ṯ ḏ ḫ š ġ aussi écrits th dh kh sh gh (« kawthar », « ikhlas »).
+export function filtrerSourates(saisie) {
+  const q = String(saisie || '').trim();
+  const tous = NOMS_SOURATES.map((_, i) => i + 1);
+  if (!q) return tous;
+  if (/^\d+$/.test(q)) return tous.filter((n) => String(n).startsWith(String(Number(q))));
+  if (estArabe(q)) {
+    const cle = normaliserArabe(q).replace(/\s+/g, '');
+    return cle ? tous.filter((n) => normaliserArabe(NOMS_SOURATES[n - 1][0]).replace(/\s+/g, '').includes(cle)) : tous;
+  }
+  // ʿ et ʾ sont des lettres modificatrices (gardées par normaliserLatin) : retirées ici.
+  const latin = (t) => normaliserLatin(t).replace(/[ʿʾ]/g, '');
+  // ṯ ḏ ḫ š ġ s'écrivent aussi th dh kh sh gh (« kawthar », « ikhlas ») : les deux écritures sont acceptées.
+  const DIGRAMMES = { ṯ: 'th', ḏ: 'dh', ḫ: 'kh', š: 'sh', ġ: 'gh' };
+  const ecritures = (nom) => {
+    const bas = nom.toLowerCase();
+    return [latin(bas), latin(bas.replace(/[ṯḏḫšġ]/g, (c) => DIGRAMMES[c]))];
+  };
+  const cle = latin(q);
+  return cle ? tous.filter((n) => ecritures(NOMS_SOURATES[n - 1][1]).some((e) => e.includes(cle))) : tous;
+}

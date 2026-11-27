@@ -159,6 +159,12 @@ main { padding: 16px; min-height: 60vh; }
 code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 
 /* ---------- Accueil ---------- */
+/* Champ de recherche des sourates (accueil) */
+.filtre-sourates-ligne { display: flex; align-items: center; gap: 12px; margin: 4px 0 14px; }
+.filtre-sourates { flex: 1; min-width: 0; font-size: 16px; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--bordure); background: var(--surface); }
+.filtre-sourates:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.filtre-sourates-ligne .avec-clavier { flex: 1; }
+.filtre-sourates-nb { flex: none; font-size: 14px; }
 .grille-sourates { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
 .grille-sourates a {
   display: flex; justify-content: space-between; align-items: center; gap: 6px; text-decoration: none; color: var(--texte);

@@ -1,6 +1,15 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — champ de recherche des sourates sur l'accueil (branche `interface/filtre-sourates`)
+- Accueil (onglet Lecture) : un champ au-dessus de la grille filtre les sourates pendant la frappe, avec le nombre
+  trouvé ; Entrée ouvre la première sourate affichée ; message si aucune ne correspond.
+- Recherche par numéro (début du numéro), par nom latin (sans accents, tirets, ʿ ni ʾ ; ṯ ḏ ḫ š ġ aussi écrits
+  th dh kh sh gh) ou par nom arabe (sans voyelles, formes d'alif confondues, avec ou sans l'article).
+  Fonction `filtrerSourates` dans `src/js/sourates.js`, tests `tests/sourates.test.mjs`.
+- Le champ a l'icône du clavier arabe ; la grille est filtrée sans être redessinée (le clavier reste ouvert).
+- Aide : une ligne sur ce champ.
+
 ### Modifié — accueil Lecture sans explications (branche `interface/accueil-sans-aide`)
 - L'encadré d'explications de l'accueil (onglet Lecture) est retiré : son contenu est dans l'onglet Aide, seule
   place des explications. L'accueil ne montre plus que la grille des sourates. Styles `.intro` retirés.
