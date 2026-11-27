@@ -1,33 +1,44 @@
 // Clavier arabe à l'écran.
-// Une icône collée aux champs où l'on tape de l'arabe (champ de recherche, champs « dir=auto », zones de texte)
-// ouvre un clavier arabe en bas de l'écran. Tant qu'il est ouvert, le clavier du système est masqué
-// (inputmode="none" sur le champ) ; à la fermeture, l'attribut d'avant est remis et le champ reprend le focus,
-// ce qui ramène le clavier du système.
+// Une icône collée à chaque champ de saisie de texte (champs texte, zones de texte, éditeur d'article)
+// ouvre un clavier arabe en bas de l'écran, avec une page « chiffres et symboles ». Tant qu'il est ouvert,
+// le clavier du système est masqué (inputmode="none" sur le champ) ; à la fermeture, l'attribut d'avant est
+// remis et le champ reprend le focus, ce qui ramène le clavier du système.
 // Les champs sont décorés par champs.js (MutationObserver) : appeler equiperClavier(champ) suffit.
 
 const ICONE = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8"/></svg>';
 
-// Disposition arabe usuelle (PC), plus les hamzas portées et les voyelles brèves.
+// Page arabe : disposition usuelle (PC), hamzas portées, voyelles brèves et signes.
 export const RANGEES = [
   ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د'],
   ['ش', 'س', 'ي', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ك', 'ط', 'ذ'],
   ['ئ', 'ء', 'ؤ', 'ر', 'ى', 'ة', 'و', 'ز', 'ظ', 'أ', 'إ', 'آ'],
   ['َ', 'ُ', 'ِ', 'ً', 'ٌ', 'ٍ', 'ّ', 'ْ', 'ٱ', 'ٰ', 'ـ', '،'],
 ];
+// Page « chiffres et symboles » (de gauche à droite).
+export const SYMBOLES = [
+  ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
+  ['(', ')', '[', ']', '{', '}', '<', '>', '|', '\\', '/', '*'],
+  [':', ';', '.', ',', '!', '?', '"', "'", '_', '+', '@', '#'],
+  ['%', '&', '~', '^', '$', '«', '»', '؟', '؛', '…', '·', '`'],
+];
 const MARQUE = /^[ً-ْٰ]$/; // voyelles et signes : montrés sur un cercle pointillé
 
-// Champs qui reçoivent l'icône : le champ de recherche, les champs texte « dir=auto » et les zones de texte
-// éditables (sauf celles du code HTML ou du dossier pour Claude, marquées spellcheck="false").
+const TYPES_TEXTE = ['text', 'search'];
+const editable = (el) => el.isContentEditable || el.getAttribute?.('contenteditable') === 'true';
+
+// Champs qui reçoivent l'icône : tous les champs texte (pas courriel, mot de passe, nombre…), les zones de texte
+// éditables et l'éditeur d'article. Exclus : lecteur audio (références seulement), code HTML et dossier pour Claude
+// (spellcheck="false" sur une zone de texte), data-sans-clavier.
 export function accepteClavier(el) {
-  if (!el || el.closest('.lecteur, .clavier-ar') || el.hasAttribute('data-sans-clavier')) return false;
-  if (el.id === 'requete') return true;
+  if (!el?.closest || el.closest('.lecteur, .clavier-ar') || el.hasAttribute('data-sans-clavier')) return false;
   if (el.tagName === 'TEXTAREA') return !el.readOnly && el.getAttribute('spellcheck') !== 'false';
-  if (el.tagName === 'INPUT') return el.getAttribute('dir') === 'auto' && ['text', 'search'].includes(el.type);
-  return false;
+  if (el.tagName === 'INPUT') return TYPES_TEXTE.includes(el.type) && !el.readOnly && !el.hidden;
+  return el.getAttribute('contenteditable') === 'true';
 }
 
 // Insère du texte à la place de la sélection (respecte maxlength) ; renvoie false si rien n'a changé.
 export function inserer(champ, texte) {
+  if (editable(champ)) return document.execCommand('insertText', false, texte);
   const debut = champ.selectionStart ?? champ.value.length;
   const fin = champ.selectionEnd ?? debut;
   if (champ.maxLength > 0 && champ.value.length - (fin - debut) + texte.length > champ.maxLength) return false;
@@ -38,6 +49,7 @@ export function inserer(champ, texte) {
 
 // Efface la sélection, sinon le caractère avant le curseur.
 export function effacerArriere(champ) {
+  if (editable(champ)) return document.execCommand('delete');
   let debut = champ.selectionStart ?? champ.value.length;
   const fin = champ.selectionEnd ?? debut;
   if (debut === fin) { if (!debut) return false; debut -= 1; }
@@ -52,17 +64,23 @@ let modeAvant = null; // valeur d'inputmode avant l'ouverture (null = absent)
 
 const boutonDe = (champ) => champ?._boutonClavier || null;
 
+function touche(c) {
+  const marque = MARQUE.test(c);
+  return `<button type="button" tabindex="-1" data-touche="${c.replace(/"/g, '&quot;')}" aria-label="${c.replace(/"/g, '&quot;')}"${marque ? ' class="marque"' : ''}>${marque ? `◌${c}` : c.replace(/</g, '&lt;')}</button>`;
+}
+
 function creerPanneau() {
   panneau = document.createElement('div');
   panneau.className = 'clavier-ar';
   panneau.setAttribute('role', 'group');
   panneau.setAttribute('aria-label', 'Clavier arabe');
   panneau.hidden = true;
-  const touche = (c) => `<button type="button" tabindex="-1" data-touche="${c}" aria-label="${c}"${MARQUE.test(c) ? ' class="marque"' : ''}>${MARQUE.test(c) ? `◌${c}` : c}</button>`;
   panneau.innerHTML = `<div class="clavier-rangees">
-      ${RANGEES.map((r) => `<div class="clavier-rangee" lang="ar">${r.map(touche).join('')}</div>`).join('')}
+      <div class="clavier-page" data-page="arabe">${RANGEES.map((r) => `<div class="clavier-rangee" lang="ar">${r.map(touche).join('')}</div>`).join('')}</div>
+      <div class="clavier-page symboles" data-page="symboles" hidden>${SYMBOLES.map((r) => `<div class="clavier-rangee">${r.map(touche).join('')}</div>`).join('')}</div>
       <div class="clavier-rangee clavier-bas">
         <button type="button" tabindex="-1" data-action="fermer" class="clavier-fermer" title="Fermer le clavier arabe (retour au clavier du système)" aria-label="Fermer le clavier arabe">×</button>
+        <button type="button" tabindex="-1" data-action="page" class="clavier-page-bouton" title="Chiffres et symboles" aria-label="Chiffres et symboles">123</button>
         <button type="button" tabindex="-1" data-touche="+" title="Terme suivant (recherche)">+</button>
         <button type="button" tabindex="-1" data-touche=" " aria-label="Espace">espace</button>
         <button type="button" tabindex="-1" data-action="arriere" title="Effacer" aria-label="Effacer">⌫</button>
@@ -75,6 +93,7 @@ function creerPanneau() {
     if (!b || !cible) return;
     if (!cible.isConnected) { fermer(false); return; }
     if (b.dataset.action === 'fermer') { fermer(true); return; }
+    if (b.dataset.action === 'page') { changerPage(); return; }
     if (document.activeElement !== cible) cible.focus({ preventScroll: true });
     if (b.dataset.touche != null) inserer(cible, b.dataset.touche);
     else if (b.dataset.action === 'arriere') effacerArriere(cible);
@@ -83,7 +102,19 @@ function creerPanneau() {
   document.body.append(panneau);
 }
 
+// Bascule entre la page arabe et la page chiffres et symboles.
+function changerPage(page) {
+  const symboles = page ? page === 'symboles' : panneau.querySelector('[data-page="symboles"]').hidden;
+  panneau.querySelector('[data-page="arabe"]').hidden = symboles;
+  panneau.querySelector('[data-page="symboles"]').hidden = !symboles;
+  const b = panneau.querySelector('[data-action="page"]');
+  b.textContent = symboles ? 'أبج' : '123';
+  b.title = symboles ? 'Lettres arabes' : 'Chiffres et symboles';
+  b.setAttribute('aria-label', b.title);
+}
+
 function entree(champ) {
+  if (editable(champ)) { document.execCommand('insertParagraph'); return; }
   if (champ.tagName === 'TEXTAREA') { inserer(champ, '\n'); return; }
   // Les écrans qui réagissent à Entrée l'écoutent sur keydown ; sinon on envoie le formulaire.
   const ev = new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true });
@@ -116,6 +147,7 @@ export function ouvrir(champ) {
   if (!panneau) creerPanneau();
   if (cible && cible !== champ) delier(false);
   if (cible !== champ) relier(champ);
+  if (panneau.hidden) changerPage('arabe');
   panneau.hidden = false;
   document.body.classList.add('clavier-ouvert');
   document.documentElement.style.setProperty('--hauteur-clavier', `${panneau.offsetHeight}px`);
@@ -129,6 +161,8 @@ export function fermer(refocus = true) {
   delier(refocus);
 }
 
+// Pose l'icône : dans le champ de recherche (déjà positionné), sinon dans une enveloppe autour du champ,
+// à droite (champ d'une ligne) ou en haut à droite (zone de texte, éditeur).
 export function equiperClavier(champ) {
   if (champ.dataset.clavier || !accepteClavier(champ)) return;
   champ.dataset.clavier = '1';
@@ -145,18 +179,17 @@ export function equiperClavier(champ) {
     if (champ.disabled) return;
     if (cible === champ && !panneau.hidden) fermer(true); else ouvrir(champ);
   });
-  const barre = champ.tagName === 'TEXTAREA' && champ.nextElementSibling?.classList.contains('outils-champ') ? champ.nextElementSibling : null;
-  if (champ.id === 'requete') {
-    champ.parentElement.append(bouton); // .recherche .champ est déjà positionné
-  } else if (barre) {
-    bouton.insertAdjacentHTML('beforeend', '<span>Clavier ar</span>');
-    barre.prepend(bouton);
-  } else {
-    const enveloppe = document.createElement('span');
-    enveloppe.className = champ.tagName === 'TEXTAREA' ? 'avec-clavier zone' : 'avec-clavier';
-    champ.before(enveloppe);
-    enveloppe.append(champ, bouton);
-  }
+  if (champ.id === 'requete') { champ.parentElement.append(bouton); return; }
+  // Déplacer un champ lui fait perdre le focus : on le lui rend, curseur compris.
+  const actif = document.activeElement === champ;
+  const sel = actif && !editable(champ) ? [champ.selectionStart, champ.selectionEnd] : null;
+  const zone = champ.tagName !== 'INPUT';
+  champ.classList.add('a-clavier');
+  const enveloppe = document.createElement(zone ? 'div' : 'span');
+  enveloppe.className = zone ? 'avec-clavier zone' : 'avec-clavier';
+  champ.before(enveloppe);
+  enveloppe.append(champ, bouton);
+  if (actif) { champ.focus({ preventScroll: true }); if (sel) champ.setSelectionRange(...sel); }
 }
 
 export function initClavier() {

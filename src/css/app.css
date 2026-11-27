@@ -669,9 +669,14 @@ button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
 /* ---------- Clavier arabe à l'écran (clavier.js) ---------- */
 /* Icône collée au champ : dans le champ, à droite (le texte ne passe pas dessous). */
 .avec-clavier { position: relative; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
-.avec-clavier > input[dir] { flex: 1; min-width: 0; padding-right: 38px; }
+.avec-clavier > input.a-clavier { flex: 1; min-width: 0; padding-right: 38px; }
+/* Zone de texte et éditeur d'article : icône en haut à droite. */
 .avec-clavier.zone { display: block; }
-.avec-clavier.zone > .bouton-clavier { top: auto; bottom: 8px; transform: none; }
+.avec-clavier.zone > .bouton-clavier { top: 6px; right: 6px; transform: none; z-index: 1; }
+.avec-clavier.zone > textarea.a-clavier, .avec-clavier.zone > .a-clavier[contenteditable] { padding-right: 40px; }
+.avec-clavier.zone > textarea.a-clavier { display: block; width: 100%; }
+/* Champ masqué (ex. éditeur visuel pendant le mode HTML) : pas d'icône. */
+.avec-clavier:has(> .a-clavier[hidden]) > .bouton-clavier { display: none; }
 .ctx-source > .avec-clavier { flex-basis: 100%; }
 .bouton-clavier {
   position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 32px; height: 28px; padding: 0;
@@ -680,10 +685,6 @@ button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
 .recherche .bouton-clavier { right: 6px; }
 .bouton-clavier svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .bouton-clavier:hover, .bouton-clavier:focus-visible, .bouton-clavier[aria-pressed='true'] { color: var(--accent); background: var(--accent-doux); }
-/* Dans la barre Copier / Effacer d'une zone de texte : bouton comme ses voisins. */
-.outils-champ .bouton-clavier { position: static; transform: none; width: auto; height: auto; display: inline-flex; }
-.outils-champ .bouton-clavier svg { width: 16px; height: 16px; }
-.outils-champ .bouton-clavier[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); }
 /* Le panneau, fixé en bas ; la page garde de la place pour lui. */
 body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 260px); }
 .clavier-ar {
@@ -699,7 +700,11 @@ body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 260px); }
 }
 .clavier-ar button:active { background: var(--accent-doux); border-color: var(--accent); }
 .clavier-ar button.marque { font-size: 24px; }
-.clavier-bas { grid-template-columns: 1.1fr 1fr 4fr 1.3fr 1.3fr; direction: ltr; }
+.clavier-page { display: grid; gap: 5px; }
+.clavier-page.symboles .clavier-rangee { direction: ltr; }
+.clavier-page.symboles button { font: 19px/1 var(--latin); }
+.clavier-bas { grid-template-columns: 1fr 1.3fr 1fr 3.4fr 1.2fr 1.2fr; direction: ltr; }
+.clavier-ar .clavier-page-bouton { font-size: 15px; }
 .clavier-bas button { font: 600 16px/1 var(--latin); }
 .clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
 .clavier-ar .clavier-fermer { font-size: 22px; color: var(--accent); }

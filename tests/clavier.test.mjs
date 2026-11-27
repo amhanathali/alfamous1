@@ -1,5 +1,5 @@
-// Tests du clavier arabe à l'écran (npm test) : champs équipés, frappe, effacement, masquage puis
-// retour du clavier du système (inputmode).
+// Tests du clavier arabe à l'écran (npm test) : champs équipés, frappe, effacement, page chiffres et symboles,
+// masquage puis retour du clavier du système (inputmode).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
@@ -11,17 +11,23 @@ const dom = new JSDOM(`<!DOCTYPE html><body>
   <input id="mail" type="email" dir="auto">
   <textarea id="com"></textarea>
   <textarea id="code" spellcheck="false"></textarea>
+  <input id="sanstype">
+  <input id="case" type="checkbox">
+  <div id="ed" contenteditable="true"></div>
   <div class="lecteur"><input id="lect" type="text" dir="auto"></div>
 </body>`, { pretendToBeVisual: true });
 for (const k of ['window', 'document', 'Event', 'KeyboardEvent', 'HTMLElement']) globalThis[k] = dom.window[k];
-const { accepteClavier, inserer, effacerArriere, equiperClavier, ouvrir, fermer, RANGEES } = await import('../src/js/clavier.js');
+const { accepteClavier, inserer, effacerArriere, equiperClavier, ouvrir, fermer, RANGEES, SYMBOLES } = await import('../src/js/clavier.js');
 const $ = (s) => document.querySelector(s);
 
-test('champs équipés : recherche, dir=auto texte, zones de texte éditables', () => {
+test('champs équipés : tous les champs texte, zones de texte et éditeur', () => {
   assert.equal(accepteClavier($('#requete')), true);
   assert.equal(accepteClavier($('#ar')), true);
   assert.equal(accepteClavier($('#com')), true);
-  assert.equal(accepteClavier($('#fr')), false, 'champ sans dir=auto');
+  assert.equal(accepteClavier($('#fr')), true, 'champ texte sans dir=auto');
+  assert.equal(accepteClavier($('#sanstype')), true, 'input sans type = texte');
+  assert.equal(accepteClavier($('#ed')), true, "éditeur d'article");
+  assert.equal(accepteClavier($('#case')), false, 'case à cocher');
   assert.equal(accepteClavier($('#mail')), false, 'courriel');
   assert.equal(accepteClavier($('#code')), false, 'code HTML (spellcheck=false)');
   assert.equal(accepteClavier($('#lect')), false, 'lecteur audio');
@@ -51,13 +57,15 @@ test('ouvrir masque le clavier du système ; fermer remet l\'inputmode d\'avant'
   const ar = $('#ar'); const req = $('#requete');
   assert.ok(req.parentElement.querySelector('.bouton-clavier'), 'icône dans le champ de recherche');
   assert.ok(ar.parentElement.classList.contains('avec-clavier'), 'icône collée au champ');
-  assert.equal($('#fr').parentElement, document.body, 'champ non équipé intact');
+  assert.equal($('#case').parentElement, document.body, 'champ non équipé intact');
+  assert.ok($('#com').parentElement.classList.contains('zone'), 'zone de texte : icône collée');
 
   ouvrir(ar);
   assert.equal(ar.getAttribute('inputmode'), 'none');
   assert.equal(document.activeElement, ar);
   assert.equal($('.clavier-ar').hidden, false);
-  assert.equal(RANGEES.every((r) => r.length === 12), true);
+  assert.equal([...RANGEES, ...SYMBOLES].every((r) => r.length === 12), true);
+  for (const c of '0123456789:-(){}|[]\\=*') assert.ok(SYMBOLES.flat().includes(c), `symbole ${c}`);
 
   ouvrir(req); // passage à un autre champ
   assert.equal(ar.getAttribute('inputmode'), 'text', 'inputmode d\'origine remis');
@@ -66,7 +74,11 @@ test('ouvrir masque le clavier du système ; fermer remet l\'inputmode d\'avant'
   req.value = '';
   $('.clavier-ar [data-touche="ر"]').click();
   $('.clavier-ar [data-touche="ح"]').click();
-  assert.equal(req.value, 'رح');
+  $('.clavier-ar [data-action="page"]').click();
+  assert.equal($('.clavier-ar [data-page="symboles"]').hidden, false, 'page chiffres et symboles');
+  $('.clavier-ar [data-touche="2"]').click();
+  $('.clavier-ar [data-touche=":"]').click();
+  assert.equal(req.value, 'رح2:');
 
   $('.clavier-ar [data-action="fermer"]').click();
   assert.equal(req.hasAttribute('inputmode'), false, 'attribut absent avant : retiré');

@@ -416,10 +416,11 @@ function vueAide() {
       </ul>
       <h2>Clavier arabe</h2>
       <ul>
-        <li>L'icône de clavier, collée au champ de recherche et aux champs où l'on tape de l'arabe (filtres, clés du lexique,
-          commentaires, notes…), ouvre un <b>clavier arabe</b> en bas de l'écran. Le clavier du téléphone est alors masqué.</li>
-        <li>Dernière rangée : <b>×</b> ferme le clavier arabe et rend le clavier habituel ; <b>+</b> sépare des termes de recherche ;
-          <b>⌫</b> efface ; <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
+        <li>L'icône de clavier, collée à chaque champ de saisie (recherche, titres, filtres, commentaires, notes, éditeur
+          d'article…), ouvre un <b>clavier arabe</b> en bas de l'écran. Le clavier du téléphone est alors masqué.</li>
+        <li>Dernière rangée : <b>×</b> ferme le clavier arabe et rend le clavier habituel ; <b>123</b> passe aux chiffres et
+          symboles (<b>أبج</b> revient aux lettres) ; <b>+</b> sépare des termes de recherche ; <b>⌫</b> efface ;
+          <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
       </ul>
     </div>`;
 }

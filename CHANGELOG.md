@@ -18,6 +18,11 @@
   clavier du système (`inputmode="none"`) ; fermé (bouton ×), l'inputmode d'avant est remis et le champ reprend le
   focus, ce qui rend le clavier du système. Suit le champ actif ; se ferme au changement d'écran. Rangée du bas :
   ×, +, espace, ⌫, ↵ (recherche ou retour à la ligne). Tests : `tests/clavier.test.mjs`.
+- Clavier arabe, retours d'essai : icône sur **tous** les champs texte (titres, références, nom affiché, filtres…,
+  plus seulement « dir=auto »), sur les zones de texte (en haut à droite, collée au champ, au lieu de la barre
+  Copier / Effacer) et sur l'éditeur visuel des articles (masquée en mode HTML). Exclus : courriel, mot de passe,
+  cases, lecteur audio, code HTML. Nouvelle page **123** : chiffres 0-9 et symboles : - ( ) { } [ ] | \ = * / < > etc.
+  Le focus et le curseur sont rendus au champ quand l'icône est posée.
 
 ### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
 - `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors
