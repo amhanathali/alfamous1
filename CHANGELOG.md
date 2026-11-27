@@ -1,6 +1,15 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — filtre de Membres aligné sur les autres onglets (branche `admin/filtre-membres`)
+- Le champ existant (nom ou courriel, majuscules seulement ignorées) devient **« Filtrer les membres »** : nom,
+  courriel et niveau (« modérateur », « bloqué »…), sans tenir compte des majuscules, des accents ni des voyelles
+  arabes (`surligner.js`) ; se combine toujours avec Tous / Admins / Modérateurs / Bloqués / Courriel non vérifié.
+- Terme surligné dans le nom et le courriel ; compteur « n sur N » inchangé.
+- Seul le tableau est redessiné pendant la frappe (avant : toute la page, ce qui fermait le clavier arabe).
+- Note : le filtre de Notes (PR n° 33) a été déployé sur `alfamous-essai` puis `alfamous-atelier` le 27 nov. 2026,
+  avec l'accord de l'auteur (tests 124/124, règles 68/68).
+
 ### Ajouté — filtre de recherche dans Notes (branche `notes/filtre`)
 - Champ **« Filtrer mes notes »** sous les boutons Toutes / Privées / Publiées : cherche dans le titre, le texte et la
   cible (verset, racine, entrée du lexique), sans tenir compte des majuscules, des accents ni des voyelles arabes
