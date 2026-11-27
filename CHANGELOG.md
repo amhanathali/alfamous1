@@ -1,6 +1,15 @@
 # Journal des changements
 
 ## [Non publié]
+### Corrigé — `ESSAI_LOCAL.bat` restait sur main (branche `outils/essai-local-2`)
+- Causes trouvées sur le PC : `functions/package-lock.json` modifié localement le 23 nov. (lien « alfamous1: file:.. »
+  ajouté par une installation npm) faisait arrêter le script sur « modifications locales » ; et les commandes git
+  lancées dans des sous-invites (`for /f`) subissaient le réglage AutoRun du PC, qui les renvoie vers Desktop\Alfamous.
+- Correctifs : les deux `package-lock.json` (régénérés par npm) sont remis à leur version GitHub avant la
+  vérification ; plus aucune commande git en sous-invite (fichiers temporaires dans %TEMP%\essai-alfamous1) ;
+  la fermeture des fenêtres garde la fenêtre du script et tous ses parents ; journal `essai-local.log` dans le
+  dossier (non versionné) pour le diagnostic à distance.
+
 ### Modifié — procédure fixe d'essai local (`ESSAI_LOCAL.bat`, branche `outils/essai-local`)
 - Un double-clic : ferme toutes les autres fenêtres cmd.exe, les émulateurs et le serveur local ; récupère la
   dernière version préparée (branche la plus récente sur GitHub, ou `main`) et l'affiche ; s'arrête sans rien changer
