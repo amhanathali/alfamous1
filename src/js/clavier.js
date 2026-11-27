@@ -1,26 +1,35 @@
 // Clavier arabe à l'écran.
 // Une icône collée à chaque champ de saisie de texte (champs texte, zones de texte, éditeur d'article)
-// ouvre un clavier arabe en bas de l'écran, avec une page « chiffres et symboles ». Tant qu'il est ouvert,
-// le clavier du système est masqué (inputmode="none" sur le champ) ; à la fermeture, l'attribut d'avant est
-// remis et le champ reprend le focus, ce qui ramène le clavier du système.
+// ouvre un clavier arabe compact : flottant et déplaçable par sa barre du haut, ou ancré en bas de l'écran.
+// Trois pages (lettres ; chiffres et symboles ; voyelles et signes). Ancrage et position sont gardés dans le
+// navigateur. Tant qu'il est ouvert, le clavier du système est masqué (inputmode="none" sur le champ) ;
+// à la fermeture, l'attribut d'avant est remis et le champ reprend le focus, ce qui ramène le clavier du système.
 // Les champs sont décorés par champs.js (MutationObserver) : appeler equiperClavier(champ) suffit.
 
 const ICONE = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8"/></svg>';
+const ICONE_ANCRER = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="15" width="16" height="5" rx="1"/><path d="M12 4v8M8.5 8.5 12 12l3.5-3.5"/></svg>';
+const ICONE_DETACHER = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4" y="4" width="16" height="11" rx="1.5"/><path d="M8 19h8"/></svg>';
 
-// Page arabe : disposition usuelle (PC), hamzas portées, voyelles brèves et signes.
+// Page des lettres : disposition arabe usuelle (PC) et hamzas portées.
 export const RANGEES = [
   ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'د'],
   ['ش', 'س', 'ي', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ك', 'ط', 'ذ'],
   ['ئ', 'ء', 'ؤ', 'ر', 'ى', 'ة', 'و', 'ز', 'ظ', 'أ', 'إ', 'آ'],
-  ['َ', 'ُ', 'ِ', 'ً', 'ٌ', 'ٍ', 'ّ', 'ْ', 'ٱ', 'ٰ', 'ـ', '،'],
 ];
 // Page « chiffres et symboles » (de gauche à droite).
 export const SYMBOLES = [
   ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='],
   ['(', ')', '[', ']', '{', '}', '<', '>', '|', '\\', '/', '*'],
   [':', ';', '.', ',', '!', '?', '"', "'", '_', '+', '@', '#'],
-  ['%', '&', '~', '^', '$', '«', '»', '؟', '؛', '…', '·', '`'],
 ];
+// Page « voyelles et signes » : voyelles brèves et signes, chiffres arabes, ponctuation arabe, derniers symboles.
+export const SIGNES = [
+  ['َ', 'ُ', 'ِ', 'ً', 'ٌ', 'ٍ', 'ّ', 'ْ', 'ٰ', 'ٱ', 'ـ', 'لا'],
+  ['١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩', '٠', '،', '؛'],
+  ['؟', '«', '»', '…', '·', '%', '٪', '&', '~', '^', '$', '`'],
+];
+const PAGES = { arabe: RANGEES, symboles: SYMBOLES, signes: SIGNES };
+const LIBELLES = { arabe: ['أبج', 'Lettres arabes'], symboles: ['123', 'Chiffres et symboles'], signes: ['◌َ', 'Voyelles et signes'] };
 const MARQUE = /^[ً-ْٰ]$/; // voyelles et signes : montrés sur un cercle pointillé
 
 const TYPES_TEXTE = ['text', 'search'];
@@ -58,15 +67,24 @@ export function effacerArriere(champ) {
   return true;
 }
 
+// Préférences d'affichage (par navigateur) : ancré ou flottant, position du clavier flottant.
+const pref = {
+  lire(cle) { try { return JSON.parse(localStorage.getItem(cle)); } catch { return null; } },
+  ecrire(cle, v) { try { localStorage.setItem(cle, JSON.stringify(v)); } catch { /* navigation privée */ } },
+};
+
 let panneau = null;
 let cible = null; // champ relié au clavier ouvert
 let modeAvant = null; // valeur d'inputmode avant l'ouverture (null = absent)
+let page = 'arabe';
+let ancre = false;
 
 const boutonDe = (champ) => champ?._boutonClavier || null;
 
 function touche(c) {
   const marque = MARQUE.test(c);
-  return `<button type="button" tabindex="-1" data-touche="${c.replace(/"/g, '&quot;')}" aria-label="${c.replace(/"/g, '&quot;')}"${marque ? ' class="marque"' : ''}>${marque ? `◌${c}` : c.replace(/</g, '&lt;')}</button>`;
+  const attr = c.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  return `<button type="button" tabindex="-1" data-touche="${attr}" aria-label="${attr}"${marque ? ' class="marque"' : ''}>${marque ? `◌${c}` : c.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</button>`;
 }
 
 function creerPanneau() {
@@ -75,12 +93,17 @@ function creerPanneau() {
   panneau.setAttribute('role', 'group');
   panneau.setAttribute('aria-label', 'Clavier arabe');
   panneau.hidden = true;
-  panneau.innerHTML = `<div class="clavier-rangees">
-      <div class="clavier-page" data-page="arabe">${RANGEES.map((r) => `<div class="clavier-rangee" lang="ar">${r.map(touche).join('')}</div>`).join('')}</div>
-      <div class="clavier-page symboles" data-page="symboles" hidden>${SYMBOLES.map((r) => `<div class="clavier-rangee">${r.map(touche).join('')}</div>`).join('')}</div>
+  panneau.innerHTML = `<div class="clavier-titre" data-poignee title="Glisser pour déplacer le clavier">
+      <span class="clavier-nom">Clavier arabe</span>
+      <span class="clavier-poignee" aria-hidden="true"></span>
+      <button type="button" tabindex="-1" data-action="ancrer" class="clavier-outil"></button>
+      <button type="button" tabindex="-1" data-action="fermer" class="clavier-outil clavier-fermer" title="Fermer le clavier arabe (retour au clavier du système)" aria-label="Fermer le clavier arabe">×</button>
+    </div>
+    <div class="clavier-rangees">
+      ${Object.entries(PAGES).map(([nom, rangees]) => `<div class="clavier-page ${nom}" data-page="${nom}"${nom === 'arabe' ? ' lang="ar"' : ''}>${rangees.map((r) => `<div class="clavier-rangee">${r.map(touche).join('')}</div>`).join('')}</div>`).join('')}
       <div class="clavier-rangee clavier-bas">
-        <button type="button" tabindex="-1" data-action="fermer" class="clavier-fermer" title="Fermer le clavier arabe (retour au clavier du système)" aria-label="Fermer le clavier arabe">×</button>
-        <button type="button" tabindex="-1" data-action="page" class="clavier-page-bouton" title="Chiffres et symboles" aria-label="Chiffres et symboles">123</button>
+        <button type="button" tabindex="-1" data-action="page" data-vers="symboles" class="clavier-page-bouton"></button>
+        <button type="button" tabindex="-1" data-action="page" data-vers="signes" class="clavier-page-bouton"></button>
         <button type="button" tabindex="-1" data-touche="+" title="Terme suivant (recherche)">+</button>
         <button type="button" tabindex="-1" data-touche=" " aria-label="Espace">espace</button>
         <button type="button" tabindex="-1" data-action="arriere" title="Effacer" aria-label="Effacer">⌫</button>
@@ -93,24 +116,93 @@ function creerPanneau() {
     if (!b || !cible) return;
     if (!cible.isConnected) { fermer(false); return; }
     if (b.dataset.action === 'fermer') { fermer(true); return; }
-    if (b.dataset.action === 'page') { changerPage(); return; }
+    if (b.dataset.action === 'ancrer') { ancrer(!ancre); return; }
+    if (b.dataset.action === 'page') { changerPage(page === b.dataset.vers ? 'arabe' : b.dataset.vers); return; }
     if (document.activeElement !== cible) cible.focus({ preventScroll: true });
     if (b.dataset.touche != null) inserer(cible, b.dataset.touche);
     else if (b.dataset.action === 'arriere') effacerArriere(cible);
     else if (b.dataset.action === 'entree') entree(cible);
   });
+  brancherDeplacement(panneau.querySelector('[data-poignee]'));
+  window.addEventListener('resize', () => { if (!panneau.hidden && !ancre) placer(positionActuelle()); majMarge(); });
   document.body.append(panneau);
+  changerPage('arabe');
+  ancrer(pref.lire('clavierAncre') === true, false);
 }
 
-// Bascule entre la page arabe et la page chiffres et symboles.
-function changerPage(page) {
-  const symboles = page ? page === 'symboles' : panneau.querySelector('[data-page="symboles"]').hidden;
-  panneau.querySelector('[data-page="arabe"]').hidden = symboles;
-  panneau.querySelector('[data-page="symboles"]').hidden = !symboles;
-  const b = panneau.querySelector('[data-action="page"]');
-  b.textContent = symboles ? 'أبج' : '123';
-  b.title = symboles ? 'Lettres arabes' : 'Chiffres et symboles';
+// Pages : chacun des deux boutons du bas mène à sa page, ou ramène aux lettres si l'on y est déjà.
+function changerPage(nom) {
+  page = nom;
+  for (const p of panneau.querySelectorAll('[data-page]')) p.hidden = p.dataset.page !== nom;
+  for (const b of panneau.querySelectorAll('[data-action="page"]')) {
+    const vers = page === b.dataset.vers ? 'arabe' : b.dataset.vers;
+    b.textContent = LIBELLES[vers][0];
+    b.title = LIBELLES[vers][1];
+    b.setAttribute('aria-label', LIBELLES[vers][1]);
+  }
+}
+
+// Ancré : pleine largeur en bas, la page garde de la place dessous. Flottant : petite fenêtre déplaçable.
+function ancrer(oui, enregistrer = true) {
+  ancre = oui;
+  if (enregistrer) pref.ecrire('clavierAncre', oui);
+  panneau.classList.toggle('ancre', oui);
+  const b = panneau.querySelector('[data-action="ancrer"]');
+  b.innerHTML = oui ? ICONE_DETACHER : ICONE_ANCRER;
+  b.title = oui ? 'Détacher (clavier flottant, déplaçable)' : 'Ancrer en bas de l\'écran';
   b.setAttribute('aria-label', b.title);
+  panneau.querySelector('[data-poignee]').title = oui ? '' : 'Glisser pour déplacer le clavier';
+  majMarge();
+  if (oui) { panneau.style.left = ''; panneau.style.top = ''; } else if (!panneau.hidden) { placer(pref.lire('clavierPosition')); if (cible) eviter(cible); }
+}
+
+function majMarge() {
+  const ouvert = !!panneau && !panneau.hidden;
+  document.body.classList.toggle('clavier-ouvert', ouvert && ancre);
+  if (ouvert) document.documentElement.style.setProperty('--hauteur-clavier', `${panneau.offsetHeight}px`);
+}
+
+// Clavier flottant : position ramenée dans la fenêtre ; par défaut, centré en bas.
+const positionActuelle = () => (panneau.style.left ? { x: parseFloat(panneau.style.left), y: parseFloat(panneau.style.top) } : pref.lire('clavierPosition'));
+function placer(pos) {
+  const l = panneau.offsetWidth; const h = panneau.offsetHeight;
+  const W = document.documentElement.clientWidth; const H = window.innerHeight;
+  const x = pos ? pos.x : (W - l) / 2;
+  const y = pos ? pos.y : H - h - 12;
+  panneau.style.left = `${Math.round(Math.max(4, Math.min(x, W - l - 4)))}px`;
+  panneau.style.top = `${Math.round(Math.max(4, Math.min(y, H - h - 4)))}px`;
+}
+
+// Ne pas cacher le champ : si le clavier flottant le recouvre, il se place juste dessous (ou dessus).
+function eviter(champ) {
+  const c = champ.getBoundingClientRect(); const p = panneau.getBoundingClientRect();
+  if (c.bottom <= p.top || c.top >= p.bottom || c.right <= p.left || c.left >= p.right) return;
+  const H = window.innerHeight;
+  placer({ x: p.left, y: c.bottom + 8 + p.height <= H ? c.bottom + 8 : c.top - 8 - p.height });
+}
+
+// Déplacement à la souris ou au doigt par la barre du haut (clavier flottant seulement).
+function brancherDeplacement(poignee) {
+  let depart = null;
+  poignee.addEventListener('pointerdown', (e) => {
+    if (ancre || e.target.closest('button') || e.button > 0) return;
+    const r = panneau.getBoundingClientRect();
+    depart = { dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId };
+    poignee.setPointerCapture?.(e.pointerId);
+    panneau.classList.add('deplace');
+    e.preventDefault();
+  });
+  poignee.addEventListener('pointermove', (e) => {
+    if (depart?.id === e.pointerId) placer({ x: e.clientX - depart.dx, y: e.clientY - depart.dy });
+  });
+  const finir = (e) => {
+    if (depart?.id !== e.pointerId) return;
+    depart = null;
+    panneau.classList.remove('deplace');
+    pref.ecrire('clavierPosition', positionActuelle());
+  };
+  poignee.addEventListener('pointerup', finir);
+  poignee.addEventListener('pointercancel', finir);
 }
 
 function entree(champ) {
@@ -147,17 +239,18 @@ export function ouvrir(champ) {
   if (!panneau) creerPanneau();
   if (cible && cible !== champ) delier(false);
   if (cible !== champ) relier(champ);
-  if (panneau.hidden) changerPage('arabe');
+  const etaitFerme = panneau.hidden;
+  if (etaitFerme) changerPage('arabe');
   panneau.hidden = false;
-  document.body.classList.add('clavier-ouvert');
-  document.documentElement.style.setProperty('--hauteur-clavier', `${panneau.offsetHeight}px`);
+  majMarge();
   if (!champ.closest('.entete')) champ.scrollIntoView?.({ block: 'nearest' });
+  if (!ancre) { if (etaitFerme) placer(pref.lire('clavierPosition')); eviter(champ); }
 }
 
 export function fermer(refocus = true) {
   if (!panneau || panneau.hidden) return;
   panneau.hidden = true;
-  document.body.classList.remove('clavier-ouvert');
+  majMarge();
   delier(refocus);
 }
 

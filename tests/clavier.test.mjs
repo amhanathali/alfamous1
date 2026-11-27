@@ -17,7 +17,8 @@ const dom = new JSDOM(`<!DOCTYPE html><body>
   <div class="lecteur"><input id="lect" type="text" dir="auto"></div>
 </body>`, { pretendToBeVisual: true });
 for (const k of ['window', 'document', 'Event', 'KeyboardEvent', 'HTMLElement']) globalThis[k] = dom.window[k];
-const { accepteClavier, inserer, effacerArriere, equiperClavier, ouvrir, fermer, RANGEES, SYMBOLES } = await import('../src/js/clavier.js');
+const mod = await import('../src/js/clavier.js');
+const { accepteClavier, inserer, effacerArriere, equiperClavier, ouvrir, fermer, RANGEES, SYMBOLES } = mod;
 const $ = (s) => document.querySelector(s);
 
 test('champs équipés : tous les champs texte, zones de texte et éditeur', () => {
@@ -85,4 +86,25 @@ test('ouvrir masque le clavier du système ; fermer remet l\'inputmode d\'avant'
   assert.equal($('.clavier-ar').hidden, true);
   assert.equal(document.activeElement, req, 'le champ reprend le focus (clavier du système)');
   fermer();
+});
+
+test('clavier compact : trois pages de trois rangées ; ancrer / détacher', () => {
+  const { SIGNES: signes } = mod;
+  assert.equal(signes.length, 3);
+  assert.equal(signes.every((r) => r.length === 12), true);
+  ouvrir($('#ar'));
+  const p = $('.clavier-ar');
+  const versSignes = p.querySelector('[data-vers="signes"]');
+  versSignes.click();
+  assert.equal(p.querySelector('[data-page="signes"]').hidden, false);
+  assert.equal(versSignes.textContent, 'أبج', 'le même bouton ramène aux lettres');
+  versSignes.click();
+  assert.equal(p.querySelector('[data-page="arabe"]').hidden, false);
+  const ancre = p.classList.contains('ancre');
+  p.querySelector('[data-action="ancrer"]').click();
+  assert.equal(p.classList.contains('ancre'), !ancre);
+  p.querySelector('[data-action="ancrer"]').click();
+  assert.equal(p.classList.contains('ancre'), ancre);
+  fermer(false);
+  assert.equal(p.hidden, true);
 });

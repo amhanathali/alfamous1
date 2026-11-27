@@ -685,28 +685,47 @@ button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
 .recherche .bouton-clavier { right: 6px; }
 .bouton-clavier svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .bouton-clavier:hover, .bouton-clavier:focus-visible, .bouton-clavier[aria-pressed='true'] { color: var(--accent); background: var(--accent-doux); }
-/* Le panneau, fixé en bas ; la page garde de la place pour lui. */
-body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 260px); }
+/* Le panneau : petite fenêtre flottante, déplaçable par sa barre ; ou ancré en bas (la page garde de la place). */
+body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 220px); }
 .clavier-ar {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; background: var(--surface);
-  border-top: 2px solid var(--accent); box-shadow: 0 -4px 16px rgba(0, 0, 0, .12);
-  padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); user-select: none; -webkit-user-select: none;
+  position: fixed; z-index: 1000; width: min(440px, calc(100vw - 8px)); background: var(--surface);
+  border: 1px solid var(--bordure); border-radius: 12px; box-shadow: 0 10px 32px rgba(0, 0, 0, .22);
+  padding: 0 5px 6px; user-select: none; -webkit-user-select: none; left: 50%; bottom: 12px;
 }
-.clavier-rangees { max-width: 640px; margin: 0 auto; display: grid; gap: 5px; }
+.clavier-ar:not(.ancre) { bottom: auto; }
+.clavier-ar.deplace { opacity: .92; box-shadow: 0 14px 40px rgba(0, 0, 0, .3); }
+.clavier-ar.ancre {
+  left: 0; right: 0; bottom: 0; top: auto; width: auto; border-radius: 0; border-width: 2px 0 0; border-color: var(--accent);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, .12); padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+/* Barre du haut : nom, poignée, ancrer / détacher, fermer. */
+.clavier-titre { display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 4px; height: 30px; cursor: grab; touch-action: none; }
+.clavier-ar.deplace .clavier-titre { cursor: grabbing; }
+.clavier-ar.ancre .clavier-titre { cursor: default; }
+.clavier-nom { font: 12px/1 var(--latin); color: var(--discret); padding-left: 4px; }
+.clavier-poignee { width: 44px; height: 4px; border-radius: 2px; background: var(--bordure); }
+.clavier-ar.ancre .clavier-poignee { visibility: hidden; }
+.clavier-ar .clavier-outil {
+  justify-self: end; width: 30px; height: 26px; border: 0; background: transparent; color: var(--discret);
+  display: grid; place-items: center; font: 400 20px/1 var(--latin); border-radius: 6px;
+}
+.clavier-ar .clavier-outil:hover { background: var(--accent-doux); color: var(--accent); }
+.clavier-ar .clavier-outil svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.clavier-ar .clavier-fermer { grid-column: 4; }
+.clavier-rangees { max-width: 640px; margin: 0 auto; display: grid; gap: 4px; }
+.clavier-page { display: grid; gap: 4px; }
 .clavier-rangee { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; direction: rtl; }
-.clavier-ar button {
-  min-width: 0; height: 42px; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; background: var(--fond);
-  color: var(--texte); font: 22px/1 var(--arabe); cursor: pointer; touch-action: manipulation;
+.clavier-ar .clavier-rangee button {
+  min-width: 0; height: 36px; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; background: var(--fond);
+  color: var(--texte); font: 20px/1 var(--arabe); cursor: pointer; touch-action: manipulation;
 }
-.clavier-ar button:active { background: var(--accent-doux); border-color: var(--accent); }
-.clavier-ar button.marque { font-size: 24px; }
-.clavier-page { display: grid; gap: 5px; }
+.clavier-ar .clavier-rangee button:active { background: var(--accent-doux); border-color: var(--accent); }
+.clavier-ar button.marque { font-size: 22px; }
 .clavier-page.symboles .clavier-rangee { direction: ltr; }
-.clavier-page.symboles button { font: 19px/1 var(--latin); }
-.clavier-bas { grid-template-columns: 1fr 1.3fr 1fr 3.4fr 1.2fr 1.2fr; direction: ltr; }
-.clavier-ar .clavier-page-bouton { font-size: 15px; }
-.clavier-bas button { font: 600 16px/1 var(--latin); }
-.clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
-.clavier-ar .clavier-fermer { font-size: 22px; color: var(--accent); }
-@media (max-width: 400px) { .clavier-ar button { height: 40px; font-size: 19px; } .clavier-rangee { gap: 2px; } }
+.clavier-page.symboles button { font: 17px/1 var(--latin) !important; }
+.clavier-bas { grid-template-columns: 1.2fr 1.2fr 1fr 4fr 1.3fr 1.3fr; direction: ltr; }
+.clavier-ar .clavier-bas button { font: 600 15px/1 var(--latin); }
+.clavier-ar .clavier-bas .clavier-page-bouton { font: 600 15px/1 var(--latin); color: var(--accent); }
+.clavier-ar .clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
+@media (max-width: 400px) { .clavier-ar .clavier-rangee button { height: 34px; font-size: 18px; } .clavier-rangee { gap: 2px; } }
 @media print { .clavier-ar, .bouton-clavier { display: none !important; } }

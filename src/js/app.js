@@ -417,10 +417,12 @@ function vueAide() {
       <h2>Clavier arabe</h2>
       <ul>
         <li>L'icône de clavier, collée à chaque champ de saisie (recherche, titres, filtres, commentaires, notes, éditeur
-          d'article…), ouvre un <b>clavier arabe</b> en bas de l'écran. Le clavier du téléphone est alors masqué.</li>
-        <li>Dernière rangée : <b>×</b> ferme le clavier arabe et rend le clavier habituel ; <b>123</b> passe aux chiffres et
-          symboles (<b>أبج</b> revient aux lettres) ; <b>+</b> sépare des termes de recherche ; <b>⌫</b> efface ;
-          <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
+          d'article…), ouvre un <b>clavier arabe</b> compact. Le clavier du téléphone est alors masqué.</li>
+        <li>Barre du haut : faites-la <b>glisser</b> pour déplacer le clavier (sa place est gardée) ; l'icône voisine
+          l'<b>ancre</b> en bas de l'écran ou le rend flottant ; <b>×</b> ferme le clavier arabe et rend le clavier habituel.</li>
+        <li>Rangée du bas : <b>123</b> chiffres et symboles ; <b>◌َ</b> voyelles, chiffres arabes et ponctuation arabe
+          (le même bouton, devenu <b>أبج</b>, revient aux lettres) ; <b>+</b> sépare des termes de recherche ;
+          <b>⌫</b> efface ; <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
       </ul>
     </div>`;
 }
