@@ -421,7 +421,8 @@ function vueAide() {
   contenu.innerHTML = `<div class="titre"><h1>Aide</h1><span class="resume">mise à jour au fil de l'application</span></div>
     <div class="aide-page">
       <h2>Rechercher</h2>
-      <p>Cherchez un verset (${ex('2:255')}), une sourate (${ex('19')}), une page (${ex('p 50')}),
+      <p>Le champ de recherche est dans l'onglet <b>Lecture</b> (la loupe du menu) ; les autres onglets ont leur propre filtre.
+        Cherchez un verset (${ex('2:255')}), une sourate (${ex('19')}), une page (${ex('p 50')}),
         un ou plusieurs mots en arabe ou en lettres latines, ou une ou plusieurs racines.</p>
       <ul>
         <li><b>Plusieurs termes</b> : séparez-les par un espace ou « + ». Les versets affichés contiennent <b>tous</b> les termes.
@@ -473,8 +474,12 @@ function vueAide() {
 function message(html) { contenu.innerHTML = `<p class="message">${html}</p>`; }
 
 // ---------- Routage (#/q/…, #/stats) ----------
+// « lecture » : accueil, recherches (#/q/…) et statistiques ; « autre » : onglets qui ont leur propre filtre.
+function vueDuLien(h) { return /^#\/(notes|note\/|forum|fil\/|membres|articles?(\/|$|\?)|temoignages?(\/|$)|lexique(\/|$)|aide$)/.test(h) ? 'autre' : 'lecture'; }
 async function router() {
   fiche.hidden = true;
+  // Champ principal et réglages visibles seulement dans Lecture (même calcul que dans index.html).
+  document.documentElement.dataset.vue = vueDuLien(location.hash);
   menuNotes();
   // Mes Notes et forum (#/notes, #/note/…, #/forum, #/fil/…)
   if (/^#\/(notes|note\/|forum|fil\/)/.test(location.hash)) {

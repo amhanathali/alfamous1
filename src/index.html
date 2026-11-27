@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Alfamous — l'atelier du codex</title>
   <meta name="description" content="Étudier le texte coranique par le texte : recherche par verset, mot et racine, mot à mot, racines voisines.">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238a4b16'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='serif'%3EA%3C/text%3E%3C/svg%3E">
+  <!-- Médaillon du logo (recadré de ZC2.png de l'ancienne application, sans le texte « AL Famous », 96 × 96). -->
+  <link rel="icon" type="image/png" href="img/logo.png">
+  <link rel="apple-touch-icon" href="img/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
@@ -13,6 +15,8 @@
   <script>
     // Thème choisi avant l'affichage (évite un éclair blanc).
     try { const t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+    // Champ de recherche seulement dans Lecture : vue connue avant l'affichage (même calcul que vueDuLien, app.js).
+    document.documentElement.dataset.vue = /^#\/(notes|note\/|forum|fil\/|membres|articles?(\/|$|\?)|temoignages?(\/|$)|lexique(\/|$)|aide$)/.test(location.hash) ? 'autre' : 'lecture';
     // blog.alfamous.ca (après la bascule depuis Blogger) : l'accueil mène aux articles, l'atelier reste sur atelier.alfamous.ca.
     if (location.hostname === 'blog.alfamous.ca' && !location.hash) location.replace('/articles/');
     // forum.alfamous.ca : l'accueil ouvre directement l'onglet Forum.
@@ -22,13 +26,15 @@
 <body>
   <header class="entete">
     <div class="entete-haut">
-      <a class="logo" href="#/">Alfamous<span class="logo-sous">l'atelier du codex</span></a>
+      <a class="logo" href="#/"><img class="logo-image" src="img/logo.png" alt="" width="40" height="40"><span>Alfamous<span class="logo-sous">l'atelier du codex</span></span></a>
       <div class="entete-actions">
         <span id="compte" class="compte"></span>
         <button id="theme" class="bouton-icone" type="button" title="Thème clair ou sombre" aria-label="Changer de thème">◐</button>
       </div>
     </div>
     <nav class="menu" id="menu" aria-label="Sections"></nav>
+    <!-- Champ principal et réglages : affichés seulement dans Lecture (accueil, recherches, statistiques) ;
+         les autres onglets ont leur propre filtre (html[data-vue], posé dans le <head> puis par le routeur). -->
     <form id="formulaire" class="recherche" role="search">
       <div class="champ">
         <input id="requete" type="text" autocomplete="off" spellcheck="false" dir="auto"

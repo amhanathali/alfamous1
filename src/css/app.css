@@ -40,7 +40,10 @@ a { color: var(--lien); }
 .entete { position: sticky; top: 0; z-index: 10; background: var(--fond); border-bottom: 1px solid var(--bordure); padding: 12px 16px 8px; }
 .entete-haut, .recherche, .options, main, .pied { max-width: 920px; margin: 0 auto; }
 .entete-haut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo { display: inline-flex; align-items: center; gap: 10px; font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
+.logo-image { flex: none; width: 40px; height: 40px; display: block; }
+/* Champ principal et réglages : seulement dans Lecture (html[data-vue], posé dans index.html puis par le routeur). */
+:root[data-vue='autre'] .recherche, :root[data-vue='autre'] .options { display: none; }
 .logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
 .entete-actions { display: flex; align-items: center; gap: 10px; }
 select, input, button { font: inherit; color: inherit; }
@@ -284,6 +287,10 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .menu::-webkit-scrollbar { display: none; }
 .menu a { flex: none; padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; font-size: 15px; white-space: nowrap; }
 .menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+/* Onglet Lecture : une loupe (nom donné par aria-label et title). */
+.menu a.onglet-icone { display: inline-flex; align-items: center; }
+.menu a.onglet-icone svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.menu a.onglet-icone.actif svg { stroke-width: 2.6; }
 @media (max-width: 520px) { .menu a { padding: 6px 8px; } }
 
 /* ---------- Mes Notes et forum ---------- */

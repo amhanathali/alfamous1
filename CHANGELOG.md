@@ -1,6 +1,16 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — en-tête affiné : logo, onglet Lecture en loupe, recherche seulement dans Lecture (branche `interface/entete-logo`)
+- **Logo** : médaillon de `ZC2.png` (ancienne application, fichier seulement lu) recadré sans le texte « AL Famous »,
+  réduit à 96 × 96 (`src/img/logo.png`, 25 Ko), affiché à 40 px devant « Alfamous » ; sert aussi d'icône d'onglet
+  du navigateur et d'icône d'écran d'accueil (iPhone). Même logo sur les pages publiques des articles.
+- **Onglet Lecture** : une loupe au lieu du mot (nom « Lecture et recherche » en infobulle et pour les lecteurs d'écran).
+- **Champ de recherche principal et réglages (ME, MC, statistiques, commentaire traditionnel)** : affichés seulement
+  dans Lecture (accueil, recherches, statistiques). Lexique, Articles, Notes, Forum, Témoignages, Membres et Aide ont
+  leur propre filtre : l'en-tête collant y est plus bas, le contenu gagne de la place. La vue est calculée dès le
+  `<head>` (pas de sursaut à l'ouverture), puis par le routeur (`vueDuLien`, `app.js`). Aide : une phrase.
+
 ### Ajouté — l'auteur retire son témoignage (branche `temoignages/retirer`)
 - Bouton **« Retirer mon témoignage »** sur son propre témoignage (même publié en Anonyme), avec confirmation :
   suppression définitive du témoignage, de son historique et de `prive/auteur`, en un seul lot.
