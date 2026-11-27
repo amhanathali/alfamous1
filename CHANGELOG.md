@@ -1,6 +1,19 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — tous les .bat : bon dossier et rien qui bloque (branche `outils/bat-robustes`)
+- Les cinq .bat (`ESSAI_LOCAL`, `deployerAlfamous1`, `LANCER_ALFAMOUS1`, `LANCER_EMULATEURS`, `INVITE_ALFAMOUS1`) se
+  placent explicitement dans le dossier Alfamous1 (celui du fichier, sinon `%USERPROFILE%\Desktop\Alfamous1`) et
+  vérifient que c'est bien lui (package.json « alfamous1 ») ; sinon arrêt avec un message. Plus jamais le dossier par
+  défaut de cmd (réglage AutoRun du PC vers Desktop\Alfamous).
+- Avant de commencer, ils ferment ce qui peut les bloquer : processus qui écoutent sur les ports des émulateurs
+  (4000, 4400, 4500, 5001, 5005, 8085, 9099, 9150, 9199) et du serveur local (5050). `ESSAI_LOCAL` et
+  `deployerAlfamous1` ferment aussi les processus node/java d'Alfamous1 ou de Firebase et les autres fenêtres cmd
+  (la leur et ses parents sont gardées). `LANCER_ALFAMOUS1` ne libère que le port 5050, `LANCER_EMULATEURS` que ceux
+  des émulateurs.
+- `deployerAlfamous1` remet aussi les `package-lock.json` (régénérés par npm) à leur version GitHub avant de passer
+  sur main.
+
 ### Corrigé — `ESSAI_LOCAL.bat` restait sur main (branche `outils/essai-local-2`)
 - Causes trouvées sur le PC : `functions/package-lock.json` modifié localement le 23 nov. (lien « alfamous1: file:.. »
   ajouté par une installation npm) faisait arrêter le script sur « modifications locales » ; et les commandes git

@@ -32,6 +32,9 @@ Double-cliquer sur **INVITE_ALFAMOUS1.bat** : une fenêtre cmd s'ouvre directeme
 3. met les outils à jour (npm install), lance les émulateurs et les données d'essai ;
 4. ouvre l'application sur http://localhost:5050 (comptes d'essai : `admin@essai.local`, mot de passe `essai123`).
 
+Tous les .bat se placent eux-mêmes dans le dossier Alfamous1 et ferment d'abord ce qui pourrait les bloquer
+(émulateurs, serveur local ; pour ESSAI_LOCAL et deployerAlfamous1, aussi les autres fenêtres cmd).
+
 Autres usages : `ESSAI_LOCAL.bat main` (ce qui est en ligne), `ESSAI_LOCAL.bat <branche>` (une branche précise).
 Le serveur local envoie les fichiers sans cache : un simple rechargement (F5) suffit après une modification.
 
