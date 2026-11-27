@@ -28,6 +28,10 @@
   Ancrage et position gardés dans le navigateur (`localStorage`, repli sans). S'il recouvre le champ, il se place
   dessous (ou dessus). Trois pages de trois rangées : lettres ; **123** chiffres et symboles ; **◌َ** voyelles et
   signes, chiffres arabes ١٢٣, ponctuation arabe et derniers symboles. Touches plus basses (36 px).
+- Corrigé : dans le filtre de la liste des **Articles** (et celui des **Membres**), le clavier arabe se fermait à
+  chaque lettre. Ces filtres redessinent leur champ à chaque frappe ; le clavier suit désormais le champ qui remplace
+  le sien (clavier du système toujours masqué, icône reposée), au passage du focus ou, à défaut, à la frappe suivante.
+  Test ajouté ; balayage dans Chrome des champs publics (recherche, Lexique, Articles, Forum, Notes, Aide).
 
 ### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
 - `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors

@@ -114,7 +114,12 @@ function creerPanneau() {
   panneau.addEventListener('click', (e) => {
     const b = e.target.closest('button');
     if (!b || !cible) return;
-    if (!cible.isConnected) { fermer(false); return; }
+    if (!cible.isConnected) {
+      // Champ redessiné sans que le focus ait été vu passer : on reprend le champ actif qui l'a remplacé.
+      const actif = document.activeElement;
+      if (actif && actif !== document.body && accepteClavier(actif) && !actif.disabled) suivre(actif);
+      else { fermer(false); return; }
+    }
     if (b.dataset.action === 'fermer') { fermer(true); return; }
     if (b.dataset.action === 'ancrer') { ancrer(!ancre); return; }
     if (b.dataset.action === 'page') { changerPage(page === b.dataset.vers ? 'arabe' : b.dataset.vers); return; }
@@ -285,12 +290,30 @@ export function equiperClavier(champ) {
   if (actif) { champ.focus({ preventScroll: true }); if (sel) champ.setSelectionRange(...sel); }
 }
 
+// Passer au champ qui remplace le champ relié (sans blur/focus : le champ vient d'être activé par l'écran).
+export function suivre(nouveau) {
+  delier(false);
+  cible = nouveau;
+  modeAvant = nouveau.getAttribute('inputmode');
+  nouveau.setAttribute('inputmode', 'none');
+  setTimeout(() => {
+    if (cible !== nouveau) return;
+    equiperClavier(nouveau);
+    boutonDe(nouveau)?.setAttribute('aria-pressed', 'true');
+    if (!ancre && !panneau.hidden) eviter(nouveau);
+  }, 0);
+}
+
 export function initClavier() {
   // Focus sur un autre champ : le clavier le suit s'il est équipé, sinon il se ferme.
   document.addEventListener('focusin', (e) => {
     if (!cible || e.target === cible || panneau?.contains(e.target) || e.target.closest?.('.bouton-clavier')) return;
-    if (e.target.dataset?.clavier && !e.target.disabled) ouvrir(e.target);
-    else fermer(false);
+    if (e.target.dataset?.clavier && !e.target.disabled) { ouvrir(e.target); return; }
+    // Champ redessiné à chaque frappe (filtres des Articles et des Membres) : l'ancien a disparu et le nouveau
+    // reçoit le focus avant d'avoir son icône. Le clavier le suit : clavier du système masqué tout de suite,
+    // icône posée juste après (le focus et le curseur sont gardés).
+    if (!cible.isConnected && accepteClavier(e.target) && !e.target.disabled) { suivre(e.target); return; }
+    fermer(false);
   });
   // Changement d'écran : le clavier se ferme sans rappeler le clavier du système.
   window.addEventListener('hashchange', () => fermer(false));

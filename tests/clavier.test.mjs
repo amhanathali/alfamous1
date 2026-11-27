@@ -108,3 +108,30 @@ test('clavier compact : trois pages de trois rangées ; ancrer / détacher', () 
   fermer(false);
   assert.equal(p.hidden, true);
 });
+
+test('champ redessiné à chaque frappe (filtre des Articles) : le clavier reste ouvert et suit le nouveau champ', async () => {
+  mod.initClavier();
+  const zone = document.createElement('div');
+  document.body.append(zone);
+  const dessiner = (valeur) => {
+    zone.innerHTML = `<input class="art-recherche" type="search" value="${valeur}">`;
+    const champ = zone.querySelector('input');
+    champ.addEventListener('input', () => { const v = champ.value; const pos = champ.selectionStart; dessiner(v); const c = zone.querySelector('input'); c.focus(); c.setSelectionRange(pos, pos); });
+    return champ;
+  };
+  const premier = dessiner('');
+  equiperClavier(premier);
+  ouvrir(premier);
+  $('.clavier-ar [data-touche="ر"]').click();
+  $('.clavier-ar [data-touche="ح"]').click();
+  await new Promise((r) => setTimeout(r, 10));
+  const actuel = zone.querySelector('input');
+  assert.notEqual(actuel, premier, 'le champ a bien été remplacé');
+  assert.equal(actuel.value, 'رح', 'les deux lettres sont dans le nouveau champ');
+  assert.equal($('.clavier-ar').hidden, false, 'le clavier reste ouvert');
+  assert.equal(actuel.getAttribute('inputmode'), 'none', 'clavier du système toujours masqué');
+  assert.equal(actuel.parentElement.querySelector('.bouton-clavier')?.getAttribute('aria-pressed'), 'true');
+  $('.clavier-ar [data-action="fermer"]').click();
+  assert.equal(zone.querySelector('input').hasAttribute('inputmode'), false, 'inputmode rendu à la fermeture');
+  zone.remove();
+});
