@@ -5,7 +5,7 @@ import {
   analyserRequete, chercherMots, chercherLatin, chercherRacines, amisRacine, trierAmis,
   declinaisons, statistiquesRacines, repartitionParSourate,
 } from './recherche.js';
-import { NOMS_SOURATES } from './sourates.js';
+import { NOMS_SOURATES, filtrerSourates } from './sourates.js';
 import { initCompte, surChangement } from './compte.js';
 import { initNotes, routeNotes, menuNotes } from './notes.js';
 import { initCommentaires, boutonCommentaires, definirTraditionnel, textesCommentairesVersets } from './commentaires.js';
@@ -185,9 +185,32 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fiche.hidd
 // ---------- Vues simples ----------
 async function vueAccueil() {
   const liste = await D.sourates();
-  // Les explications et exemples de saisie sont dans l'onglet Aide (#/aide) : l'accueil ne montre que les sourates.
-  contenu.innerHTML = `<div class="grille-sourates">${liste.map((x) => `<a href="${lienRequete(String(x.n))}">
-      <span class="n">${x.n}</span><span>${echapper(nomSourate(x.n)[1])}</span><span class="ar" lang="ar">${echapper(nomSourate(x.n)[0])}</span></a>`).join('')}</div>`;
+  // Les explications et exemples de saisie sont dans l'onglet Aide (#/aide) : l'accueil montre les sourates,
+  // avec un champ pour les filtrer (numéro, nom en lettres latines ou en arabe).
+  contenu.innerHTML = `<div class="filtre-sourates-ligne">
+      <input class="filtre-sourates" type="search" dir="auto" autocomplete="off" spellcheck="false"
+        placeholder="Chercher une sourate : 18 · kahf · الكهف" aria-label="Chercher une sourate (numéro ou nom)">
+      <span class="filtre-sourates-nb resume" role="status"></span>
+    </div>
+    <div class="grille-sourates">${liste.map((x) => `<a href="${lienRequete(String(x.n))}" data-n="${x.n}">
+      <span class="n">${x.n}</span><span>${echapper(nomSourate(x.n)[1])}</span><span class="ar" lang="ar">${echapper(nomSourate(x.n)[0])}</span></a>`).join('')}</div>
+    <p class="message" data-aucune-sourate hidden>Aucune sourate ne correspond.</p>`;
+  const champ = $('.filtre-sourates', contenu);
+  const liens = [...contenu.querySelectorAll('.grille-sourates [data-n]')];
+  // Filtrer sans redessiner : le champ garde le focus (et le clavier arabe reste ouvert).
+  champ.addEventListener('input', () => {
+    const gardees = new Set(filtrerSourates(champ.value));
+    for (const a of liens) a.hidden = !gardees.has(Number(a.dataset.n));
+    $('.filtre-sourates-nb', contenu).textContent = champ.value.trim() ? pluriel(gardees.size, 'sourate') : '';
+    $('[data-aucune-sourate]', contenu).hidden = gardees.size > 0;
+  });
+  // Entrée : ouvre la première sourate affichée.
+  champ.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    const premiere = liens.find((a) => !a.hidden);
+    if (premiere && champ.value.trim()) location.hash = premiere.getAttribute('href');
+  });
 }
 
 async function vueSourate(s, de = 1, a = null) {
@@ -393,6 +416,8 @@ function vueAide() {
           Les lettres ا و ي non tapées sont ignorées, comme dans l'ancienne application (« كتب » trouve ٱلْكِتَـٰبُ).</li>
         <li><span aria-hidden="true">ℹ️</span> Le latin est cherché dans la translittération, les commentaires Alfamous et le commentaire traditionnel choisi.</li>
         <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens.</li>
+        <li><b>Accueil</b> (onglet Lecture) : le champ au-dessus des sourates les filtre par numéro (« 18 »), par nom en lettres
+          latines (« kahf », « kawthar » ou « kawtar ») ou en arabe (« الكهف », « كهف ») ; Entrée ouvre la première sourate affichée.</li>
       </ul>
       <p class="exemples-aide">Exemples de saisie : ${ex('2:255')} ${ex('2:255-257')} ${ex('p 50')} ${ex('رحم', true)} ${ex('رحم غفر', true)} ${ex('رحمن رحيم', true)} ${ex('r:كتب')} ${ex('sabr')}</p>
       <h2>Réglages sous le champ de recherche</h2>
