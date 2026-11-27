@@ -1,6 +1,19 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — en-tête compact et onglet Aide (branche `interface/entete-compacte`)
+- Sous le champ de recherche, une seule ligne de réglages : cases **ME** (mot entier) et **MC** (mots contigus),
+  avec info-bulle et nom accessible complets ; icône des statistiques (lien `#/stats`, sans libellé) ; menu des
+  commentaires traditionnels sans libellé, valeur par défaut « No Comment » (rétrécit sur téléphone).
+- Retirés de l'en-tête : la ligne d'exemples de saisie et la note « ℹ️ Le latin est cherché… », déplacées dans
+  l'Aide.
+- Nouvel onglet **Aide** (`#/aide`, dernier du menu) : explications de l'accueil Lecture, exemples de saisie, note
+  sur la recherche en latin, rôle des réglages ME / MC / statistiques / commentaire. À compléter au fil de
+  l'application.
+- Menu : défile horizontalement sur téléphone (sept onglets possibles) ; le trait du bas devient une ombre
+  intérieure pour ne pas être rogné.
+- Textes mis à jour : accueil (ME / MC, lien vers l'Aide), bouton « décocher « MC » (mots contigus) ».
+
 ### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
 - `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors
   fusion, ouverture de PR, .bat d'essai) ; confirmation exigée pour fusionner, déployer et importer ; interdits :
