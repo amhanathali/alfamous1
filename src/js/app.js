@@ -433,7 +433,7 @@ function vueAide() {
         <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens.</li>
         <li><b>Accueil</b> (onglet Lecture) : le champ au-dessus des sourates les filtre par numéro (« 18 »), par nom en lettres
           latines (« kahf », « kawthar » ou « kawtar ») ou en arabe (« الكهف », « كهف ») ; Entrée ouvre la première sourate affichée.</li>
-        <li><b>Filtres des listes</b> (Lecture, Lexique, Articles, Forum, Témoignages) : le terme tapé est <mark class="surligne-filtre">surligné</mark>
+        <li><b>Filtres des listes</b> (Lecture, Lexique, Articles, Notes, Forum, Témoignages) : le terme tapé est <mark class="surligne-filtre">surligné</mark>
           (sans tenir compte des majuscules, des accents ni des voyelles arabes). L'élément ouvert depuis une liste filtrée
           surligne aussi le terme et descend jusqu'au premier passage ; le filtre est gardé au retour à la liste.</li>
       </ul>

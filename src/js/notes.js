@@ -16,6 +16,7 @@ let filtreTexteForum = ''; // gardé pendant la visite ; passé au fil ouvert (?
 let forumAffiche = null; // fils de la dernière liste du forum affichée
 const reponsesForum = new Map(); // id du fil → { nb, reps } : réponses lues pour le filtre (gardées pendant la visite)
 let filtreNotes = 'toutes';
+let filtreTexteNotes = ''; // filtre texte de Notes, gardé pendant la visite (retour à la liste depuis une note)
 let filCourant = null; // { note, reponses } du fil affiché
 
 // ---------- Outils ----------
@@ -81,20 +82,39 @@ async function vueMesNotes(contenu) {
     const { db, F } = await firebase();
     const q = F.query(F.collection(db, 'notes'), F.where('auteurUid', '==', session.utilisateur.uid), F.orderBy('modifieLe', 'desc'));
     const notes = (await avecDelai(F.getDocsFromServer(q))).docs.map((d) => ({ id: d.id, ...d.data() }));
+    // Filtre texte : titre, texte et cible (verset, racine…) ; sans majuscules ni accents ni voyelles (surligner.js).
+    const trouve = (n, t) => !t || plages(`${n.titre || ''} ${n.texte} ${n.lien?.cle || ''}`, t).length > 0;
+    // Seule la liste est redessinée pendant la frappe : le champ garde le focus (et le clavier arabe reste ouvert).
+    const dessinerListe = () => {
+      const t = filtreTexteNotes.trim();
+      const liste = notes.filter((n) => (filtreNotes === 'toutes' || (filtreNotes === 'publiees') === n.publie) && trouve(n, t));
+      contenu.querySelector('.titre .resume').textContent = t
+        ? `${pluriel(liste.length, 'note')} sur ${notes.length}`
+        : `${pluriel(notes.length, 'note')} · privées tant qu'elles ne sont pas publiées`;
+      const zone = contenu.querySelector('.liste-fils');
+      zone.innerHTML = liste.map((n) => {
+        // Extrait : début du texte, ou passage trouvé quand le terme n'est pas dans le titre.
+        const ext = t && !plages(n.titre || '', t).length ? extrait(n.texte, 160, t) : `${n.texte.slice(0, 90)}${n.texte.length > 90 ? '…' : ''}`;
+        return `<a class="fil-ligne" href="#/note/${n.id}">
+            <div><div class="fil-titre">${echapper(n.masque ? 'Fil masqué par un modérateur' : n.titre || 'Sans titre')}</div>
+              <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée' : 'privée'}</span>${puceLien(n.lien, false)}
+                <span class="extrait" dir="auto">${echapper(ext)}</span></div></div>
+            <div class="fil-droite">modifiée le<b>${dateCourte(n.modifieLe)}</b>${n.publie ? pluriel(n.nbReponses, 'réponse') : ''}</div></a>`;
+      }).join('') || `<p class="vide">${t ? 'Aucune note ne correspond.' : 'Aucune note pour l\'instant.'}</p>`;
+      zone.querySelectorAll('.fil-titre, .fil-meta').forEach((el) => surlignerDans(el, t));
+    };
     const dessiner = () => {
-      const liste = notes.filter((n) => filtreNotes === 'toutes' || (filtreNotes === 'publiees') === n.publie);
-      contenu.innerHTML = `<div class="titre"><h1>Notes</h1><span class="resume">${pluriel(notes.length, 'note')} · privées tant qu'elles ne sont pas publiées</span></div>
+      contenu.innerHTML = `<div class="titre"><h1>Notes</h1><span class="resume"></span></div>
         <div class="barre-outils">
           <div class="filtres">${[['toutes', 'Toutes'], ['privees', 'Privées'], ['publiees', 'Publiées au forum']].map(([k, l]) => `<button data-filtre-notes="${k}" class="${filtreNotes === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
           <a class="btn principal" href="#/note/nouvelle">+ Nouvelle note</a>
         </div>
-        <div class="liste-fils">${liste.length ? liste.map((n) => `<a class="fil-ligne" href="#/note/${n.id}">
-            <div><div class="fil-titre">${echapper(n.masque ? 'Fil masqué par un modérateur' : n.titre || 'Sans titre')}</div>
-              <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée' : 'privée'}</span>${puceLien(n.lien, false)}
-                <span class="extrait">${echapper(n.texte.slice(0, 90))}${n.texte.length > 90 ? '…' : ''}</span></div></div>
-            <div class="fil-droite">modifiée le<b>${dateCourte(n.modifieLe)}</b>${n.publie ? pluriel(n.nbReponses, 'réponse') : ''}</div></a>`).join('')
-          : '<p class="vide">Aucune note pour l\'instant.</p>'}</div>`;
+        <div class="barre-outils"><input class="art-recherche filtre-notes" type="search" dir="auto" autocomplete="off" spellcheck="false"
+          placeholder="Filtrer mes notes : titre, texte, verset, racine…" value="${echapper(filtreTexteNotes)}" aria-label="Filtrer mes notes"></div>
+        <div class="liste-fils"></div>`;
       contenu.querySelectorAll('[data-filtre-notes]').forEach((b) => b.addEventListener('click', () => { filtreNotes = b.dataset.filtreNotes; dessiner(); }));
+      contenu.querySelector('.filtre-notes').addEventListener('input', (e) => { filtreTexteNotes = e.target.value; dessinerListe(); });
+      dessinerListe();
     };
     dessiner();
   } catch (e) { contenu.innerHTML = erreurHtml(e); }
