@@ -13,6 +13,7 @@ import { afficherCommentaires, publierCommentaire } from './commentaires.js';
 import { blocArticlesLexique } from './articles-liens.js';
 import { normaliserCle, estRacine, racinesProches, grouperEntrees, filtrerEntrees, CLE_MAX } from './lexique-outils.js';
 import { estArabe } from './arabe.js';
+import { surlignerDans, allerAuPassage, extrait as extraitAutour, avecTerme } from './surligner.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
 export const lienEntree = (cle) => `#/lexique/${encodeURIComponent(cle)}`;
@@ -91,12 +92,13 @@ async function vueListe(contenu) {
     contenu.querySelector('#lex-compte').textContent = liste.length === entrees.length ? 'ordre alphabétique arabe' : `${pluriel(liste.length, 'entrée')} sur ${entrees.length}`;
     contenu.querySelector('#liste-lex').innerHTML = liste.map((e) => {
       const racine = estRacine(e.cle, racines);
-      const extrait = e.derniere ? e.derniere.texte.replace(/\s+/g, ' ').slice(0, 160) : 'Définition masquée par un modérateur.';
-      return `<a class="lex-ligne" href="${lienEntree(e.cle)}">
+      const extrait = e.derniere ? extraitAutour(e.derniere.texte, 160, saisie) : 'Définition masquée par un modérateur.';
+      return `<a class="lex-ligne" href="${avecTerme(lienEntree(e.cle), saisie)}">
         <span class="lex-cle"><span class="${estArabe(e.cle) ? 'ar' : ''}" lang="${estArabe(e.cle) ? 'ar' : 'fr'}">${echapper(e.cle)}</span>${racine ? '' : '<span class="etiquette">expression</span>'}</span>
         <span class="lex-droite"><b>${e.definitions}</b> définition${e.definitions > 1 ? 's' : ''}${racine ? `<br>${pluriel(racines[e.cle].length, 'occurrence')}` : ''}</span>
         <span class="lex-extrait" dir="auto">${echapper(extrait)}</span></a>`;
     }).join('') || `<p class="vide">${entrees.length ? 'Aucune entrée ne correspond.' : 'Le lexique est vide pour l\'instant.'}</p>`;
+    contenu.querySelectorAll('#liste-lex .lex-cle, #liste-lex .lex-extrait').forEach((el) => surlignerDans(el, saisie));
   };
   dessiner();
   const champ = contenu.querySelector('#filtre-lexique');
@@ -111,10 +113,10 @@ async function vueListe(contenu) {
 // ---------- Fiche d'une entrée ----------
 let inverse = false;
 
-async function vueEntree(contenu, cleBrute) {
+async function vueEntree(contenu, cleBrute, q = '') {
   const cle = normaliserCle(cleBrute);
   if (!cle) { location.hash = '#/lexique'; return; }
-  if (cle !== cleBrute) { location.replace(lienEntree(cle)); return; } // clé avec voyelles → forme enregistrée
+  if (cle !== cleBrute) { location.replace(avecTerme(lienEntree(cle), q)); return; } // clé avec voyelles → forme enregistrée
   document.title = `${cle} — Lexique — Alfamous`;
   const racines = await D.racines();
   const racine = estRacine(cle, racines);
@@ -149,6 +151,10 @@ async function vueEntree(contenu, cleBrute) {
     proches ? dessinerProches(contenu.querySelector('#proches'), cle, racines) : null,
     blocArticlesLexique(contenu.querySelector('#articles-entree'), cle, racine),
   ]);
+  // Terme venu du filtre de la liste : surligné dans la clé et les définitions.
+  const premierCle = surlignerDans(contenu.querySelector('.entree-cle'), q);
+  const premierDef = surlignerDans(contenu.querySelector('.commentaires'), q);
+  if (!premierCle) allerAuPassage(premierDef);
 }
 
 async function dessinerProches(zone, cle, racines) {
@@ -207,10 +213,12 @@ async function creerEntree(form) {
 
 // ---------- Routage ----------
 export async function routeLexique(contenu) {
-  const m = location.hash.match(/^#\/lexique(?:\/(.*))?$/);
+  const [chemin, qs] = location.hash.split('?');
+  const q = new URLSearchParams(qs || '').get('q') || '';
+  const m = chemin.match(/^#\/lexique(?:\/(.*))?$/);
   if (!m) return false;
   try {
-    if (m[1]) await vueEntree(contenu, decodeURIComponent(m[1]));
+    if (m[1]) await vueEntree(contenu, decodeURIComponent(m[1]), q);
     else { document.title = 'Lexique — Alfamous'; await vueListe(contenu); }
   } catch (e) {
     contenu.innerHTML = `<p class="message erreur">Lexique indisponible : ${echapper(messageErreur(e))}</p>`;

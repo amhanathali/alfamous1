@@ -9,6 +9,7 @@ import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, dateCourte, messageErreur } from './commentaires-format.js';
 import { ajouterLimite } from './limite.js';
+import { allerAuPassage } from './surligner.js';
 import {
   LIMITES_TEMOIGNAGE, signature, identite, verifierTemoignage, texteEnParagraphes, extrait, surlignerDans,
 } from './temoignages-outils.js';
@@ -128,9 +129,9 @@ async function vueLecture(contenu, id, q = '') {
     </article>`;
   // Terme venu du filtre de la liste : surligné dans le titre et le texte ; on descend jusqu'au premier passage
   // (après le retour en haut de page fait par le routeur).
-  const premier = surlignerDans(contenu.querySelector('.art-page h1'), q) || surlignerDans(contenu.querySelector('.corps-art'), q);
-  surlignerDans(contenu.querySelector('.corps-art'), q);
-  if (premier && !premier.closest('h1')) setTimeout(() => premier.scrollIntoView({ block: 'center' }), 0);
+  const premierTitre = surlignerDans(contenu.querySelector('.art-page h1'), q);
+  const premierTexte = surlignerDans(contenu.querySelector('.corps-art'), q);
+  if (!premierTitre) allerAuPassage(premierTexte);
   const msg = contenu.querySelector('.form-msg');
   contenu.querySelectorAll('[data-tem]').forEach((b) => b.addEventListener('click', async () => {
     msg.textContent = '';

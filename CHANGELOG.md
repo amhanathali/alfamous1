@@ -1,6 +1,20 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — surlignage du filtre dans tous les onglets ; filtre du Forum (branche `temoignages/onglet`)
+- Module commun `src/js/surligner.js` (tests `tests/surligner.test.mjs`) : surlignage sans majuscules, accents,
+  voyelles arabes ni tatwīl, formes d'alif confondues ; seuls les nœuds de texte sont touchés (liens intacts).
+- **Lecture** : la grille des sourates surligne le début du numéro, le nom arabe ou le nom latin (« kawthar » aussi).
+- **Lexique** : clé et extrait surlignés (extrait pris près du passage trouvé) ; la fiche ouverte (`?q=`) surligne
+  la clé et les définitions.
+- **Articles** : titres et résumés surlignés ; l'article ouvert (`?q=`) surligne titre, chapeau et texte ; le filtre
+  est gardé au retour à la liste.
+- **Forum** : nouveau champ de filtre (titre, texte, auteur, verset ou racine) ; extrait du texte quand le terme n'est
+  pas dans le titre ; le fil ouvert (`?q=`) surligne titre et messages. Pendant la frappe, seule la liste est
+  redessinée (le champ garde le focus).
+- **Témoignages** : passent par le module commun (mêmes règles d'accents).
+- Dans chaque cas, l'élément ouvert descend jusqu'au premier passage surligné. Aide : une ligne.
+
 ### Ajouté — onglet Témoignages et import depuis l'ancienne application (branche `temoignages/onglet`)
 - Menu : onglet **Témoignages** avant Aide (`src/js/temoignages.js`, sur le modèle de l'onglet Articles) : liste
   (plus récents d'abord, filtre), lecture, « + Témoigner » (niveau ≥ 1, publié tout de suite, limite de fréquence),

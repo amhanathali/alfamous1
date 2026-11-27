@@ -13,9 +13,12 @@ import {
 } from './articles-outils.js';
 import { assainisseur, texteBrut } from './articles-assainir.js';
 import { versDocx, markdownVersHtml, texteVersHtml } from './articles-import.js';
+import { surlignerDans, allerAuPassage, avecTerme } from './surligner.js';
 import { creerPanneau, normaliserContexte, developperRefs, verset, fenetreDossier } from './articles-contexte.js';
 
 const PAR_PAGE = 30;
+// Filtre de la liste, gardé pendant la visite et passé à l'article ouvert (?q=) pour y être surligné.
+let filtreArticles = '';
 const LIBELLES_CONNUS = ['Les mots du Coran', 'Développement personnel', 'Société', 'Politique', 'Divers', 'Conférences',
   'Livres', 'Outils', 'Sciences & Philosophie'];
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
@@ -38,7 +41,7 @@ export async function routeArticles(contenu) {
   let m = chemin.match(/^#\/article\/([^/]+)\/modifier$/);
   if (m) { document.title = 'Modifier un article — Alfamous'; await vueEditeur(contenu, decodeURIComponent(m[1])); return true; }
   m = chemin.match(/^#\/article\/([^/]+)$/);
-  if (m) { await vueLecture(contenu, decodeURIComponent(m[1])); return true; }
+  if (m) { await vueLecture(contenu, decodeURIComponent(m[1]), params.get('q') || ''); return true; }
   return false;
 }
 
@@ -71,7 +74,7 @@ async function vueListe(contenu, params) {
     }
   } catch (e) { contenu.innerHTML = erreurHtml(e); return; }
 
-  let filtre = '';
+  const filtre = () => filtreArticles.trim();
   const lienFiltre = (f, l) => {
     const p = new URLSearchParams();
     if (f) p.set('famille', f);
@@ -80,7 +83,7 @@ async function vueListe(contenu, params) {
   };
   const ligne = (a) => {
     const image = imageOk(a.image) ? `<img src="${echapper(a.image)}" alt="" loading="lazy">` : '';
-    return `<a class="art-ligne" href="${adresse(a)}">
+    return `<a class="art-ligne" href="${avecTerme(adresse(a), filtre())}">
       <span class="vignette">${image || echapper((String(a.titre || '').match(/\p{L}/u) || ['?'])[0])}</span>
       <span class="art-centre"><span class="art-titre">${echapper(a.titre || 'Sans titre')}</span>
         ${a.resume ? `<span class="art-resume">${echapper(a.resume)}</span>` : ''}
@@ -89,7 +92,7 @@ async function vueListe(contenu, params) {
     </a>`;
   };
   const dessiner = () => {
-    const f = filtre.toLocaleLowerCase('fr');
+    const f = filtre().toLocaleLowerCase('fr');
     const garde = (a) => !f || `${a.titre} ${a.resume}`.toLocaleLowerCase('fr').includes(f);
     const vus = publies.filter(garde);
     const libs = [...new Set([...LIBELLES_CONNUS, ...publies.flatMap((a) => a.libelles || [])])];
@@ -99,14 +102,15 @@ async function vueListe(contenu, params) {
         <div class="filtres">${[['', 'Toutes'], ...Object.entries(FAMILLES)].map(([k, t]) => `<a class="filtre${famille === k ? ' actif' : ''}" href="${lienFiltre(k, libelle)}">${echapper(t)}</a>`).join('')}</div>
         ${redacteur() ? '<a class="btn principal" href="#/articles/nouveau">+ Nouvel article</a>' : ''}
       </div>
-      <div class="barre-outils"><input class="art-recherche" type="search" placeholder="Filtrer les titres et résumés affichés…" value="${echapper(filtre)}" aria-label="Filtrer"></div>
+      <div class="barre-outils"><input class="art-recherche" type="search" placeholder="Filtrer les titres et résumés affichés…" value="${echapper(filtreArticles)}" aria-label="Filtrer"></div>
       <div class="libelles-filtre">Libellés : ${libs.map((l) => `<a class="${libelle === l ? 'actif' : ''}" href="${lienFiltre(famille, libelle === l ? '' : l)}">${echapper(l)}</a>`).join('')}</div>
       ${travail.length ? `<details class="bloc travail" open><summary>Brouillons et articles retirés · ${travail.length} <small>(rédacteurs seulement)</small></summary>
         <div class="liste-fils">${travail.filter(garde).map(ligne).join('') || '<p class="vide">Aucun.</p>'}</div></details>` : ''}
       <div class="liste-fils">${vus.map(ligne).join('') || '<p class="vide">Aucun article.</p>'}</div>
       ${suite ? '<button class="plus" type="button" data-plus>Articles plus anciens</button>' : ''}`;
+    contenu.querySelectorAll('.art-ligne .art-titre, .art-ligne .art-resume').forEach((el) => surlignerDans(el, filtre()));
     const champ = contenu.querySelector('.art-recherche');
-    champ.addEventListener('input', () => { filtre = champ.value; const pos = champ.selectionStart; dessiner(); const c = contenu.querySelector('.art-recherche'); c.focus(); c.setSelectionRange(pos, pos); });
+    champ.addEventListener('input', () => { filtreArticles = champ.value; const pos = champ.selectionStart; dessiner(); const c = contenu.querySelector('.art-recherche'); c.focus(); c.setSelectionRange(pos, pos); });
     contenu.querySelector('[data-plus]')?.addEventListener('click', async (e) => {
       e.target.disabled = true;
       try { await charger(suite); dessiner(); } catch (err) { e.target.textContent = messageErreur(err); }
@@ -129,7 +133,7 @@ async function trouverArticle(cle) {
   } catch (e) { if (e.code === 'permission-denied') return null; throw e; }
 }
 
-async function vueLecture(contenu, cle) {
+async function vueLecture(contenu, cle, q = '') {
   contenu.innerHTML = '<p class="message">Chargement…</p>';
   let a; let assainir;
   try { [a, assainir] = await Promise.all([trouverArticle(cle), assainisseur()]); } catch (e) { contenu.innerHTML = erreurHtml(e); return; }
@@ -152,6 +156,11 @@ async function vueLecture(contenu, cle) {
     ${(a.liens || []).length ? '<div class="bloc articles-lies"><h2>Articles liés</h2><div class="liste-fils" data-lies></div></div>' : ''}
     ${a.statut === 'publie' ? `<div class="bloc article-coms"><section class="commentaires" data-com-type="article" data-com-cle="${echapper(a.id)}"><p class="aide">Chargement…</p></section></div>` : ''}`;
   lierVersets(contenu.querySelector('.corps-art'));
+  // Terme venu du filtre de la liste : surligné dans le titre, le chapeau et le texte.
+  const premierHaut = surlignerDans(contenu.querySelector('.art-page h1'), q) || surlignerDans(contenu.querySelector('.art-page .chapeau'), q);
+  surlignerDans(contenu.querySelector('.art-page .chapeau'), q);
+  const premierCorps = surlignerDans(contenu.querySelector('.corps-art'), q);
+  if (!premierHaut) allerAuPassage(premierCorps);
   if (a.statut === 'publie') afficherCommentaires(contenu.querySelector('.commentaires'));
   if ((a.liens || []).length) articlesLies(contenu.querySelector('[data-lies]'), a.liens);
   contenu.querySelector('[data-historique]')?.addEventListener('click', () => fenetreHistorique(a, null));

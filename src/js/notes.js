@@ -6,11 +6,13 @@ import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX, AIDE_RENVOIS } from './commentaires-format.js';
 import { ajouterLimite } from './limite.js';
+import { plages, surlignerDans, allerAuPassage, extrait, avecTerme } from './surligner.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
 const NOTE_MAX = 20000;
 const TITRE_MAX = 140;
 let filtreForum = 'tous';
+let filtreTexteForum = ''; // gardé pendant la visite ; passé au fil ouvert (?q=) pour y être surligné
 let filtreNotes = 'toutes';
 let filCourant = null; // { note, reponses } du fil affiché
 
@@ -54,7 +56,7 @@ export async function routeNotes(contenu) {
   let m = chemin.match(/^#\/note\/(.+)$/);
   if (m) { document.title = 'Note — Alfamous'; await vueEditeur(contenu, decodeURIComponent(m[1]), params); return true; }
   m = chemin.match(/^#\/fil\/(.+)$/);
-  if (m) { document.title = 'Forum — Alfamous'; await vueFil(contenu, decodeURIComponent(m[1])); return true; }
+  if (m) { document.title = 'Forum — Alfamous'; await vueFil(contenu, decodeURIComponent(m[1]), params.get('q') || ''); return true; }
   return false;
 }
 
@@ -247,25 +249,44 @@ async function vueForum(contenu, cle) {
     const { db, F } = await firebase();
     const q = F.query(F.collection(db, 'notes'), F.where('publie', '==', true), F.orderBy('activiteLe', 'desc'), F.limit(200));
     const fils = (await avecDelai(F.getDocsFromServer(q))).docs.map((d) => ({ id: d.id, ...d.data() }));
-    const dessiner = () => {
+    // Filtre texte : titre, texte du fil, auteur et cible (verset, racine…) ; sans majuscules ni accents ni voyelles.
+    const trouve = (n, t) => !t || plages(`${titreAffiche(n)} ${n.masque ? '' : n.texte} ${n.auteurNom} ${n.lien?.cle || ''}`, t).length > 0;
+    // Seule la liste est redessinée pendant la frappe : le champ garde le focus (et le clavier arabe reste ouvert).
+    const dessinerListe = () => {
+      const t = filtreTexteForum.trim();
       let liste = fils;
       if (cle) liste = liste.filter((n) => n.lien?.cle === cle);
       else if (filtreForum === 'verset') liste = liste.filter((n) => n.lien?.type === 'verset');
       else if (filtreForum === 'racine') liste = liste.filter((n) => n.lien && n.lien.type !== 'verset');
       else if (filtreForum === 'libre') liste = liste.filter((n) => !n.lien);
-      contenu.innerHTML = `<div class="titre"><h1>Forum${cle ? ` · ${echapper(cle)}` : ''}</h1><span class="resume">${pluriel(liste.length, 'fil')} · par dernière activité</span></div>
+      liste = liste.filter((n) => trouve(n, t));
+      contenu.querySelector('.titre .resume').textContent = `${pluriel(liste.length, 'fil')} · par dernière activité`;
+      const zone = contenu.querySelector('.liste-fils');
+      zone.innerHTML = liste.map((n) => {
+        // Passage trouvé dans le texte (pas dans le titre) : un extrait le montre.
+        const dansTexte = t && !n.masque && !plages(n.titre || '', t).length && plages(n.texte || '', t).length;
+        return `<a class="fil-ligne${n.masque ? ' masque' : ''}" href="${avecTerme(`#/fil/${n.id}`, t)}">
+            <div><div class="fil-titre">${echapper(titreAffiche(n))}</div>
+              ${dansTexte ? `<div class="fil-extrait" dir="auto">${echapper(extrait(n.texte, 160, t))}</div>` : ''}
+              <div class="fil-meta"><span>${echapper(n.auteurNom)}</span>${puceLien(n.lien, false)}<span>publié le ${dateCourte(n.publieLe)}</span></div></div>
+            <div class="fil-droite"><b>${n.nbReponses}</b>${n.nbReponses > 1 ? 'réponses' : 'réponse'}<br>activité ${dateCourte(n.activiteLe)}</div></a>`;
+      }).join('') || `<p class="vide">${t ? 'Aucun fil ne correspond.' : 'Aucun fil pour l\'instant.'}</p>`;
+      zone.querySelectorAll('.fil-titre, .fil-extrait, .fil-meta').forEach((el) => surlignerDans(el, t));
+    };
+    const dessiner = () => {
+      contenu.innerHTML = `<div class="titre"><h1>Forum${cle ? ` · ${echapper(cle)}` : ''}</h1><span class="resume"></span></div>
         <div class="barre-outils">
           ${cle ? `<a href="#/forum">← Tous les fils</a>` : `<div class="filtres">${[['tous', 'Tous'], ['verset', 'Sur un verset'], ['racine', 'Racine ou lexique'], ['libre', 'Libres']]
             .map(([k, l]) => `<button data-filtre-forum="${k}" class="${filtreForum === k ? 'actif' : ''}">${l}</button>`).join('')}</div>`}
           ${session.niveau >= 1 ? `<a class="btn principal" href="#/note/nouvelle${cle && /^\d+:\d+$/.test(cle) ? `?type=verset&cle=${cle}` : ''}">+ Nouveau fil</a>`
             : '<button class="lien-bouton" data-compte="connexion">Se connecter pour publier ou répondre</button>'}
         </div>
-        <div class="liste-fils">${liste.map((n) => `<a class="fil-ligne${n.masque ? ' masque' : ''}" href="#/fil/${n.id}">
-            <div><div class="fil-titre">${echapper(titreAffiche(n))}</div>
-              <div class="fil-meta"><span>${echapper(n.auteurNom)}</span>${puceLien(n.lien, false)}<span>publié le ${dateCourte(n.publieLe)}</span></div></div>
-            <div class="fil-droite"><b>${n.nbReponses}</b>${n.nbReponses > 1 ? 'réponses' : 'réponse'}<br>activité ${dateCourte(n.activiteLe)}</div></a>`).join('')
-          || '<p class="vide">Aucun fil pour l\'instant.</p>'}</div>`;
+        <div class="barre-outils"><input class="art-recherche filtre-forum" type="search" dir="auto" autocomplete="off" spellcheck="false"
+          placeholder="Filtrer les fils : titre, texte, auteur, verset…" value="${echapper(filtreTexteForum)}" aria-label="Filtrer les fils du forum"></div>
+        <div class="liste-fils"></div>`;
       contenu.querySelectorAll('[data-filtre-forum]').forEach((b) => b.addEventListener('click', () => { filtreForum = b.dataset.filtreForum; dessiner(); }));
+      contenu.querySelector('.filtre-forum').addEventListener('input', (e) => { filtreTexteForum = e.target.value; dessinerListe(); });
+      dessinerListe();
     };
     dessiner();
   } catch (e) { contenu.innerHTML = erreurHtml(e); }
@@ -314,7 +335,7 @@ function blocMessage(m, { tete, note }) {
       ${corps}${acts.length ? `<div class="com-actions">${acts.join('')}</div>` : ''}</div></div>`;
 }
 
-async function vueFil(contenu, id) {
+async function vueFil(contenu, id, q = '') {
   contenu.innerHTML = '<p class="message">Chargement du fil…</p>';
   let donnees;
   try { donnees = await chargerFil(id); } catch (e) {
@@ -355,6 +376,10 @@ async function vueFil(contenu, id) {
               <button type="button" class="btn" data-compte="inscription">Créer un compte</button></div>`}
     </div>`;
   contenu.querySelector('#repondre')?.addEventListener('submit', (e) => { e.preventDefault(); repondre(contenu, e.target); });
+  // Terme venu du filtre du forum : surligné dans le titre et les messages ; on descend jusqu'au premier passage.
+  const premierTitre = surlignerDans(contenu.querySelector('.fil-tete h1'), q);
+  contenu.querySelectorAll('.com-texte, .com-meta .auteur').forEach((el) => surlignerDans(el, q));
+  if (!premierTitre) allerAuPassage(contenu.querySelector('mark.surligne-filtre'));
 }
 
 async function repondre(contenu, form) {

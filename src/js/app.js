@@ -15,6 +15,8 @@ import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
 import { routeArticles } from './articles.js';
 import { routeTemoignages } from './temoignages.js';
+import { surlignerDans, effacerSurlignage, plierDigrammes } from './surligner.js';
+import { estArabe } from './arabe.js';
 import { initArticlesLiens } from './articles-liens.js';
 import { initLecteur, boutonEcouter } from './lecteur.js';
 import { versetVoisin } from './lecteur-outils.js';
@@ -202,6 +204,17 @@ async function vueAccueil() {
   champ.addEventListener('input', () => {
     const gardees = new Set(filtrerSourates(champ.value));
     for (const a of liens) a.hidden = !gardees.has(Number(a.dataset.n));
+    // Surlignage : début du numéro, nom arabe, ou nom latin (ṯ ḏ ḫ š ġ lus aussi th dh kh sh gh).
+    const q = champ.value.trim();
+    effacerSurlignage($('.grille-sourates', contenu));
+    for (const a of liens.filter((x) => !x.hidden && q)) {
+      if (/^\d+$/.test(q)) surlignerDans(a.querySelector('.n'), String(Number(q)), { debut: true });
+      else if (estArabe(q)) surlignerDans(a.querySelector('.ar'), q.replace(/\s+/g, ''));
+      else {
+        const nom = a.querySelector('span:nth-child(2)');
+        if (!surlignerDans(nom, q)) surlignerDans(nom, q, { plier: plierDigrammes });
+      }
+    }
     $('.filtre-sourates-nb', contenu).textContent = champ.value.trim() ? pluriel(gardees.size, 'sourate') : '';
     $('[data-aucune-sourate]', contenu).hidden = gardees.size > 0;
   });
@@ -419,6 +432,9 @@ function vueAide() {
         <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens.</li>
         <li><b>Accueil</b> (onglet Lecture) : le champ au-dessus des sourates les filtre par numéro (« 18 »), par nom en lettres
           latines (« kahf », « kawthar » ou « kawtar ») ou en arabe (« الكهف », « كهف ») ; Entrée ouvre la première sourate affichée.</li>
+        <li><b>Filtres des listes</b> (Lecture, Lexique, Articles, Forum, Témoignages) : le terme tapé est <mark class="surligne-filtre">surligné</mark>
+          (sans tenir compte des majuscules, des accents ni des voyelles arabes). L'élément ouvert depuis une liste filtrée
+          surligne aussi le terme et descend jusqu'au premier passage ; le filtre est gardé au retour à la liste.</li>
       </ul>
       <p class="exemples-aide">Exemples de saisie : ${ex('2:255')} ${ex('2:255-257')} ${ex('p 50')} ${ex('رحم', true)} ${ex('رحم غفر', true)} ${ex('رحمن رحيم', true)} ${ex('r:كتب')} ${ex('sabr')}</p>
       <h2>Réglages sous le champ de recherche</h2>

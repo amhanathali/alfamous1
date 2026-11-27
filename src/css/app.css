@@ -738,3 +738,4 @@ body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 220px); }
 .editeur label.case-anonyme input { width: 20px; height: 20px; margin: 0; }
 .btn.danger { color: #b42318; border-color: #b42318; }
 mark.surligne-filtre { background: var(--surligne); color: inherit; border-radius: 3px; padding: 0 1px; }
+.fil-extrait { font-size: 14px; color: var(--discret); margin: 2px 0; overflow-wrap: anywhere; }
