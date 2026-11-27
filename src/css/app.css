@@ -732,3 +732,11 @@ body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 220px); }
 .clavier-ar .clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
 @media (max-width: 400px) { .clavier-ar .clavier-rangee button { height: 34px; font-size: 18px; } .clavier-rangee { gap: 2px; } }
 @media print { .clavier-ar, .bouton-clavier { display: none !important; } }
+
+/* ---------- Témoignages ---------- */
+.editeur label.case-anonyme { display: flex; align-items: center; gap: 8px; color: var(--texte); font-size: 16px; margin-top: 14px; }
+.editeur label.case-anonyme input { width: 20px; height: 20px; margin: 0; }
+.btn.danger { color: #b42318; border-color: #b42318; }
+mark.surligne-filtre { background: var(--surligne); color: inherit; border-radius: 3px; padding: 0 1px; }
+.fil-extrait { font-size: 14px; color: var(--discret); margin: 2px 0; overflow-wrap: anywhere; }
+.fil-extrait .fil-reponse { font-weight: 600; }

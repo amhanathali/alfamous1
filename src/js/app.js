@@ -14,6 +14,9 @@ import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
 import { routeArticles } from './articles.js';
+import { routeTemoignages } from './temoignages.js';
+import { surlignerDans, effacerSurlignage, plierDigrammes } from './surligner.js';
+import { estArabe } from './arabe.js';
 import { initArticlesLiens } from './articles-liens.js';
 import { initLecteur, boutonEcouter } from './lecteur.js';
 import { versetVoisin } from './lecteur-outils.js';
@@ -201,6 +204,17 @@ async function vueAccueil() {
   champ.addEventListener('input', () => {
     const gardees = new Set(filtrerSourates(champ.value));
     for (const a of liens) a.hidden = !gardees.has(Number(a.dataset.n));
+    // Surlignage : début du numéro, nom arabe, ou nom latin (ṯ ḏ ḫ š ġ lus aussi th dh kh sh gh).
+    const q = champ.value.trim();
+    effacerSurlignage($('.grille-sourates', contenu));
+    for (const a of liens.filter((x) => !x.hidden && q)) {
+      if (/^\d+$/.test(q)) surlignerDans(a.querySelector('.n'), String(Number(q)), { debut: true });
+      else if (estArabe(q)) surlignerDans(a.querySelector('.ar'), q.replace(/\s+/g, ''));
+      else {
+        const nom = a.querySelector('span:nth-child(2)');
+        if (!surlignerDans(nom, q)) surlignerDans(nom, q, { plier: plierDigrammes });
+      }
+    }
     $('.filtre-sourates-nb', contenu).textContent = champ.value.trim() ? pluriel(gardees.size, 'sourate') : '';
     $('[data-aucune-sourate]', contenu).hidden = gardees.size > 0;
   });
@@ -418,6 +432,9 @@ function vueAide() {
         <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens.</li>
         <li><b>Accueil</b> (onglet Lecture) : le champ au-dessus des sourates les filtre par numéro (« 18 »), par nom en lettres
           latines (« kahf », « kawthar » ou « kawtar ») ou en arabe (« الكهف », « كهف ») ; Entrée ouvre la première sourate affichée.</li>
+        <li><b>Filtres des listes</b> (Lecture, Lexique, Articles, Forum, Témoignages) : le terme tapé est <mark class="surligne-filtre">surligné</mark>
+          (sans tenir compte des majuscules, des accents ni des voyelles arabes). L'élément ouvert depuis une liste filtrée
+          surligne aussi le terme et descend jusqu'au premier passage ; le filtre est gardé au retour à la liste.</li>
       </ul>
       <p class="exemples-aide">Exemples de saisie : ${ex('2:255')} ${ex('2:255-257')} ${ex('p 50')} ${ex('رحم', true)} ${ex('رحم غفر', true)} ${ex('رحمن رحيم', true)} ${ex('r:كتب')} ${ex('sabr')}</p>
       <h2>Réglages sous le champ de recherche</h2>
@@ -427,6 +444,16 @@ function vueAide() {
         <li><b>Icône des statistiques</b> : <a href="#/stats">statistiques des racines</a> (occurrences de chaque racine).</li>
         <li><b>Commentaire traditionnel</b> (menu déroulant, « No Comment » par défaut) : un commentaire traditionnel,
           cité seulement pour la comparaison, affiché avec les commentaires de chaque verset.</li>
+      </ul>
+      <h2>Témoignages</h2>
+      <ul>
+        <li>L'onglet <a href="#/temoignages">Témoignages</a> réunit des parcours personnels, lisibles par tous, les plus récents d'abord.</li>
+        <li><b>Témoigner</b> : connectez-vous (courriel vérifié), puis « + Témoigner ». Le témoignage est publié tout de suite ;
+          une ligne vide sépare les paragraphes.</li>
+        <li><b>Masquer mon nom (publier en Anonyme)</b> : la page affiche « Anonyme » ; ni votre nom ni votre compte n'y
+          figurent. Vous restez l'auteur : vous pouvez le modifier, et cocher ou décocher la case plus tard
+          (chaque modification est gardée dans l'historique).</li>
+        <li>Les modérateurs peuvent masquer un témoignage ; seul l'administrateur peut le supprimer.</li>
       </ul>
       <h2>Clavier arabe</h2>
       <ul>
@@ -463,6 +490,12 @@ async function router() {
   if (/^#\/articles?(\/|$|\?)/.test(location.hash)) {
     $('#requete').value = ''; $('#effacer').hidden = true;
     try { await routeArticles(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
+  // Témoignages (#/temoignages, #/temoignage/<id>, #/temoignages/nouveau, #/temoignage/<id>/modifier)
+  if (/^#\/temoignages?(\/|$)/.test(location.hash)) {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeTemoignages(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
   // Lexique (#/lexique, #/lexique/<clé>)
@@ -555,7 +588,7 @@ initCompte();
 initLecteur({ contenu, naviguer: (hash) => { if (location.hash === hash) return; sansHistorique = true; location.hash = hash; } })
   .catch((e) => console.error('Lecteur audio :', e));
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
-surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?))/.test(location.hash)) router(); });
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?)|temoignages?(\/|$))/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

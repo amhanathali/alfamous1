@@ -181,6 +181,120 @@ service cloud.firestore {
       }
     }
 
+    // ---------- Témoignages (onglet Témoignages, docs/MODELE-DONNEES.md) ----------
+    // Publiés tout de suite par un membre (niveau ≥ 1), lus par tous. « Masquer mon nom » (anonyme) : le document
+    // public ne porte ni le compte ni le nom ; l'auteur réel est dans prive/auteur, lu par lui seul et par l'admin.
+    // C'est prive/auteur qui donne le droit de modifier (même pour un témoignage anonyme).
+    match /temoignages/{id} {
+      function tem() { return get(/databases/$(database)/documents/temoignages/$(id)).data; }
+      function temApres() { return getAfter(/databases/$(database)/documents/temoignages/$(id)).data; }
+      function auteurTem() { return get(/databases/$(database)/documents/temoignages/$(id)/prive/auteur).data.auteurUid; }
+      function contenuTemValide(d) {
+        return d.titre is string && d.titre.size() >= 1 && d.titre.size() <= 200
+          && d.texte is string && d.texte.size() >= 40 && d.texte.size() <= 20000;
+      }
+      function identiteTemValide(d) {
+        return d.anonyme is bool
+          && (d.anonyme ? (d.auteurUid == null && d.auteurNom == '')
+                        : (d.auteurUid == moi() && d.auteurNom == monNom()));
+      }
+
+      allow read: if true;
+
+      allow create: if niveau() >= 1
+        && monNom().size() > 0
+        && request.resource.data.keys().hasOnly(
+             ['titre', 'texte', 'anonyme', 'auteurUid', 'auteurNom', 'creeLe', 'modifieLe', 'nbVersions', 'masque'])
+        && request.resource.data.keys().hasAll(
+             ['titre', 'texte', 'anonyme', 'auteurUid', 'auteurNom', 'creeLe', 'modifieLe', 'nbVersions', 'masque'])
+        && contenuTemValide(request.resource.data)
+        && identiteTemValide(request.resource.data)
+        && request.resource.data.creeLe == request.time
+        && request.resource.data.modifieLe == null
+        && request.resource.data.nbVersions == 1
+        && request.resource.data.masque == null
+        && getAfter(/databases/$(database)/documents/temoignages/$(id)/prive/auteur).data.auteurUid == moi()
+        && limiteOk();
+
+      // Modifier (texte, titre, case « Masquer mon nom ») : l'auteur réel, témoignage non masqué ; l'ancienne
+      // version est écrite dans le même lot (versions/{n}).
+      function modificationTem() {
+        return niveau() >= 1
+          && resource.data.masque == null
+          && auteurTem() == moi()
+          && changes(['titre', 'texte', 'anonyme', 'auteurUid', 'auteurNom', 'modifieLe', 'nbVersions'])
+          && contenuTemValide(request.resource.data)
+          && identiteTemValide(request.resource.data)
+          && request.resource.data.modifieLe == request.time
+          && request.resource.data.nbVersions == resource.data.nbVersions + 1
+          && existsAfter(/databases/$(database)/documents/temoignages/$(id)/versions/$(string(resource.data.nbVersions)));
+      }
+      // Masquer (niveau ≥ 2) : titre et texte vidés, originaux dans prive/texte (même lot).
+      function masquageTem() {
+        return niveau() >= 2
+          && resource.data.masque == null
+          && changes(['masque', 'titre', 'texte'])
+          && request.resource.data.titre == ''
+          && request.resource.data.texte == ''
+          && request.resource.data.masque.keys().hasOnly(['par', 'parNom', 'le'])
+          && request.resource.data.masque.par == moi()
+          && request.resource.data.masque.parNom == monNom()
+          && request.resource.data.masque.le == request.time
+          && getAfter(/databases/$(database)/documents/temoignages/$(id)/prive/texte).data.titre == resource.data.titre
+          && getAfter(/databases/$(database)/documents/temoignages/$(id)/prive/texte).data.texte == resource.data.texte;
+      }
+      function demasquageTem() {
+        return niveau() >= 2
+          && resource.data.masque != null
+          && changes(['masque', 'titre', 'texte'])
+          && request.resource.data.masque == null
+          && request.resource.data.titre == get(/databases/$(database)/documents/temoignages/$(id)/prive/texte).data.titre
+          && request.resource.data.texte == get(/databases/$(database)/documents/temoignages/$(id)/prive/texte).data.texte
+          && !existsAfter(/databases/$(database)/documents/temoignages/$(id)/prive/texte);
+      }
+      allow update: if modificationTem() || masquageTem() || demasquageTem();
+      allow delete: if niveau() >= 3;
+
+      // Historique : versions/{n} = { titre, texte, le } de la version n ; sans nom (anonymat gardé).
+      match /versions/{n} {
+        allow read: if tem().masque == null || niveau() >= 2;
+        allow create: if niveau() >= 1
+          && auteurTem() == moi()
+          && tem().masque == null
+          && n == string(tem().nbVersions)
+          && temApres().nbVersions == tem().nbVersions + 1
+          && request.resource.data.keys().hasOnly(['titre', 'texte', 'le'])
+          && request.resource.data.titre == tem().titre
+          && request.resource.data.texte == tem().texte
+          && request.resource.data.le == (tem().modifieLe != null ? tem().modifieLe : tem().creeLe);
+        allow delete: if niveau() >= 3;
+      }
+
+      // prive/auteur : { auteurUid, auteurNom }, écrit avec le témoignage (jamais ajouté à un témoignage existant) ;
+      //   lu par l'auteur lui-même et par l'admin (les modérateurs ne voient pas qui se cache derrière « Anonyme »).
+      // prive/texte : { titre, texte } d'un témoignage masqué, niveaux 2–3.
+      match /prive/{doc} {
+        allow read: if (doc == 'auteur' && (niveau() >= 3 || (request.auth != null && resource.data.auteurUid == request.auth.uid)))
+          || (doc == 'texte' && niveau() >= 2);
+        allow create: if (doc == 'auteur'
+            && niveau() >= 1
+            && request.resource.data.keys().hasOnly(['auteurUid', 'auteurNom'])
+            && request.resource.data.auteurUid == moi()
+            && request.resource.data.auteurNom == monNom()
+            && !exists(/databases/$(database)/documents/temoignages/$(id))
+            && existsAfter(/databases/$(database)/documents/temoignages/$(id)))
+          || (doc == 'texte'
+            && niveau() >= 2
+            && tem().masque == null
+            && temApres().masque != null
+            && request.resource.data.keys().hasOnly(['titre', 'texte'])
+            && request.resource.data.titre == tem().titre
+            && request.resource.data.texte == tem().texte);
+        allow delete: if (niveau() >= 2 && doc == 'texte' && temApres().masque == null)
+          || niveau() >= 3;
+      }
+    }
+
     // ---------- Articles (docs/ARTICLES.md, docs/MODELE-DONNEES.md) ----------
     // Rédacteurs = niveau ≥ 2. Un modérateur modifie ses propres articles ; l'admin, tous.
     // Le document articles/{id} est la partie publique (lue par tous une fois publiée) ; la version de travail

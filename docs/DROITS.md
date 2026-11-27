@@ -25,6 +25,9 @@ Le niveau 1 est déduit du courriel vérifié. Les niveaux 2 et 3 (et 0 pour blo
 | Signaler un commentaire aux modérateurs (une fois, pas le sien) | — | ✓ | ✓ | ✓ |
 | Masquer un contenu d'autrui (réversible) | — | — | ✓ | ✓ |
 | Lire les articles publiés ; commenter un article publié (comme un verset) | lire | ✓ | ✓ | ✓ |
+| Témoignages : lire | ✓ | ✓ | ✓ | ✓ |
+| Témoignages : publier (signé ou « Masquer mon nom ») ; modifier le sien (historique conservé) | — | ✓ | ✓ | ✓ |
+| Témoignages : masquer (réversible) ; savoir qui a écrit un témoignage anonyme | — | — | masquer | ✓ |
 | Articles : créer, modifier, publier, retirer **ses** articles ; lire les brouillons des autres ; panneau Contexte et fichiers | — | — | ✓ | ✓ |
 | Articles : modifier, publier, retirer l'article d'un autre ; supprimer un article | — | — | — | ✓ |
 | Supprimer définitivement ; changer le niveau d'un membre (onglet « Membres », pas le sien) | — | — | — | ✓ |

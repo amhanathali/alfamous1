@@ -1,6 +1,50 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — surlignage du filtre dans tous les onglets ; filtre du Forum (branche `temoignages/onglet`)
+- Module commun `src/js/surligner.js` (tests `tests/surligner.test.mjs`) : surlignage sans majuscules, accents,
+  voyelles arabes ni tatwīl, formes d'alif confondues ; seuls les nœuds de texte sont touchés (liens intacts).
+- **Lecture** : la grille des sourates surligne le début du numéro, le nom arabe ou le nom latin (« kawthar » aussi).
+- **Lexique** : clé et extrait surlignés (extrait pris près du passage trouvé) ; la fiche ouverte (`?q=`) surligne
+  la clé et les définitions.
+- **Articles** : titres et résumés surlignés ; l'article ouvert (`?q=`) surligne titre, chapeau et texte ; le filtre
+  est gardé au retour à la liste.
+- **Forum** : nouveau champ de filtre (titre, texte, **réponses**, auteur, verset ou racine) ; extrait du texte ou de
+  la réponse trouvée (« ↪ Nom : … ») quand le terme n'est pas dans le titre. Les réponses sont lues fil par fil au
+  premier terme tapé, puis gardées pendant la visite (relues si leur nombre change) : une requête « groupe de
+  collections » demanderait d'ouvrir les règles, car la lecture d'une réponse dépend de son fil ; le fil ouvert (`?q=`) surligne titre et messages. Pendant la frappe, seule la liste est
+  redessinée (le champ garde le focus).
+- **Témoignages** : passent par le module commun (mêmes règles d'accents).
+- Dans chaque cas, l'élément ouvert descend jusqu'au premier passage surligné. Aide : une ligne.
+
+### Ajouté — onglet Témoignages et import depuis l'ancienne application (branche `temoignages/onglet`)
+- Menu : onglet **Témoignages** avant Aide (`src/js/temoignages.js`, sur le modèle de l'onglet Articles) : liste
+  (plus récents d'abord, filtre), lecture, « + Témoigner » (niveau ≥ 1, publié tout de suite, limite de fréquence),
+  modification par l'auteur avec historique, masquage (2+), suppression (3).
+- Case **« Masquer mon nom (publier en Anonyme) »** : la page affiche « Anonyme » ; le document public ne porte alors
+  ni le nom ni le compte (sinon l'uid permettrait de retrouver la personne par ses commentaires). L'auteur réel est
+  dans `temoignages/{id}/prive/auteur`, lu par lui seul et par l'admin ; c'est ce document qui lui donne le droit de
+  modifier. La case peut être cochée ou décochée en modifiant.
+- Règles Firestore `temoignages` (+ `versions`, `prive/auteur`, `prive/texte`) et 12 tests avec l'émulateur
+  (`tests/regles/temoignages.test.mjs`).
+- `npm run importer:temoignages` (`scripts/importer-temoignages.mjs`) : lit publiquement l'ancienne collection
+  `temoignages` du projet `alfamous-amha` (API REST, aucune clé, rien n'y est écrit), copie locale dans
+  `import/temoignages/` (hors Git). Seuls les témoignages approuvés sont repris (13 aujourd'hui) ; alias « anonyme »
+  ou « moi » → Anonyme, « Amha » → Amha Nathali (relié à son compte) ; le courriel n'est jamais recopié ; HTML de
+  l'ancien forum (`<br>`, liens) → texte simple. Modes à blanc, `--ecrire`, `--projet essai|prod`, `--verifier`,
+  `--purger`, `--forcer`, comme l'import des articles. Tests : `tests/temoignages.test.mjs`.
+- `npm run emulateurs:peupler` : deux témoignages d'essai du membre (un signé, un anonyme), puis import des vrais
+  témoignages dans les émulateurs.
+- Aide : section Témoignages.
+- **27 nov. 2026, avec l'accord de l'auteur** : règles Firestore de cette branche déployées sur `alfamous-essai` puis
+  `alfamous-atelier` ; 13 témoignages importés sur les deux projets (vérification : 13 conformes ; lecture publique
+  contrôlée sans compte, aucun courriel, `prive/auteur` refusé aux visiteurs). Le code de l'onglet n'est pas encore
+  déployé (Hosting) : il le sera après la fusion de la PR.
+- Filtre de la liste : le terme est surligné (titre, extrait, signature) ; l'extrait commence près du passage trouvé
+  s'il est loin dans le texte. Le témoignage ouvert depuis la liste filtrée (`#/temoignage/<id>?q=…`) surligne le
+  terme dans le titre et le texte et défile jusqu'au premier passage ; le filtre est gardé au retour à la liste.
+  Fonctions `surlignerDans` et `extrait` (`src/js/temoignages-outils.js`), testées.
+
 ### Ajouté — champ de recherche des sourates sur l'accueil (branche `interface/filtre-sourates`)
 - Accueil (onglet Lecture) : un champ au-dessus de la grille filtre les sourates pendant la frappe, avec le nombre
   trouvé ; Entrée ouvre la première sourate affichée ; message si aucune ne correspond.
