@@ -2,13 +2,13 @@
 // lexique, historique des recherches et copie de versets (phase 3) ; onglet Articles.
 import * as D from './donnees.js';
 import {
-  analyserRequete, chercherMots, chercherRacines, amisRacine, trierAmis,
+  analyserRequete, chercherMots, chercherLatin, chercherRacines, amisRacine, trierAmis,
   declinaisons, statistiquesRacines, repartitionParSourate,
 } from './recherche.js';
 import { NOMS_SOURATES } from './sourates.js';
 import { initCompte, surChangement } from './compte.js';
 import { initNotes, routeNotes, menuNotes } from './notes.js';
-import { initCommentaires, boutonCommentaires } from './commentaires.js';
+import { initCommentaires, boutonCommentaires, definirTraditionnel, textesCommentairesVersets } from './commentaires.js';
 import { routeLexique, initLexique, encadreLexique, clesLexique } from './lexique.js';
 import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
@@ -17,6 +17,7 @@ import { routeArticles } from './articles.js';
 import { initArticlesLiens } from './articles-liens.js';
 import { initLecteur, boutonEcouter } from './lecteur.js';
 import { versetVoisin } from './lecteur-outils.js';
+import { initChamps } from './champs.js';
 
 const $ = (sel, racine = document) => racine.querySelector(sel);
 const contenu = $('#contenu');
@@ -45,11 +46,11 @@ const ICONE_BAS = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6
 const options = () => ({
   motEntier: $('#mot-entier').checked,
   contigus: $('#contigus').checked,
-  dansTraduction: $('#source').value === 'traduction' && !!traductionActive,
 });
+const ICONE_TR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 18 8.5 6 13 18M5.7 14h5.6M15 18v-6.5a2.5 2.5 0 0 1 5 0V18M15 14.5h5"/></svg>';
 
 // ---------- Liste de versets ----------
-// items : [{ s, v, positions?, dansTraduction? }]
+// items : [{ s, v, positions?, positionsTrad?, nbCommentaires?, latin? }]
 async function afficherVersets(items, { titre, resume, avant = '', surligner = true, cible = null, vide = 'Aucun verset ne correspond.' }) {
   const zone = cible || contenu;
   if (!cible) zone.innerHTML = `<div class="titre">${titre}<span class="resume">${resume || ''}</span></div>${avant}`;
@@ -93,21 +94,43 @@ function boutonsVoisins(s, v) {
   return `<div class="voisins">${bouton(avant, -1, ICONE_HAUT, 'précédent')}${bouton(apres, 1, ICONE_BAS, 'suivant')}</div>`;
 }
 
+// resultat (recherche) : { positions } en arabe ou en lettres latines (les mots de la translittération sont
+// alignés sur ceux du texte arabe) ; recherche latine : aussi { positionsTrad, nbCommentaires, latin: true }.
+// La translittération est masquée par défaut (bouton « Aa » par verset), sauf quand elle contient le mot cherché.
+// Le commentaire traditionnel choisi est affiché avec les commentaires Alfamous (bouton Commentaires) ;
+// il n'apparaît dans la carte que s'il contient le mot cherché.
 function carteVerset(s, x, motsVerset, resultat, contexte = false) {
   const nbMots = x.ar.split(/\s+/).length;
   const cliquable = motsVerset && motsVerset.length === nbMots;
-  const posAr = resultat && !resultat.dansTraduction ? resultat.positions : null;
-  const ar = surlignerMots(x.ar, posAr, (i) => (cliquable ? ` tabindex="0" data-ref="${s}:${x.v}:${i}"` : ''));
+  const pos = resultat?.positions?.length ? resultat.positions : null;
+  const ar = surlignerMots(x.ar, pos, (i) => (cliquable ? ` tabindex="0" data-ref="${s}:${x.v}:${i}"` : ''));
+  const trVisible = !!(resultat?.latin && pos);
   const trad = traductionActive?.carte.get(`${s}:${x.v}`);
-  const tradHtml = trad ? (resultat?.dansTraduction ? surlignerMots(trad, resultat.positions) : echapper(trad)) : '';
-  return `<article class="verset${contexte ? ' contexte' : ''}" data-cle="${s}:${x.v}">
-    <div class="verset-entete"><span class="ref-groupe"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a>${boutonEcouter(s, x.v)}</span><span class="verset-infos"><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span>${caseChoisir(`${s}:${x.v}`)}</span></div>
+  const tradTrouvee = resultat?.positionsTrad?.length && trad;
+  const sources = resultat?.latin ? [
+    pos ? 'translittération' : null,
+    tradTrouvee ? `commentaire traditionnel (${echapper(traductionActive.nom)})` : null,
+    resultat.nbCommentaires ? pluriel(resultat.nbCommentaires, 'commentaire') + ' Alfamous' : null,
+  ].filter(Boolean) : [];
+  return `<article class="verset${contexte ? ' contexte' : ''}${trVisible ? ' tr-visible' : ''}" data-cle="${s}:${x.v}">
+    <div class="verset-entete"><span class="ref-groupe"><a class="ref" href="${lienRequete(`${s}:${x.v}`)}">${s}:${x.v}</a>${boutonEcouter(s, x.v)}<button type="button" class="bouton-tr" data-tr aria-pressed="${trVisible}" aria-label="${trVisible ? 'Masquer' : 'Afficher'} la translittération du verset ${s}:${x.v}" title="Translittération">${ICONE_TR}</button></span><span class="verset-infos"><span>${echapper(nomSourate(s)[1])} · page ${x.page ?? '?'}</span>${caseChoisir(`${s}:${x.v}`)}</span></div>
     <p class="ar" lang="ar">${ar}</p>
-    <p class="tr">${echapper(x.tr)}</p>
-    ${trad ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${tradHtml}</p>` : ''}
+    <p class="tr">${resultat?.latin && pos ? surlignerMots(x.tr, pos) : echapper(x.tr)}</p>
+    ${tradTrouvee ? `<p class="trad"><span class="trad-source" title="Commentaire traditionnel, cité pour la comparaison">${echapper(traductionActive.nom)} (tradition)</span> ${surlignerMots(trad, resultat.positionsTrad)}</p>` : ''}
+    ${sources.length ? `<p class="trouve-dans">Trouvé dans : ${sources.join(' · ')}</p>` : ''}
     <div class="verset-pied">${nbVersets.length ? boutonsVoisins(s, x.v) : '<span></span>'}${boutonCommentaires(`${s}:${x.v}`)}</div>
   </article>`;
 }
+
+// Afficher ou masquer la translittération d'un verset.
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tr]');
+  if (!b) return;
+  const carte = b.closest('.verset');
+  const visible = carte.classList.toggle('tr-visible');
+  b.setAttribute('aria-pressed', String(visible));
+  b.setAttribute('aria-label', `${visible ? 'Masquer' : 'Afficher'} la translittération du verset ${carte.dataset.cle}`);
+});
 
 // Afficher le verset précédent ou suivant juste au-dessus ou au-dessous de la carte.
 contenu.addEventListener('click', async (e) => {
@@ -235,15 +258,26 @@ function blocRepartition(resultats) {
 async function vueMots(termes, langue) {
   message('Recherche dans les 6 236 versets…');
   const o = options();
-  const dansTrad = langue === 'latin' && o.dansTraduction;
-  const resultats = chercherMots(await D.toutLeTexte(), termes, langue, {
-    motEntier: o.motEntier, contigus: o.contigus, source: dansTrad ? traductionActive.carte : 'coran',
-  });
-  const sans = o.contigus && !resultats.length
-    ? chercherMots(await D.toutLeTexte(), termes, langue, { motEntier: o.motEntier, source: dansTrad ? traductionActive.carte : 'coran' }).length : 0;
-  const occ = resultats.reduce((t, r) => t + r.positions.length, 0);
+  const texte = await D.toutLeTexte();
+  let resultats;
+  let sans = 0;
+  let ou;
+  if (langue === 'ar') {
+    resultats = chercherMots(texte, termes, langue, { motEntier: o.motEntier, contigus: o.contigus });
+    if (o.contigus && !resultats.length) sans = chercherMots(texte, termes, langue, { motEntier: o.motEntier }).length;
+    ou = 'texte arabe';
+  } else {
+    // Le latin : translittération, commentaire traditionnel choisi et commentaires Alfamous des versets.
+    let commentaires = null;
+    try { commentaires = await textesCommentairesVersets(); } catch { /* hors ligne : sans les commentaires */ }
+    const sources = { traduction: traductionActive?.carte || null, commentaires };
+    resultats = chercherLatin(texte, termes, { motEntier: o.motEntier, contigus: o.contigus, ...sources }).map((r) => ({ ...r, latin: true }));
+    if (o.contigus && !resultats.length) sans = chercherLatin(texte, termes, { motEntier: o.motEntier, ...sources }).length;
+    ou = ['translittération', traductionActive ? `commentaire traditionnel ${echapper(traductionActive.nom)}` : null,
+      commentaires ? 'commentaires Alfamous' : 'commentaires Alfamous indisponibles'].filter(Boolean).join(', ');
+  }
+  const occ = resultats.reduce((t, r) => t + r.positions.length + (r.positionsTrad?.length || 0), 0);
   const affichage = termes.map((t) => (langue === 'ar' ? `<span class="ar" lang="ar">${echapper(t)}</span>` : `« ${echapper(t)} »`)).join(' <span class="plus-terme">+</span> ');
-  const ou = langue === 'ar' ? 'texte arabe' : dansTrad ? `commentaire traditionnel ${echapper(traductionActive.nom)}` : 'translittération';
   await afficherVersets(resultats, {
     titre: `<h1>${affichage}</h1>`,
     resume: `${pluriel(occ, 'mot')} surligné${occ > 1 ? 's' : ''} dans ${pluriel(resultats.length, 'verset')} · ${ou} · ${modeTexte()}`,
@@ -418,7 +452,6 @@ for (const [id, cle] of [['mot-entier', 'motEntier'], ['contigus', 'contigus']])
   $(`#${id}`).checked = preferences.lire(cle, '0') === '1';
   $(`#${id}`).addEventListener('change', (e) => { preferences.ecrire(cle, e.target.checked ? '1' : '0'); router(); });
 }
-$('#source').addEventListener('change', (e) => { preferences.ecrire('source', e.target.value); router(); });
 $('#theme').addEventListener('click', () => {
   const sombre = document.documentElement.dataset.theme
     ? document.documentElement.dataset.theme === 'sombre'
@@ -443,19 +476,20 @@ async function initTraductions() {
       const t = dispo.find((x) => x.id === select.value);
       traductionActive = t ? { id: t.id, nom: t.nom, carte: await D.traduction(t.id) } : null;
       preferences.ecrire('traduction', select.value);
-      const source = $('#source');
-      source.closest('label').hidden = !traductionActive;
-      source.querySelector('[value="traduction"]').textContent = traductionActive ? `le commentaire traditionnel (${traductionActive.nom})` : 'le commentaire traditionnel';
-      if (!traductionActive) source.value = 'coran';
     };
-    $('#source').value = preferences.lire('source', 'coran');
     await appliquer();
     select.addEventListener('change', async () => { await appliquer(); router(); });
   } catch { /* pas de traductions déployées */ }
 }
 
 window.addEventListener('hashchange', router);
+// Le commentaire traditionnel choisi est montré et compté avec les commentaires Alfamous de chaque verset.
+definirTraditionnel((cle) => {
+  const texte = traductionActive?.carte.get(cle);
+  return texte ? { nom: traductionActive.nom, texte } : null;
+});
 initCommentaires(contenu);
+initChamps();
 initNotes(contenu);
 initLexique();
 initMembres(contenu);

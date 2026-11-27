@@ -93,7 +93,7 @@ export function creerPanneau(o) {
       ${section('fils', 'Discussions du forum', fils.length, `
         ${fils.map((f) => `<div class="ctx-item"><div><a href="#/fil/${encodeURIComponent(f.id)}" target="_blank">${echapper(f.titre)}</a> ${f.auto ? '<span class="petit">lié à l\'article</span>' : ''}</div><div class="actions">${f.auto ? '' : retirer('fils', x.fils.findIndex((g) => g.id === f.id))}</div></div>`).join('') || vide('Aucun fil. Depuis un fil, copiez son adresse ici.')}
         <div class="ctx-ajout"><input type="text" data-ajout="fils" placeholder="adresse ou identifiant du fil"><button type="button" class="btn" data-ajout-ok="fils">Ajouter</button></div>`)}
-      ${section('notes', 'Mes Notes liées', x.notes.length, `
+      ${section('notes', 'Notes liées', x.notes.length, `
         ${x.notes.map((n, i) => `<div class="ctx-item"><div><a href="#/note/${encodeURIComponent(n.id)}" target="_blank">${echapper(n.titre)}</a> <span class="petit">privée</span></div><div class="actions">${retirer('notes', i)}</div></div>`).join('') || vide('Aucune note.')}
         <p><button type="button" class="btn" data-choisir="notes">Choisir parmi mes notes…</button></p>`)}
       ${section('verification', `Vérification${nonVerifies ? ` <span class="etat brouillon">${nonVerifies} à vérifier</span>` : ''}`, x.verification.length, `
@@ -169,7 +169,7 @@ export function creerPanneau(o) {
           .map((d) => ({ id: d.id, titre: d.data().titre, info: `${FAMILLES[d.data().famille] || ''} · ${dateCourte(d.data().publieLe)}` }));
       }
       const deja = new Set(c()[liste].map((x) => x.id));
-      ouvrirFenetre(`<h2>${liste === 'notes' ? 'Mes Notes' : 'Articles publiés'}</h2>
+      ouvrirFenetre(`<h2>${liste === 'notes' ? 'Notes' : 'Articles publiés'}</h2>
         <input type="search" data-filtre-choix placeholder="Filtrer…">
         <div class="liste-choix">${items.map((it) => `<label class="choix"><input type="checkbox" value="${it.id}" ${deja.has(it.id) ? 'checked disabled' : ''}><span>${echapper(it.titre)} <small class="aide">${echapper(it.info)}</small></span></label>`).join('') || '<p class="aide">Rien à choisir.</p>'}</div>
         <div class="fenetre-bas"><button type="button" class="btn" data-fermer>Annuler</button><button type="button" class="btn principal" data-choix-ok>Ajouter</button></div>`);
@@ -333,7 +333,7 @@ export async function construireDossier(d, article) {
   if (x.notes.length || x.fils.length || x.liens.length) {
     const { db, F } = await firebase();
     if (x.notes.length) {
-      L.push('', '## Mes Notes liées (privées)');
+      L.push('', '## Notes liées (privées)');
       for (const n of x.notes) {
         try { const s = await avecDelai(F.getDoc(F.doc(db, `notes/${n.id}`))); L.push('', `### ${s.data()?.titre || n.titre}`, s.data()?.texte || '(introuvable)'); }
         catch { L.push('', `### ${n.titre}`, '(introuvable)'); }

@@ -96,6 +96,33 @@ export function chercherMots(texteParSourate, termesBruts, langue, { motEntier =
   return resultats;
 }
 
+// ---------- Recherche en lettres latines ----------
+// Le latin est cherché à la fois dans la translittération, dans le commentaire traditionnel choisi
+// (traduction : Map « s:v » → texte, ou null) et dans les commentaires Alfamous des versets
+// (commentaires : Map « s:v » → [textes], ou null). Un verset est retenu s'il convient dans l'une des sources.
+// Résultat : [{ s, v, positions (translittération), positionsTrad, nbCommentaires }], dans l'ordre du texte.
+export function chercherLatin(texteParSourate, termesBruts, { motEntier = false, contigus = false, traduction = null, commentaires = null } = {}) {
+  const termes = termesBruts.map(normaliserLatin).filter(Boolean);
+  if (!termes.length) return [];
+  const egal = motEntier ? (w, t) => w === t : (w, t) => w.includes(t);
+  const mots = (brut) => String(brut).split(/\s+/).map(normaliserLatin);
+  const resultats = [];
+  for (const [s, { versets }] of texteParSourate) {
+    for (const x of versets) {
+      const cle = `${s}:${x.v}`;
+      const positions = x.tr ? correspondre(mots(x.tr), termes, egal, { contigus }) : null;
+      const trad = traduction?.get(cle);
+      const positionsTrad = trad ? correspondre(mots(trad), termes, egal, { contigus }) : null;
+      const nbCommentaires = (commentaires?.get(cle) || [])
+        .filter((c) => c && correspondre(mots(c), termes, egal, { contigus })).length;
+      if (positions || positionsTrad || nbCommentaires) {
+        resultats.push({ s, v: x.v, positions: positions || [], positionsTrad: positionsTrad || [], nbCommentaires });
+      }
+    }
+  }
+  return resultats;
+}
+
 // ---------- Recherche de racines (plusieurs racines possibles) ----------
 export function chercherRacines(texteParSourate, racines, { contigus = false } = {}) {
   const resultats = [];

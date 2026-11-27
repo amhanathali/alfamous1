@@ -4,7 +4,7 @@
 // Modèle et règles : docs/MODELE-DONNEES.md, firestore.rules (collection notes).
 import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
-import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX } from './commentaires-format.js';
+import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX, AIDE_RENVOIS } from './commentaires-format.js';
 import { ajouterLimite } from './limite.js';
 
 const lienRequete = (q) => `#/q/${encodeURIComponent(q)}`;
@@ -36,7 +36,7 @@ export function menuNotes() {
   zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?)/.test(h) ? '' : 'actif'}">Lecture</a>
     <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
     <a href="#/articles" class="${actif(/^#\/articles?(\/|$|\?)/).trim()}">Articles</a>
-    ${session.utilisateur && session.niveau >= 1 ? `<a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}">Mes Notes</a>` : ''}
+    <a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}"${session.utilisateur && session.niveau >= 1 ? '' : ' title="Connectez-vous pour utiliser Notes"'}>Notes</a>
     <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>
     ${session.niveau >= 3 ? `<a href="#/membres" class="${actif(/^#\/membres/).trim()}">Membres</a>` : ''}`;
 }
@@ -47,7 +47,7 @@ export async function routeNotes(contenu) {
   const [chemin, qs] = h.split('?');
   const params = new URLSearchParams(qs || '');
   menuNotes();
-  if (chemin === '#/notes') { document.title = 'Mes Notes — Alfamous'; await vueMesNotes(contenu); return true; }
+  if (chemin === '#/notes') { document.title = 'Notes — Alfamous'; await vueMesNotes(contenu); return true; }
   if (chemin === '#/forum') { document.title = 'Forum — Alfamous'; await vueForum(contenu, params.get('cle')); return true; }
   let m = chemin.match(/^#\/note\/(.+)$/);
   if (m) { document.title = 'Note — Alfamous'; await vueEditeur(contenu, decodeURIComponent(m[1]), params); return true; }
@@ -58,9 +58,15 @@ export async function routeNotes(contenu) {
 
 // ---------- Mes Notes ----------
 async function vueMesNotes(contenu) {
-  if (!session.utilisateur || session.niveau < 1) {
-    contenu.innerHTML = `<p class="message">Mes Notes est réservé aux membres connectés (courriel vérifié).<br>
-      <button class="btn principal" data-compte="connexion">Se connecter</button></p>`;
+  if (!session.utilisateur) {
+    contenu.innerHTML = `<p class="message">Connectez-vous pour utiliser Notes : vos notes privées, que vous pouvez publier sur le forum.<br>
+      <button class="btn principal" data-compte="connexion">Se connecter</button>
+      <button class="btn" data-compte="inscription">Créer un compte</button></p>`;
+    return;
+  }
+  if (session.niveau < 1) {
+    contenu.innerHTML = `<p class="message">Vérifiez votre courriel pour utiliser Notes.
+      <button type="button" class="lien-bouton" data-compte="verifier">Que faire ?</button></p>`;
     return;
   }
   contenu.innerHTML = '<p class="message">Chargement…</p>';
@@ -70,7 +76,7 @@ async function vueMesNotes(contenu) {
     const notes = (await avecDelai(F.getDocsFromServer(q))).docs.map((d) => ({ id: d.id, ...d.data() }));
     const dessiner = () => {
       const liste = notes.filter((n) => filtreNotes === 'toutes' || (filtreNotes === 'publiees') === n.publie);
-      contenu.innerHTML = `<div class="titre"><h1>Mes Notes</h1><span class="resume">${pluriel(notes.length, 'note')} · privées tant qu'elles ne sont pas publiées</span></div>
+      contenu.innerHTML = `<div class="titre"><h1>Notes</h1><span class="resume">${pluriel(notes.length, 'note')} · privées tant qu'elles ne sont pas publiées</span></div>
         <div class="barre-outils">
           <div class="filtres">${[['toutes', 'Toutes'], ['privees', 'Privées'], ['publiees', 'Publiées au forum']].map(([k, l]) => `<button data-filtre-notes="${k}" class="${filtreNotes === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
           <a class="btn principal" href="#/note/nouvelle">+ Nouvelle note</a>
@@ -106,7 +112,7 @@ async function vueEditeur(contenu, id, params) {
   }
   const l = n.lien || { type: 'aucun', cle: '' };
   const peutDepublier = n.publie && !n.nbReponsesAutrui;
-  contenu.innerHTML = `<a class="retour" href="#/notes">← Mes Notes</a>
+  contenu.innerHTML = `<a class="retour" href="#/notes">← Notes</a>
     <form class="editeur" id="editeur">
       <div class="fil-meta"><span class="etat ${n.publie ? 'publie' : 'prive'}">${n.publie ? 'publiée au forum' : 'privée'}</span>
         <span>${n.id ? `créée le ${dateCourte(n.creeLe)}` : 'nouvelle note'}</span>${n.publie ? `<a href="#/fil/${n.id}">voir le fil</a>` : ''}</div>
@@ -119,7 +125,7 @@ async function vueEditeur(contenu, id, params) {
           .map(([k, t]) => `<option value="${k}" ${l.type === k ? 'selected' : ''}>${t}</option>`).join('')}</select>
         <input type="text" name="cle" value="${echapper(l.cle)}" placeholder="112:1 · أحد · expression du lexique" ${l.type === 'aucun' ? 'disabled' : ''} dir="auto">
       </div>
-      <label>Texte<textarea name="texte" maxlength="${NOTE_MAX}" required placeholder="Votre note… (renvois possibles : 2:255, r:أحد)">${echapper(n.texte)}</textarea></label>
+      <label>Texte<textarea name="texte" maxlength="${NOTE_MAX}" required placeholder="Votre note… (${AIDE_RENVOIS})">${echapper(n.texte)}</textarea></label>
       <div class="editeur-bas">
         <div class="gauche">
           ${!n.publie && n.id ? '<button type="button" class="btn" data-note="supprimer">Supprimer</button>' : ''}
@@ -339,7 +345,7 @@ async function vueFil(contenu, id) {
       ${reponses.map((r) => blocMessage(r, { tete: false, note })).join('') || '<p class="aide">Aucune réponse pour l\'instant.</p>'}
       ${!peutRepondre ? ''
         : session.niveau >= 1
-          ? `<form class="ecrire" id="repondre"><textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="Votre réponse… (renvois possibles : 2:255, r:أحد)"></textarea>
+          ? `<form class="ecrire" id="repondre"><textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="Votre réponse… (${AIDE_RENVOIS})"></textarea>
               <div class="ecrire-bas"><span>Publiée tout de suite, signée « ${echapper(session.nom)} ». Vous pourrez la modifier, pas la supprimer.</span>
               <button class="btn principal">Répondre</button></div><p class="form-msg" role="alert"></p></form>`
           : `<div class="ecrire connexion">Pour répondre, connectez-vous avec un compte au courriel vérifié.<br>

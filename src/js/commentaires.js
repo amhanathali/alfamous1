@@ -6,7 +6,7 @@
 // Modèle et règles : docs/MODELE-DONNEES.md, firestore.rules.
 import { firebase, avecDelai } from './firebase.js';
 import { session, surChangement, demanderConnexion, ouvrirFenetre, fermerFenetre } from './compte.js';
-import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX } from './commentaires-format.js';
+import { echapper, enrichir, dateCourte, initiale, messageErreur, TEXTE_MAX, AIDE_RENVOIS } from './commentaires-format.js';
 import { ligneForum } from './notes.js';
 import { ajouterLimite } from './limite.js';
 
@@ -15,6 +15,11 @@ const ICONE_BULLE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h1
 const nombres = new Map(); // « type|cle » → nombre de commentaires
 const listes = new Map(); // « type|cle » → commentaires chargés (pour les actions)
 const brouillons = new Map();
+// Commentaire traditionnel du verset (traduction choisie dans l'en-tête), fourni par app.js :
+// cle « s:v » → { nom, texte } ou null. Il est affiché avec les commentaires Alfamous et compté avec eux.
+let traditionnel = () => null;
+export function definirTraditionnel(fn) { traditionnel = fn; }
+const tradDe = (type, cle) => (type === 'verset' ? traditionnel(cle) : null);
 
 // ---------- Bouton sous le verset ----------
 export function boutonCommentaires(cle, type = 'verset') {
@@ -23,7 +28,8 @@ export function boutonCommentaires(cle, type = 'verset') {
 
 function libelleBouton(b) {
   const k = `${b.dataset.comType}|${b.dataset.comCle}`;
-  const n = nombres.get(k);
+  const plus = tradDe(b.dataset.comType, b.dataset.comCle) ? 1 : 0;
+  const n = nombres.has(k) ? nombres.get(k) + plus : plus || undefined;
   const ouvert = b.getAttribute('aria-expanded') === 'true';
   b.classList.toggle('a-des', n > 0);
   b.querySelector('span').textContent = ouvert ? 'Fermer'
@@ -100,9 +106,17 @@ async function charger(zone) {
     nombres.set(k, liste.length);
     dessiner(zone, liste);
   } catch (e) {
-    zone.innerHTML = `<p class="aide erreur">Commentaires indisponibles : ${echapper(messageErreur(e))}</p>`;
+    zone.innerHTML = `${blocTraditionnel(type, cle)}<p class="aide erreur">Commentaires Alfamous indisponibles : ${echapper(messageErreur(e))}</p>`;
   }
   document.querySelectorAll(`.bouton-com[data-com-type="${type}"][data-com-cle="${CSS.escape(cle)}"]`).forEach(libelleBouton);
+}
+
+// Commentaire traditionnel du verset, en tête des commentaires Alfamous (cité seulement pour la comparaison).
+function blocTraditionnel(type, cle) {
+  const trad = tradDe(type, cle);
+  return trad ? `<div class="com-trad"><div class="com-meta"><span class="trad-source">${echapper(trad.nom)}</span>
+      <span title="Commentaire traditionnel, cité seulement pour la comparaison">commentaire traditionnel</span></div>
+      <p class="com-texte">${echapper(trad.texte)}</p></div>` : '';
 }
 
 function dessiner(zone, liste) {
@@ -147,7 +161,7 @@ function dessiner(zone, liste) {
     : n < 1
       ? '<div class="ecrire connexion">Vérifiez votre courriel pour pouvoir écrire. <button type="button" class="lien-bouton" data-compte="verifier">Que faire ?</button></div>'
       : `<form class="ecrire" data-com-form>
-          <textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="${lexique ? 'Votre définition de' : 'Votre commentaire sur'} ${echapper(cible)}… (renvois possibles : 2:255, r:أحد)">${echapper(brouillons.get(k) || '')}</textarea>
+          <textarea name="texte" maxlength="${TEXTE_MAX}" required placeholder="${lexique ? 'Votre définition de' : 'Votre commentaire sur'} ${echapper(cible)}… (${AIDE_RENVOIS})">${echapper(brouillons.get(k) || '')}</textarea>
           <div class="ecrire-bas"><span>Publié tout de suite, signé « ${echapper(session.nom)} ». Vous pourrez le modifier, pas le supprimer.</span>
           <span><span data-compteur>${(brouillons.get(k) || '').length}</span> / ${TEXTE_MAX.toLocaleString('fr-CA')}
           <button class="btn principal">Publier</button></span></div>
@@ -155,12 +169,33 @@ function dessiner(zone, liste) {
         </form>`;
 
   const fem = lexique ? 'e' : '';
-  zone.innerHTML = `<div class="com-entete"><h3>${lexique ? 'Définitions' : 'Commentaires Alfamous'} · ${liste.length}</h3>
+  zone.innerHTML = `${blocTraditionnel(type, cle)}<div class="com-entete"><h3>${lexique ? 'Définitions' : 'Commentaires Alfamous'} · ${liste.length}</h3>
       <span class="discret">${liste.length > 1 ? `les plus récent${fem}s en premier` : ''}${nbMasques ? ` · dont ${nbMasques} masqué${fem}${nbMasques > 1 ? 's' : ''}` : ''}</span></div>
     ${liste.length ? `<div class="com-liste">${items}</div>` : `<p class="aide">${lexique ? 'Aucune définition pour l\'instant.' : 'Aucun commentaire pour l\'instant.'}</p>`}
     ${ecrire}
     ${zone.dataset.forum !== 'non' ? '<div class="forum-verset"></div>' : ''}`;
   if (zone.dataset.forum !== 'non') ligneForum(zone.querySelector('.forum-verset'), cle, type);
+}
+
+// ---------- Textes de tous les commentaires de versets (recherche en lettres latines) ----------
+// Map « s:v » → [textes] ; commentaires masqués exclus (leur texte public est vide). Chargé une fois par session.
+let textesVersets = null;
+export function textesCommentairesVersets() {
+  if (!textesVersets) {
+    textesVersets = (async () => {
+      const { db, F } = await firebase();
+      const snap = await avecDelai(F.getDocsFromServer(F.query(F.collection(db, 'commentaires'), F.where('type', '==', 'verset'))));
+      const carte = new Map();
+      for (const d of snap.docs) {
+        const c = d.data();
+        if (c.masque || !c.texte) continue;
+        if (!carte.has(c.cle)) carte.set(c.cle, []);
+        carte.get(c.cle).push(c.texte);
+      }
+      return carte;
+    })().catch((e) => { textesVersets = null; throw e; });
+  }
+  return textesVersets;
 }
 
 // ---------- Actions ----------
@@ -178,6 +213,7 @@ export async function publierCommentaire(type, cle, texte) {
   });
   await ajouterLimite(lot, db, F, session);
   await avecDelai(lot.commit());
+  textesVersets = null; // la recherche latine relira les commentaires
   nombres.delete(`${type}|${cle}`);
   document.dispatchEvent(new CustomEvent('commentaire-publie', { detail: { type, cle } }));
 }
@@ -222,6 +258,7 @@ async function enregistrer(form) {
     lot.set(F.doc(db, `commentaires/${c.id}/versions/${c.nbVersions}`), { texte: c.texte, le: c.modifieLe ?? c.creeLe });
     lot.update(F.doc(db, `commentaires/${c.id}`), { texte, modifieLe: F.serverTimestamp(), nbVersions: c.nbVersions + 1 });
     await avecDelai(lot.commit());
+    textesVersets = null; // la recherche latine relira les commentaires
     changement(zone);
     await charger(zone);
   } catch (e) { msg.textContent = messageErreur(e); }
@@ -244,6 +281,7 @@ async function masquer(zone, c) {
   lot.set(F.doc(db, `commentaires/${c.id}/prive/texte`), { texte: c.texte });
   lot.update(F.doc(db, `commentaires/${c.id}`), { texte: '', masque: { ...signature(), le: F.serverTimestamp() } });
   await avecDelai(lot.commit());
+  textesVersets = null; // la recherche latine relira les commentaires
 }
 
 async function demasquer(zone, c) {
@@ -252,6 +290,7 @@ async function demasquer(zone, c) {
   lot.delete(F.doc(db, `commentaires/${c.id}/prive/texte`));
   lot.update(F.doc(db, `commentaires/${c.id}`), { texte: c.textePrive, masque: null });
   await avecDelai(lot.commit());
+  textesVersets = null; // la recherche latine relira les commentaires
 }
 
 function confirmerSuppression(c) {
@@ -272,6 +311,7 @@ async function supprimer(id) {
   }
   lot.delete(F.doc(db, `commentaires/${id}`));
   await avecDelai(lot.commit());
+  textesVersets = null; // la recherche latine relira les commentaires
 }
 
 function formulaireSignalement(c) {
@@ -293,6 +333,7 @@ async function signaler(form) {
       { motif: form.motif.value.trim(), le: F.serverTimestamp() });
     await ajouterLimite(lot, db, F, session);
     await avecDelai(lot.commit());
+    textesVersets = null; // la recherche latine relira les commentaires
     ouvrirFenetre('<h2>Merci</h2><p>Le signalement a été transmis aux modérateurs.</p><div class="fenetre-bas"><button type="button" class="btn" data-fermer>Fermer</button></div>');
   } catch (e) {
     // Un deuxième signalement du même membre est refusé par les règles.

@@ -4,12 +4,34 @@ export const TEXTE_MAX = 4000;
 
 export const echapper = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Texte simple → HTML : échappé, puis liens automatiques.
-//   2:255 ou 2:255-257 → recherche du verset ; r:رحم → vue de la racine.
+// Texte simple → HTML : échappé, puis liens automatiques (« renvois »).
+//   3:14 · 2:255-257   → verset(s)            r:3.14 · r:3:14 → verset 3:14
+//   r:1                → sourate 1 (dès 1:1)   p50 · p 50      → page 50
+//   r:رحم              → racine               m:رحم+سلم · m:abc+xyz → recherche de mots
+// Un nombre seul (« 5 ») reste du texte : seul le préfixe r: en fait un renvoi.
+export const AIDE_RENVOIS = 'renvois possibles : 3:14, r:3.14, r:1, p50, r:رحم, m:رحم+سلم, m:abc+xyz';
+const TERME = '[^\\s+.,;:!?()«»"\'&<>]+';
+const RENVOI = new RegExp(
+  '(^|[^\\w:./])(?:'
+  + 'r:(\\d{1,3})(?:[.:](\\d{1,3})(?:-(\\d{1,3}))?)?(?![\\w:]|\\.\\d)'          // r:3.14, r:3:14-20, r:1
+  + '|(\\d{1,3}):(\\d{1,3})(?:-(\\d{1,3}))?(?![\\d:])'                    // 3:14, 2:255-257
+  + '|r:([\\u0621-\\u064A\\u0671]+)'                                     // r:رحم
+  + '|[pP] ?(\\d{1,3})(?![\\w:]|\\.\\d)'                                         // p50, p 50
+  + `|m: ?(${TERME}(?:\\+${TERME})*)`                                       // m:رحم+سلم, m:abc+xyz
+  + ')', 'g');
+const estArabe = (t) => /[\u0600-\u06FF]/.test(t);
 export function enrichir(texte, lien) {
-  return echapper(texte)
-    .replace(/(^|[^\d:])(\d{1,3}:\d{1,3}(?:-\d{1,3})?)(?![\d:])/g, (_, avant, ref) => `${avant}<a href="${lien(ref)}">${ref}</a>`)
-    .replace(/r:([ء-يٱ]+)/g, (_, r) => `<a href="${lien(`r:${r}`)}" class="ar" lang="ar">${r}</a>`);
+  return echapper(texte).replace(RENVOI, (tout, avant, rs, rv, ra, vs, vv, va, racine, page, mots) => {
+    const vu = tout.slice(avant.length);
+    let q;
+    let attrs = '';
+    if (rs) q = rv ? `${rs}:${rv}${ra ? `-${ra}` : ''}` : rs;
+    else if (vs) q = `${vs}:${vv}${va ? `-${va}` : ''}`;
+    else if (racine) return `${avant}<a href="${lien(`r:${racine}`)}" class="ar" lang="ar">${racine}</a>`;
+    else if (page) q = `p ${page}`;
+    else if (mots) { q = `m:${mots}`; if (estArabe(mots)) attrs = ' dir="auto"'; }
+    return `${avant}<a href="${lien(q)}"${attrs}>${vu}</a>`;
+  });
 }
 
 // Horodatage Firestore (ou Date) → « 23 nov. 2026 ».
