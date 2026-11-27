@@ -1,6 +1,12 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — procédure fixe d'essai local (`ESSAI_LOCAL.bat`, branche `outils/essai-local`)
+- Un double-clic : ferme toutes les autres fenêtres cmd.exe, les émulateurs et le serveur local ; récupère la
+  dernière version préparée (branche la plus récente sur GitHub, ou `main`) et l'affiche ; s'arrête sans rien changer
+  s'il y a des modifications locales ; puis outils, émulateurs, données d'essai, application et navigateur.
+  `ESSAI_LOCAL.bat main` ou `ESSAI_LOCAL.bat <branche>` pour une version précise. Le script s'exécute depuis une
+  copie dans %TEMP% (changer de branche ne le modifie pas en cours de route). README et CLAUDE.md (règle 9) à jour.
 ### Modifié — lecture, commentaires et champs (branche `interface/lecture-commentaires`, demande de l'auteur du 26 nov.)
 - En-tête : le choix de la traduction passe sous la ligne des exemples et s'appelle « Commentaires traditionnels »
   (option « aucun ») ; une note ℹ️ sous les exemples : « Le latin est cherché dans la translittération, les

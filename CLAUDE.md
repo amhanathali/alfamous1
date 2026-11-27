@@ -19,3 +19,7 @@ ne doit JAMAIS être modifiée depuis ce dépôt.
 6. Les données éditoriales (commentaires) vivent dans Firestore, pas dans des fichiers du dépôt.
 7. Expliquer chaque changement ; tenir `CHANGELOG.md` à jour.
 8. Langue du projet : français (code commenté en français, noms de variables en anglais ou français cohérents).
+9. Essai local par l'auteur : une seule procédure, **ESSAI_LOCAL.bat** (double-clic). Il ferme les autres fenêtres
+   cmd, puis essaie la branche modifiée le plus récemment sur GitHub. Avant de demander un essai, Claude pousse
+   sa branche (et la remet à jour sur `main` si nécessaire) pour qu'elle soit la plus récente, et dit à l'auteur
+   quelle version le script affichera.
