@@ -23,6 +23,9 @@ ne doit JAMAIS être modifiée depuis ce dépôt.
    cmd, puis essaie la branche modifiée le plus récemment sur GitHub. Avant de demander un essai, Claude pousse
    sa branche (et la remet à jour sur `main` si nécessaire) pour qu'elle soit la plus récente, et dit à l'auteur
    quelle version le script affichera.
+10. Émulateurs ou serveur local d'un essai qui occupent encore les ports (tests des règles, déploiement) : Claude
+    les ferme avec `npm run fermer:emulateurs` (seulement ce qui écoute sur les ports d'Alfamous1 ; `--voir` pour
+    vérifier d'abord), jamais avec un `taskkill` général. Les données saisies pendant l'essai ne sont pas réexportées.
 
 ## Répartition du travail
 - **Claude Code (VS Code)** : tout le code d'Alfamous1. Chantiers, tests, émulateurs, essais locaux, branches,

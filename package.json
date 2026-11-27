@@ -14,6 +14,7 @@
     "servir:dist": "node scripts/servir.mjs --dist",
     "emulateurs": "node scripts/emulateurs.mjs",
     "emulateurs:peupler": "node scripts/peupler-emulateurs.mjs",
+    "fermer:emulateurs": "node scripts/fermer-emulateurs.mjs",
     "test:regles": "firebase emulators:exec --project demo-alfamous1 --only auth,firestore,storage \"node --test --test-concurrency=1 tests/regles/*.test.mjs\"",
     "niveau": "node scripts/changer-niveau.mjs",
     "importer": "node scripts/importer.mjs",
