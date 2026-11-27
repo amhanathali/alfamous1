@@ -414,6 +414,13 @@ function vueAide() {
         <li><b>Commentaire traditionnel</b> (menu déroulant, « No Comment » par défaut) : un commentaire traditionnel,
           cité seulement pour la comparaison, affiché avec les commentaires de chaque verset.</li>
       </ul>
+      <h2>Clavier arabe</h2>
+      <ul>
+        <li>L'icône de clavier, collée au champ de recherche et aux champs où l'on tape de l'arabe (filtres, clés du lexique,
+          commentaires, notes…), ouvre un <b>clavier arabe</b> en bas de l'écran. Le clavier du téléphone est alors masqué.</li>
+        <li>Dernière rangée : <b>×</b> ferme le clavier arabe et rend le clavier habituel ; <b>+</b> sépare des termes de recherche ;
+          <b>⌫</b> efface ; <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
+      </ul>
     </div>`;
 }
 

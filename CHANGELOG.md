@@ -13,6 +13,11 @@
 - Menu : défile horizontalement sur téléphone (sept onglets possibles) ; le trait du bas devient une ombre
   intérieure pour ne pas être rogné.
 - Textes mis à jour : accueil (ME / MC, lien vers l'Aide), bouton « décocher « MC » (mots contigus) ».
+- **Clavier arabe à l'écran** (`src/js/clavier.js`) : icône collée au champ de recherche, aux champs « dir=auto »
+  (filtres, clés du lexique, notes…) et aux zones de texte (dans la barre Copier / Effacer). Ouvert, il masque le
+  clavier du système (`inputmode="none"`) ; fermé (bouton ×), l'inputmode d'avant est remis et le champ reprend le
+  focus, ce qui rend le clavier du système. Suit le champ actif ; se ferme au changement d'écran. Rangée du bas :
+  ×, +, espace, ⌫, ↵ (recherche ou retour à la ligne). Tests : `tests/clavier.test.mjs`.
 
 ### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
 - `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors

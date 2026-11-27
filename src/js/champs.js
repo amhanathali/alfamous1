@@ -1,7 +1,10 @@
 // Aides communes à tous les écrans (commentaires, lexique, notes, forum, articles, membres) :
 //  - une icône devant les boutons « Modifier », « Supprimer… » et « Enregistrer… » ;
 //  - sous chaque champ d'édition (textarea) : « Copier » et « Effacer » (avec « Annuler » pendant quelques secondes).
+//  - une icône de clavier arabe collée aux champs où l'on tape de l'arabe (clavier.js).
 // Les écrans sont dessinés par plusieurs modules : un MutationObserver décore ce qui apparaît, sans toucher à leur code.
+
+import { equiperClavier, initClavier } from './clavier.js';
 
 const svg = (d) => `<svg class="icone-bouton" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="${d}"/></svg>`;
 export const ICONES = {
@@ -96,9 +99,13 @@ function decorer(racine) {
   racine.querySelectorAll('button').forEach(decorerBouton);
   if (racine.matches('textarea')) outillerChamp(racine);
   racine.querySelectorAll('textarea').forEach(outillerChamp);
+  // Icône du clavier arabe (après « Copier / Effacer », pour se placer dans leur barre).
+  if (racine.matches('input, textarea')) equiperClavier(racine);
+  racine.querySelectorAll('input, textarea').forEach(equiperClavier);
 }
 
 export function initChamps() {
+  initClavier();
   decorer(document.body);
   new MutationObserver((mutations) => {
     for (const m of mutations) {

@@ -53,11 +53,11 @@ select { background: var(--surface); border: 1px solid var(--bordure); border-ra
 .recherche { display: flex; gap: 8px; margin-top: 12px; }
 .recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
 .recherche input {
-  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 76px 10px 14px; border-radius: 10px;
   border: 1px solid var(--bordure); background: var(--surface);
 }
 .recherche .effacer {
-  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  position: absolute; padding: 0; right: 38px; top: 50%; transform: translateY(-50%);
   width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
   color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
 }
@@ -665,3 +665,43 @@ button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
 .outils-champ button:hover, .outils-champ button:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
 .outils-champ .icone-bouton { width: 14px; height: 14px; }
 .outils-etat { color: var(--discret); }
+
+/* ---------- Clavier arabe à l'écran (clavier.js) ---------- */
+/* Icône collée au champ : dans le champ, à droite (le texte ne passe pas dessous). */
+.avec-clavier { position: relative; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
+.avec-clavier > input[dir] { flex: 1; min-width: 0; padding-right: 38px; }
+.avec-clavier.zone { display: block; }
+.avec-clavier.zone > .bouton-clavier { top: auto; bottom: 8px; transform: none; }
+.ctx-source > .avec-clavier { flex-basis: 100%; }
+.bouton-clavier {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 32px; height: 28px; padding: 0;
+  border: 0; border-radius: 6px; background: transparent; color: var(--discret); cursor: pointer; display: grid; place-items: center;
+}
+.recherche .bouton-clavier { right: 6px; }
+.bouton-clavier svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bouton-clavier:hover, .bouton-clavier:focus-visible, .bouton-clavier[aria-pressed='true'] { color: var(--accent); background: var(--accent-doux); }
+/* Dans la barre Copier / Effacer d'une zone de texte : bouton comme ses voisins. */
+.outils-champ .bouton-clavier { position: static; transform: none; width: auto; height: auto; display: inline-flex; }
+.outils-champ .bouton-clavier svg { width: 16px; height: 16px; }
+.outils-champ .bouton-clavier[aria-pressed='true'] { color: var(--accent); border-color: var(--accent); background: var(--accent-doux); }
+/* Le panneau, fixé en bas ; la page garde de la place pour lui. */
+body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 260px); }
+.clavier-ar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000; background: var(--surface);
+  border-top: 2px solid var(--accent); box-shadow: 0 -4px 16px rgba(0, 0, 0, .12);
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); user-select: none; -webkit-user-select: none;
+}
+.clavier-rangees { max-width: 640px; margin: 0 auto; display: grid; gap: 5px; }
+.clavier-rangee { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; direction: rtl; }
+.clavier-ar button {
+  min-width: 0; height: 42px; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; background: var(--fond);
+  color: var(--texte); font: 22px/1 var(--arabe); cursor: pointer; touch-action: manipulation;
+}
+.clavier-ar button:active { background: var(--accent-doux); border-color: var(--accent); }
+.clavier-ar button.marque { font-size: 24px; }
+.clavier-bas { grid-template-columns: 1.1fr 1fr 4fr 1.3fr 1.3fr; direction: ltr; }
+.clavier-bas button { font: 600 16px/1 var(--latin); }
+.clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
+.clavier-ar .clavier-fermer { font-size: 22px; color: var(--accent); }
+@media (max-width: 400px) { .clavier-ar button { height: 40px; font-size: 19px; } .clavier-rangee { gap: 2px; } }
+@media print { .clavier-ar, .bouton-clavier { display: none !important; } }
