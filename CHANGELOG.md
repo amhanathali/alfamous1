@@ -9,8 +9,10 @@
   la clé et les définitions.
 - **Articles** : titres et résumés surlignés ; l'article ouvert (`?q=`) surligne titre, chapeau et texte ; le filtre
   est gardé au retour à la liste.
-- **Forum** : nouveau champ de filtre (titre, texte, auteur, verset ou racine) ; extrait du texte quand le terme n'est
-  pas dans le titre ; le fil ouvert (`?q=`) surligne titre et messages. Pendant la frappe, seule la liste est
+- **Forum** : nouveau champ de filtre (titre, texte, **réponses**, auteur, verset ou racine) ; extrait du texte ou de
+  la réponse trouvée (« ↪ Nom : … ») quand le terme n'est pas dans le titre. Les réponses sont lues fil par fil au
+  premier terme tapé, puis gardées pendant la visite (relues si leur nombre change) : une requête « groupe de
+  collections » demanderait d'ouvrir les règles, car la lecture d'une réponse dépend de son fil ; le fil ouvert (`?q=`) surligne titre et messages. Pendant la frappe, seule la liste est
   redessinée (le champ garde le focus).
 - **Témoignages** : passent par le module commun (mêmes règles d'accents).
 - Dans chaque cas, l'élément ouvert descend jusqu'au premier passage surligné. Aide : une ligne.
