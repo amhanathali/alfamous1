@@ -27,3 +27,7 @@ import/
 # Émulateurs Firebase : données locales d'essai (comptes, commentaires) et journaux
 .emulateurs/
 *-debug.log
+
+# Exports automatiques des émulateurs (à l'arrêt) et anciennes copies de fichiers
+firebase-export-*/
+*.ancien.json

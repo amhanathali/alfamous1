@@ -1,6 +1,15 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
+- `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors
+  fusion, ouverture de PR, .bat d'essai) ; confirmation exigée pour fusionner, déployer et importer ; interdits :
+  pousser sur main, forcer un push, `git reset --hard`, modifier `fTabVersets1.js` / `fTabLexique1.js`, lire les
+  clés et secrets.
+- `.gitignore` : ignore les exports d'émulateurs (`firebase-export-*/`) et les anciennes copies (`*.ancien.json`).
+- Ménage local (fichiers non versionnés) : suppression de `package-lock.ancien.json` et de deux dossiers
+  `firebase-export-*`.
+
 ### Modifié — tous les .bat : bon dossier et rien qui bloque (branche `outils/bat-robustes`)
 - Les cinq .bat (`ESSAI_LOCAL`, `deployerAlfamous1`, `LANCER_ALFAMOUS1`, `LANCER_EMULATEURS`, `INVITE_ALFAMOUS1`) se
   placent explicitement dans le dossier Alfamous1 (celui du fichier, sinon `%USERPROFILE%\Desktop\Alfamous1`) et
