@@ -189,6 +189,8 @@ Opérations (en un seul lot) :
 - **Modifier** (auteur réel d'après `prive/auteur`, témoignage non masqué) : `versions/{nbVersions}` + titre, texte,
   case anonyme (et donc `auteurUid`/`auteurNom`), `modifieLe`, `nbVersions + 1`.
 - **Masquer / démasquer** (2+) : comme les fils du forum. **Supprimer** : admin (sous-collections comprises).
+- **Retirer** (auteur réel, témoignage non masqué) : suppression définitive, dans un même lot, de `versions/{n}`, de
+  `prive/auteur` et du témoignage ; les règles refusent un retrait partiel (ni `prive/auteur` ni l'historique seuls).
 
 Import : `npm run importer:temoignages` lit publiquement l'ancienne collection `alfamous-amha/temoignages` (jamais
 modifiée) ; approuvés seulement ; identifiants stables `imp-t-<ancien id>` ; courriel jamais recopié ; `prive/auteur`

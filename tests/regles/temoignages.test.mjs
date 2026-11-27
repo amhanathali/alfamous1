@@ -159,9 +159,48 @@ test('masquer (2+) puis démasquer ; un membre ne masque pas ; l\'auteur ne modi
   await assertSucceeds(b.commit());
 });
 
-test('suppression : admin seulement (auteur et modérateur refusés)', async () => {
+// Retrait par l'auteur, comme le client : historique, prive/auteur et témoignage dans un même lot.
+function retirer(p, id, nbVersions = 1, { avecPrive = true } = {}) {
+  const d = db(p);
+  const b = writeBatch(d);
+  for (let n = 1; n < nbVersions; n += 1) b.delete(doc(d, `temoignages/${id}/versions/${n}`));
+  if (avecPrive) b.delete(doc(d, `temoignages/${id}/prive/auteur`));
+  b.delete(doc(d, `temoignages/${id}`));
+  return b.commit();
+}
+
+test('retrait : l\'auteur réel retire son témoignage (même anonyme), historique compris', async () => {
+  await existant('t1', true, { nbVersions: 2 });
+  await semer('temoignages/t1/versions/1', { titre: 'Ancien', texte: TEXTE, le: T0 });
+  await assertSucceeds(retirer('membre', 't1', 2));
+  let restes = [];
+  await env.withSecurityRulesDisabled(async (c) => {
+    restes = await Promise.all(['temoignages/t1', 'temoignages/t1/prive/auteur', 'temoignages/t1/versions/1']
+      .map((ch) => getDoc(doc(c.firestore(), ch)).then((s) => s.exists())));
+  });
+  if (restes.some(Boolean)) throw new Error(`documents restants : ${restes}`);
+});
+
+test('retrait refusé : autre membre, modérateur, témoignage masqué, prive/auteur oublié, morceaux seuls', async () => {
+  await existant('t1', true);
+  await assertFails(retirer('autre', 't1'));
+  await assertFails(retirer('modo', 't1'));
+  await assertFails(retirer('membre', 't1', 1, { avecPrive: false }));
+  // Effacer prive/auteur ou l'historique sans retirer le témoignage : refusé.
+  await assertFails(deleteDoc(doc(db('membre'), 'temoignages/t1/prive/auteur')));
+  await existant('t2', false, { masque: { par: 'modo', parNom: 'Modo Essai', le: T0 }, titre: '', texte: '' });
+  await assertFails(retirer('membre', 't2'));
+});
+
+test('témoignage importé sans compte : personne ne le retire, sauf l\'admin', async () => {
+  await semer('temoignages/imp', { ...nouveau('membre', true), creeLe: T0 });
+  await semer('temoignages/imp/prive/auteur', { auteurUid: null, auteurNom: 'anonyme' });
+  await assertFails(retirer('membre', 'imp'));
+  await assertSucceeds(retirer('admin', 'imp'));
+});
+
+test('suppression par l\'admin (modérateur refusé)', async () => {
   await existant();
-  await assertFails(deleteDoc(doc(db('membre'), 'temoignages/t1')));
   await assertFails(deleteDoc(doc(db('modo'), 'temoignages/t1')));
   const d = db('admin');
   const b = writeBatch(d);

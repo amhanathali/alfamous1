@@ -453,7 +453,9 @@ function vueAide() {
         <li><b>Masquer mon nom (publier en Anonyme)</b> : la page affiche « Anonyme » ; ni votre nom ni votre compte n'y
           figurent. Vous restez l'auteur : vous pouvez le modifier, et cocher ou décocher la case plus tard
           (chaque modification est gardée dans l'historique).</li>
-        <li>Les modérateurs peuvent masquer un témoignage ; seul l'administrateur peut le supprimer.</li>
+        <li><b>Retirer mon témoignage</b> (bouton sur votre témoignage) : il disparaît du site avec son historique ; c'est
+          définitif. Un témoignage masqué par un modérateur ne peut plus être retiré par son auteur.</li>
+        <li>Les modérateurs peuvent masquer un témoignage ; l'administrateur peut le supprimer.</li>
       </ul>
       <h2>Clavier arabe</h2>
       <ul>
