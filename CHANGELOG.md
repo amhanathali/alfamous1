@@ -9,6 +9,8 @@
 - `.gitignore` : ignore les exports d'émulateurs (`firebase-export-*/`) et les anciennes copies (`*.ancien.json`).
 - Ménage local (fichiers non versionnés) : suppression de `package-lock.ancien.json` et de deux dossiers
   `firebase-export-*`.
+- `CLAUDE.md` : nouvelle section « Répartition du travail » (Claude Code pour le code et le journal Notion du
+  chantier ; Claude sur claude.ai pour le blog, les livres, le pilotage Notion et le cadrage ; l'auteur fait le lien).
 
 ### Modifié — tous les .bat : bon dossier et rien qui bloque (branche `outils/bat-robustes`)
 - Les cinq .bat (`ESSAI_LOCAL`, `deployerAlfamous1`, `LANCER_ALFAMOUS1`, `LANCER_EMULATEURS`, `INVITE_ALFAMOUS1`) se
