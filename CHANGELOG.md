@@ -1,6 +1,10 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — accueil Lecture sans explications (branche `interface/accueil-sans-aide`)
+- L'encadré d'explications de l'accueil (onglet Lecture) est retiré : son contenu est dans l'onglet Aide, seule
+  place des explications. L'accueil ne montre plus que la grille des sourates. Styles `.intro` retirés.
+
 ### Ajouté — fermeture des émulateurs par Claude (branche `outils/fermer-emulateurs`)
 - `npm run fermer:emulateurs` (`scripts/fermer-emulateurs.mjs`) : ferme seulement les processus qui écoutent sur les
   ports d'Alfamous1 (émulateurs 4000, 4400, 4500, 5001, 5005, 8085, 9099, 9150, 9199 ; serveur local 5050), avec
