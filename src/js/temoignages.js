@@ -115,6 +115,7 @@ async function vueLecture(contenu, id, q = '') {
   if (t.nbVersions > 1 && (!t.masque || n >= 2)) actions.push(`<button class="btn" type="button" data-tem="historique">Historique (${t.nbVersions} versions)</button>`);
   if (n >= 2) actions.push(`<button class="btn" type="button" data-tem="${t.masque ? 'demasquer' : 'masquer'}">${t.masque ? 'Démasquer' : 'Masquer'}</button>`);
   if (n >= 3) actions.push('<button class="btn danger" type="button" data-tem="supprimer">Supprimer définitivement</button>');
+  else if (t.estAuteur && !t.masque) actions.push('<button class="btn danger" type="button" data-tem="retirer">Retirer mon témoignage</button>');
   contenu.innerHTML = `<a class="retour" href="#/temoignages">← Témoignages</a>
     <article class="art-page">
       <div class="art-meta"><span>${echapper(signature(t))} · ${dateCourte(t.creeLe)}${t.modifieLe ? ` · modifié le ${dateCourte(t.modifieLe)}` : ''}</span>
@@ -160,18 +161,24 @@ async function agir(contenu, t, action) {
     await vueLecture(contenu, t.id);
     return;
   }
-  if (action === 'supprimer') {
-    ouvrirFenetre(`<h2>Supprimer ce témoignage ?</h2><p>Le témoignage et son historique sont effacés définitivement.</p>
-      <p class="form-msg" role="alert"></p>
+  if (action === 'supprimer' || action === 'retirer') {
+    // Admin : tout ce que contient le témoignage. Auteur (retrait) : historique et prive/auteur, désignés un par un
+    // (les règles n'autorisent pas l'auteur à lister prive/), dans le même lot que le témoignage.
+    const parAuteur = action === 'retirer';
+    ouvrirFenetre(parAuteur
+      ? `<h2>Retirer votre témoignage ?</h2><p>Il disparaît du site, avec son historique. Ce retrait est <b>définitif</b> :
+        pour le republier, il faudra l'écrire de nouveau.</p>`
+      : '<h2>Supprimer ce témoignage ?</h2><p>Le témoignage et son historique sont effacés définitivement.</p>');
+    document.querySelector('#fenetre').insertAdjacentHTML('beforeend', `<p class="form-msg" role="alert"></p>
       <div class="fenetre-bas"><button type="button" class="btn" data-fermer>Annuler</button>
-      <button type="button" class="btn danger-plein" data-confirmer>Supprimer</button></div>`);
+      <button type="button" class="btn danger-plein" data-confirmer>${parAuteur ? 'Retirer' : 'Supprimer'}</button></div>`);
     const f = document.querySelector('#fenetre');
     f.querySelector('[data-confirmer]').addEventListener('click', async () => {
       try {
         const lot = F.writeBatch(db);
-        for (const sous of ['versions', 'prive']) {
-          (await F.getDocs(F.collection(db, `temoignages/${t.id}/${sous}`))).docs.forEach((d) => lot.delete(d.ref));
-        }
+        (await F.getDocs(F.collection(db, `temoignages/${t.id}/versions`))).docs.forEach((d) => lot.delete(d.ref));
+        if (parAuteur) lot.delete(F.doc(db, `temoignages/${t.id}/prive/auteur`));
+        else (await F.getDocs(F.collection(db, `temoignages/${t.id}/prive`))).docs.forEach((d) => lot.delete(d.ref));
         lot.delete(ref);
         await avecDelai(lot.commit());
         fermerFenetre();

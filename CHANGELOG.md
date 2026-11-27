@@ -1,6 +1,13 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — l'auteur retire son témoignage (branche `temoignages/retirer`)
+- Bouton **« Retirer mon témoignage »** sur son propre témoignage (même publié en Anonyme), avec confirmation :
+  suppression définitive du témoignage, de son historique et de `prive/auteur`, en un seul lot.
+- Règles Firestore : retrait permis à l'auteur réel (d'après `prive/auteur`), témoignage non masqué ; retrait partiel
+  refusé (`prive/auteur` ou historique seuls). L'admin garde « Supprimer définitivement ». 3 tests de plus (68/68).
+- Aide, `docs/DROITS.md`, `docs/MODELE-DONNEES.md`.
+
 ### Ajouté — surlignage du filtre dans tous les onglets ; filtre du Forum (branche `temoignages/onglet`)
 - Module commun `src/js/surligner.js` (tests `tests/surligner.test.mjs`) : surlignage sans majuscules, accents,
   voyelles arabes ni tatwīl, formes d'alif confondues ; seuls les nœuds de texte sont touchés (liens intacts).

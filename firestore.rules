@@ -253,7 +253,17 @@ service cloud.firestore {
           && !existsAfter(/databases/$(database)/documents/temoignages/$(id)/prive/texte);
       }
       allow update: if modificationTem() || masquageTem() || demasquageTem();
-      allow delete: if niveau() >= 3;
+      // Retirer (définitif) : l'admin, ou l'auteur réel d'un témoignage non masqué. L'auteur efface dans le même lot
+      // prive/auteur et l'historique (versions/{n}) : rien ne reste de son témoignage.
+      function retraitParAuteur() {
+        return niveau() >= 1
+          && tem().masque == null
+          && auteurTem() == moi()
+          && !existsAfter(/databases/$(database)/documents/temoignages/$(id));
+      }
+      allow delete: if niveau() >= 3
+        || (retraitParAuteur()
+            && !existsAfter(/databases/$(database)/documents/temoignages/$(id)/prive/auteur));
 
       // Historique : versions/{n} = { titre, texte, le } de la version n ; sans nom (anonymat gardé).
       match /versions/{n} {
@@ -267,7 +277,7 @@ service cloud.firestore {
           && request.resource.data.titre == tem().titre
           && request.resource.data.texte == tem().texte
           && request.resource.data.le == (tem().modifieLe != null ? tem().modifieLe : tem().creeLe);
-        allow delete: if niveau() >= 3;
+        allow delete: if niveau() >= 3 || retraitParAuteur();
       }
 
       // prive/auteur : { auteurUid, auteurNom }, écrit avec le témoignage (jamais ajouté à un témoignage existant) ;
@@ -291,6 +301,7 @@ service cloud.firestore {
             && request.resource.data.titre == tem().titre
             && request.resource.data.texte == tem().texte);
         allow delete: if (niveau() >= 2 && doc == 'texte' && temApres().masque == null)
+          || (doc == 'auteur' && retraitParAuteur())
           || niveau() >= 3;
       }
     }
