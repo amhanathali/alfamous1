@@ -1,6 +1,13 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — procédure fixe d'essai local (`ESSAI_LOCAL.bat`, branche `outils/essai-local`)
+- Un double-clic : ferme toutes les autres fenêtres cmd.exe, les émulateurs et le serveur local ; récupère la
+  dernière version préparée (branche la plus récente sur GitHub, ou `main`) et l'affiche ; s'arrête sans rien changer
+  s'il y a des modifications locales ; puis outils, émulateurs, données d'essai, application et navigateur.
+  `ESSAI_LOCAL.bat main` ou `ESSAI_LOCAL.bat <branche>` pour une version précise. Le script s'exécute depuis une
+  copie dans %TEMP% (changer de branche ne le modifie pas en cours de route). README et CLAUDE.md (règle 9) à jour.
+
 ### Ajouté — écouter et suivre la lecture (branche `lecture/ecouter-suivre`, cadrage `docs/LECTURE-AUDIO.md`)
 - Bouton « écouter » rond à côté de la référence de chaque verset (onglet Lecture) : lit à partir de ce verset.
   Nom accessible « Écouter à partir du verset 3:14 », zone de toucher de 44 px.

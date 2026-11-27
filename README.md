@@ -24,7 +24,18 @@ Code sous GPL v3 (voir `LICENSE`). Les traductions proviennent de
 ## Invite de commandes
 Double-cliquer sur **INVITE_ALFAMOUS1.bat** : une fenêtre cmd s'ouvre directement dans ce dossier et affiche la branche en cours.
 
-## Essayer en local (sans déployer)
+## Vérifier une modification en local — procédure fixe
+**Un seul geste : double-cliquer sur ESSAI_LOCAL.bat.** Le script :
+1. ferme toutes les autres fenêtres cmd.exe, les émulateurs et le serveur local encore ouverts ;
+2. récupère la **dernière version préparée par Claude** (la branche modifiée le plus récemment sur GitHub,
+   ou `main` si c'est elle), l'affiche en grand, et s'arrête sans rien toucher s'il y a des modifications locales ;
+3. met les outils à jour (npm install), lance les émulateurs et les données d'essai ;
+4. ouvre l'application sur http://localhost:5050 (comptes d'essai : `admin@essai.local`, mot de passe `essai123`).
+
+Autres usages : `ESSAI_LOCAL.bat main` (ce qui est en ligne), `ESSAI_LOCAL.bat <branche>` (une branche précise).
+Le serveur local envoie les fichiers sans cache : un simple rechargement (F5) suffit après une modification.
+
+## Essayer en local sans émulateurs
 Double-cliquer sur **LANCER_ALFAMOUS1.bat** : le navigateur s'ouvre sur http://localhost:5050.
 Toute modification du code se voit en rechargeant la page (F5). Fermer la fenêtre noire arrête le serveur.
 (Équivalent : `npm run servir`. Pour essayer exactement ce qui sera déployé : `npm run construire` puis `npm run servir:dist`.)
@@ -53,7 +64,7 @@ Niveaux : 0 bloqué, 1 membre (par défaut), 2 modérateur, 3 admin. Pour `--pro
 service gardée **hors du dépôt** : `set GOOGLE_APPLICATION_CREDENTIALS=C:\chemin\cle.json`. La production demande de taper OUI.
 
 ### Essayer les comptes et les commentaires en local
-**Le plus simple : double-cliquer sur ESSAI_LOCAL.bat** (émulateurs, données d'essai, application et navigateur en une fois).
+**Le plus simple : double-cliquer sur ESSAI_LOCAL.bat** (voir « Vérifier une modification en local » plus haut).
 Étape par étape :
 1. Fenêtre 1 : **LANCER_EMULATEURS.bat** (laisser ouverte).
 2. Fenêtre 2 : `npm run emulateurs:peupler` (comptes d'essai + commentaires d'essai sur 112:1).
