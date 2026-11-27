@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  signature, identite, verifierTemoignage, texteEnParagraphes, extrait, ancienContenuEnTexte,
+  signature, identite, verifierTemoignage, texteEnParagraphes, extrait, ancienContenuEnTexte, surlignerDans,
 } from '../src/js/temoignages-outils.js';
 import { lireRest, preparerTemoignages, idImporte } from '../scripts/lib/import-temoignages.mjs';
 
@@ -61,4 +61,24 @@ test('import : approuvés seulement, anonymat, signature de l\'auteur, aucun cou
   assert.equal(par.A1.id, idImporte('A1'));
   assert.ok(!JSON.stringify(p.temoignages).includes('@'));
   assert.equal(p.temoignages[0].import.ancienId, 'B2', 'plus récent d\'abord');
+});
+
+test('extrait : commence près du terme filtré trouvé loin dans le texte', () => {
+  const t = `${'mot '.repeat(80)}cible et la suite`;
+  const e = extrait(t, 180, 'CIBLE');
+  assert.ok(e.startsWith('…') && e.includes('cible'));
+  assert.equal(extrait('cible au début', 180, 'cible'), 'cible au début');
+});
+
+test('surlignerDans : <mark> sur chaque occurrence, sans majuscules, balises et liens intacts', async () => {
+  const { JSDOM } = await import('jsdom');
+  const { document } = new JSDOM('<div id="r"><p>La Peur, <a href="https://peur.ca">la peur</a> &amp; moi</p></div>').window;
+  const r = document.querySelector('#r');
+  const premier = surlignerDans(r, 'peur');
+  assert.equal(r.querySelectorAll('mark.surligne-filtre').length, 2);
+  assert.equal(premier.textContent, 'Peur');
+  assert.equal(r.querySelector('a').getAttribute('href'), 'https://peur.ca');
+  assert.equal(r.textContent, 'La Peur, la peur & moi');
+  assert.equal(surlignerDans(r, ''), null);
+  assert.equal(surlignerDans(r, 'a.b'), null, 'caractères spéciaux pris à la lettre');
 });

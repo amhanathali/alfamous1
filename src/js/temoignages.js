@@ -10,22 +10,24 @@ import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, dateCourte, messageErreur } from './commentaires-format.js';
 import { ajouterLimite } from './limite.js';
 import {
-  LIMITES_TEMOIGNAGE, signature, identite, verifierTemoignage, texteEnParagraphes, extrait,
+  LIMITES_TEMOIGNAGE, signature, identite, verifierTemoignage, texteEnParagraphes, extrait, surlignerDans,
 } from './temoignages-outils.js';
 
 const PAR_PAGE = 50;
 const erreurHtml = (e) => `<p class="message erreur">${echapper(messageErreur(e))}</p>`;
 const puceMasque = '<span class="etat retire">masqué</span>';
-const puceAnonyme = (t) => (t.anonyme ? '<span class="etat prive">anonyme</span>' : '');
+// Filtre de la liste, gardé pendant la visite (retour à la liste) et passé au témoignage ouvert (?q=) pour y être surligné.
+let filtreListe = '';
 
 export async function routeTemoignages(contenu) {
-  const [chemin] = location.hash.split('?');
+  const [chemin, qs] = location.hash.split('?');
+  const q = new URLSearchParams(qs || '').get('q') || '';
   if (chemin === '#/temoignages') { document.title = 'Témoignages — Alfamous'; await vueListe(contenu); return true; }
   if (chemin === '#/temoignages/nouveau') { document.title = 'Témoigner — Alfamous'; await vueEditeur(contenu, null); return true; }
   let m = chemin.match(/^#\/temoignage\/([^/]+)\/modifier$/);
   if (m) { document.title = 'Modifier un témoignage — Alfamous'; await vueEditeur(contenu, decodeURIComponent(m[1])); return true; }
   m = chemin.match(/^#\/temoignage\/([^/]+)$/);
-  if (m) { await vueLecture(contenu, decodeURIComponent(m[1])); return true; }
+  if (m) { await vueLecture(contenu, decodeURIComponent(m[1]), q); return true; }
   return false;
 }
 
@@ -44,31 +46,31 @@ async function vueListe(contenu) {
   }
   try { await charger(); } catch (e) { contenu.innerHTML = erreurHtml(e); return; }
 
-  let filtre = '';
-  const ligne = (t) => `<a class="art-ligne" href="#/temoignage/${encodeURIComponent(t.id)}">
+  const ligne = (t) => `<a class="art-ligne" href="#/temoignage/${encodeURIComponent(t.id)}${filtreListe.trim() ? `?q=${encodeURIComponent(filtreListe.trim())}` : ''}">
       <span class="vignette">${echapper((String(t.titre || '').match(/\p{L}/u) || ['·'])[0])}</span>
       <span class="art-centre"><span class="art-titre" dir="auto">${echapper(t.masque ? 'Témoignage masqué par un modérateur' : t.titre || 'Sans titre')}</span>
-        ${t.masque ? '' : `<span class="art-resume" dir="auto">${echapper(extrait(t.texte))}</span>`}
+        ${t.masque ? '' : `<span class="art-resume" dir="auto">${echapper(extrait(t.texte, 180, filtreListe.trim()))}</span>`}
         <span class="art-meta"><span>${echapper(signature(t))}</span>${t.masque ? puceMasque : ''}</span></span>
       <span class="art-droite">${dateCourte(t.creeLe)}</span>
     </a>`;
   const dessiner = () => {
-    const f = filtre.toLocaleLowerCase('fr');
+    const f = filtreListe.trim().toLocaleLowerCase('fr');
     const vus = liste.filter((t) => !f || `${t.titre} ${t.texte} ${signature(t)}`.toLocaleLowerCase('fr').includes(f));
     contenu.innerHTML = `
       <div class="titre"><h1>Témoignages</h1><span class="resume">${liste.length}${suite ? '+' : ''} témoignage${liste.length > 1 ? 's' : ''} · les plus récents d'abord</span></div>
       <p class="aide">Des parcours personnels, racontés par celles et ceux qui les ont vécus. Chacun peut signer de son nom ou
         publier en Anonyme.</p>
       <div class="barre-outils">
-        <input class="art-recherche" type="search" placeholder="Filtrer les témoignages affichés…" value="${echapper(filtre)}" aria-label="Filtrer">
+        <input class="art-recherche" type="search" placeholder="Filtrer les témoignages affichés…" value="${echapper(filtreListe)}" aria-label="Filtrer">
         ${session.niveau >= 1 ? '<a class="btn principal" href="#/temoignages/nouveau">+ Témoigner</a>'
           : session.utilisateur ? '<span class="aide">Vérifiez votre courriel pour témoigner.</span>'
             : '<button class="lien-bouton" type="button" data-compte="connexion">Se connecter pour témoigner</button>'}
       </div>
       <div class="liste-fils">${vus.map(ligne).join('') || '<p class="vide">Aucun témoignage.</p>'}</div>
       ${suite ? '<button class="plus" type="button" data-plus>Témoignages plus anciens</button>' : ''}`;
+    contenu.querySelectorAll('.art-ligne .art-centre').forEach((el) => surlignerDans(el, filtreListe));
     const champ = contenu.querySelector('.art-recherche');
-    champ.addEventListener('input', () => { filtre = champ.value; const pos = champ.selectionStart; dessiner(); const c = contenu.querySelector('.art-recherche'); c.focus(); c.setSelectionRange(pos, pos); });
+    champ.addEventListener('input', () => { filtreListe = champ.value; const pos = champ.selectionStart; dessiner(); const c = contenu.querySelector('.art-recherche'); c.focus(); c.setSelectionRange(pos, pos); });
     contenu.querySelector('[data-plus]')?.addEventListener('click', async (e) => {
       e.target.disabled = true;
       try { await charger(suite); dessiner(); } catch (err) { e.target.textContent = messageErreur(err); }
@@ -98,7 +100,7 @@ async function lire(id) {
   return t;
 }
 
-async function vueLecture(contenu, id) {
+async function vueLecture(contenu, id, q = '') {
   contenu.innerHTML = '<p class="message">Chargement…</p>';
   let t;
   try { t = await lire(id); } catch (e) { contenu.innerHTML = erreurHtml(e); return; }
@@ -124,6 +126,11 @@ async function vueLecture(contenu, id) {
       <div class="corps-art" dir="auto">${texteEnParagraphes(texte)}</div>
       <p class="form-msg" role="alert"></p>
     </article>`;
+  // Terme venu du filtre de la liste : surligné dans le titre et le texte ; on descend jusqu'au premier passage
+  // (après le retour en haut de page fait par le routeur).
+  const premier = surlignerDans(contenu.querySelector('.art-page h1'), q) || surlignerDans(contenu.querySelector('.corps-art'), q);
+  surlignerDans(contenu.querySelector('.corps-art'), q);
+  if (premier && !premier.closest('h1')) setTimeout(() => premier.scrollIntoView({ block: 'center' }), 0);
   const msg = contenu.querySelector('.form-msg');
   contenu.querySelectorAll('[data-tem]').forEach((b) => b.addEventListener('click', async () => {
     msg.textContent = '';

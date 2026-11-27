@@ -20,6 +20,10 @@
 - `npm run emulateurs:peupler` : deux témoignages d'essai du membre (un signé, un anonyme), puis import des vrais
   témoignages dans les émulateurs.
 - Aide : section Témoignages.
+- Filtre de la liste : le terme est surligné (titre, extrait, signature) ; l'extrait commence près du passage trouvé
+  s'il est loin dans le texte. Le témoignage ouvert depuis la liste filtrée (`#/temoignage/<id>?q=…`) surligne le
+  terme dans le titre et le texte et défile jusqu'au premier passage ; le filtre est gardé au retour à la liste.
+  Fonctions `surlignerDans` et `extrait` (`src/js/temoignages-outils.js`), testées.
 
 ### Ajouté — champ de recherche des sourates sur l'accueil (branche `interface/filtre-sourates`)
 - Accueil (onglet Lecture) : un champ au-dessus de la grille filtre les sourates pendant la frappe, avec le nombre
