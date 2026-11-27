@@ -5,6 +5,7 @@
 import { firebase } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
 import { echapper, messageErreur } from './commentaires-format.js';
+import { plages, surlignerDans } from './surligner.js';
 
 const NIVEAUX = ['0 · bloqué', '1 · membre', '2 · modérateur', '3 · admin'];
 const pluriel = (n, mot) => `${n} ${mot}${n > 1 ? 's' : ''}`;
@@ -21,9 +22,10 @@ async function appeler(nom, data) {
   return (await Fn.httpsCallable(fonctions, nom, { timeout: 60000 })(data)).data;
 }
 
+// Filtre texte : nom, courriel et niveau, sans majuscules ni accents ni voyelles arabes (surligner.js).
 function filtrer(liste) {
-  const q = saisie.trim().toLowerCase();
-  return liste.filter((m) => (!q || m.nom.toLowerCase().includes(q) || m.courriel.toLowerCase().includes(q))
+  const q = saisie.trim();
+  return liste.filter((m) => (!q || plages(`${m.nom || ''} ${m.courriel || ''} ${NIVEAUX[m.niveau] || ''}`, q).length > 0)
     && (filtre === 'tous' || (filtre === 'admins' && m.niveau === 3) || (filtre === 'modos' && m.niveau === 2)
       || (filtre === 'bloques' && m.bloque) || (filtre === 'nonverifies' && !m.verifie)));
 }
@@ -35,42 +37,46 @@ function celluleNiveau(m) {
     ${NIVEAUX.map((l, i) => `<option value="${i}"${i === m.niveau ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 }
 
-function dessiner(contenu) {
-  const { membres, journal } = donnees;
-  const liste = filtrer(membres);
-  const n = (k) => membres.filter((m) => m.niveau === k && m.verifie).length;
-  contenu.innerHTML = `<div class="titre"><h1>Membres</h1>
-      <span class="resume">${pluriel(membres.length, 'inscrit')} · ${pluriel(n(3), 'admin')} · ${pluriel(n(2), 'modérateur')} · plus récents en premier</span></div>
-    <div class="barre-outils">
-      <input id="filtre-membres" class="filtre-lexique" type="search" autocomplete="off" placeholder="Chercher un nom ou un courriel" value="${echapper(saisie)}" aria-label="Chercher un membre">
-      <button type="button" class="btn" data-membres="recharger">Actualiser</button>
-    </div>
-    <div class="barre-outils"><div class="filtres">${[['tous', 'Tous'], ['admins', 'Admins'], ['modos', 'Modérateurs'], ['bloques', 'Bloqués'], ['nonverifies', 'Courriel non vérifié']]
-      .map(([k, l]) => `<button type="button" data-filtre-membres="${k}" class="${filtre === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
-      <span class="aide">${liste.length === membres.length ? '' : `${liste.length} sur ${membres.length}`}</span></div>
-    <table class="membres">
-      <thead><tr><th>Membre</th><th>Courriel vérifié</th><th>Inscrit le</th><th>Dernière connexion</th>
-        <th title="Commentaires de versets + définitions du lexique">Commentaires</th><th title="Fils publiés + réponses">Forum</th><th>Niveau</th></tr></thead>
-      <tbody>${liste.map((m) => `<tr class="${m.bloque ? 'bloque' : ''}">
+const ligneMembre = (m) => `<tr class="${m.bloque ? 'bloque' : ''}">
         <td data-l="Membre"><span class="nom">${echapper(m.nom || '(sans nom)')}</span>${m.uid === session.utilisateur?.uid ? ' <span class="toi">vous</span>' : ''}<span class="courriel">${echapper(m.courriel)}</span></td>
         <td data-l="Vérifié">${m.verifie ? '<span class="pastille ok">vérifié</span>' : '<span class="pastille non">non vérifié</span>'}</td>
         <td data-l="Inscrit le" class="date">${date(m.creeLe)}</td>
         <td data-l="Connexion" class="date">${date(m.vuLe)}</td>
         <td data-l="Commentaires" class="nombre" title="${nb(m.commentaires)} commentaire(s) de versets + ${nb(m.definitions)} définition(s) du lexique">${m.commentaires === null || m.definitions === null ? '?' : m.commentaires + m.definitions}</td>
         <td data-l="Forum" class="nombre" title="${nb(m.fils)} fil(s) publié(s) + ${nb(m.reponses)} réponse(s)">${m.fils === null || m.reponses === null ? '?' : m.fils + m.reponses}</td>
-        <td data-l="Niveau" class="col-niveau">${celluleNiveau(m)}</td></tr>`).join('')
-        || '<tr><td colspan="7" class="vide">Aucun membre ne correspond.</td></tr>'}</tbody></table>
+        <td data-l="Niveau" class="col-niveau">${celluleNiveau(m)}</td></tr>`;
+
+// Seul le tableau est redessiné pendant la frappe : le champ garde le focus (et le clavier arabe reste ouvert).
+function dessinerListe(contenu) {
+  const { membres } = donnees;
+  const liste = filtrer(membres);
+  contenu.querySelector('.compte-filtre').textContent = liste.length === membres.length ? '' : `${liste.length} sur ${membres.length}`;
+  const corps = contenu.querySelector('table.membres tbody');
+  corps.innerHTML = liste.map(ligneMembre).join('') || '<tr><td colspan="7" class="vide">Aucun membre ne correspond.</td></tr>';
+  corps.querySelectorAll('.nom, .courriel').forEach((el) => surlignerDans(el, saisie.trim()));
+}
+
+function dessiner(contenu) {
+  const { membres, journal } = donnees;
+  const n = (k) => membres.filter((m) => m.niveau === k && m.verifie).length;
+  contenu.innerHTML = `<div class="titre"><h1>Membres</h1>
+      <span class="resume">${pluriel(membres.length, 'inscrit')} · ${pluriel(n(3), 'admin')} · ${pluriel(n(2), 'modérateur')} · plus récents en premier</span></div>
+    <div class="barre-outils">
+      <input id="filtre-membres" class="art-recherche" type="search" dir="auto" autocomplete="off" spellcheck="false" placeholder="Filtrer les membres : nom, courriel, niveau…" value="${echapper(saisie)}" aria-label="Filtrer les membres">
+      <button type="button" class="btn" data-membres="recharger">Actualiser</button>
+    </div>
+    <div class="barre-outils"><div class="filtres">${[['tous', 'Tous'], ['admins', 'Admins'], ['modos', 'Modérateurs'], ['bloques', 'Bloqués'], ['nonverifies', 'Courriel non vérifié']]
+      .map(([k, l]) => `<button type="button" data-filtre-membres="${k}" class="${filtre === k ? 'actif' : ''}">${l}</button>`).join('')}</div>
+      <span class="aide compte-filtre"></span></div>
+    <table class="membres">
+      <thead><tr><th>Membre</th><th>Courriel vérifié</th><th>Inscrit le</th><th>Dernière connexion</th>
+        <th title="Commentaires de versets + définitions du lexique">Commentaires</th><th title="Fils publiés + réponses">Forum</th><th>Niveau</th></tr></thead>
+      <tbody></tbody></table>
     <section class="panneau journal-niveaux"><h2>Journal des changements de niveau</h2>
       ${journal.length ? journal.map((j) => `<p>${dateHeure(j.le)} · <b>${echapper(j.parNom)}</b> : ${echapper(j.cibleNom)} ${NIVEAUX[j.avant] ?? j.avant} → <b>${NIVEAUX[j.apres] ?? j.apres}</b></p>`).join('')
         : '<p>Aucun changement pour l\'instant.</p>'}</section>`;
-
-  const champ = contenu.querySelector('#filtre-membres');
-  champ.addEventListener('input', () => {
-    saisie = champ.value;
-    const p = champ.selectionStart;
-    dessiner(contenu);
-    const c = contenu.querySelector('#filtre-membres'); c.focus(); c.setSelectionRange(p, p);
-  });
+  contenu.querySelector('#filtre-membres').addEventListener('input', (e) => { saisie = e.target.value; dessinerListe(contenu); });
+  dessinerListe(contenu);
 }
 
 function confirmer(m, apres) {
