@@ -29,7 +29,9 @@
       "Bash(code:*)",
       "Bash(ESSAI_LOCAL.bat:*)",
       "Bash(LANCER_ALFAMOUS1.bat:*)",
-      "Bash(LANCER_EMULATEURS.bat:*)"
+      "Bash(LANCER_EMULATEURS.bat:*)",
+      "Bash(npm run fermer\\:emulateurs:*)",
+      "Bash(node scripts/fermer-emulateurs.mjs:*)"
     ],
     "ask": [
       "Bash(gh pr merge:*)",

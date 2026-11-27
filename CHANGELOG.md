@@ -1,6 +1,14 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — fermeture des émulateurs par Claude (branche `outils/fermer-emulateurs`)
+- `npm run fermer:emulateurs` (`scripts/fermer-emulateurs.mjs`) : ferme seulement les processus qui écoutent sur les
+  ports d'Alfamous1 (émulateurs 4000, 4400, 4500, 5001, 5005, 8085, 9099, 9150, 9199 ; serveur local 5050), avec
+  leurs enfants ; jamais le système. `--voir` affiche ce qui serait fermé. Tests : `tests/fermer-emulateurs.test.mjs`.
+- `.claude/settings.json` : cette commande est autorisée sans confirmation (pas de `taskkill` général).
+- `CLAUDE.md`, règle 10 : Claude l'utilise quand un essai local occupe les ports avant les tests des règles ou un
+  déploiement.
+
 ### Modifié — en-tête compact et onglet Aide (branche `interface/entete-compacte`)
 - Sous le champ de recherche, une seule ligne de réglages : cases **ME** (mot entier) et **MC** (mots contigus),
   avec info-bulle et nom accessible complets ; icône des statistiques (lien `#/stats`, sans libellé) ; menu des
