@@ -39,21 +39,17 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg>
       </button>
     </form>
+    <!-- Une seule ligne de réglages (gain de place verticale) ; explications et exemples : onglet Aide (#/aide). -->
     <div class="options">
-      <label title="Le mot doit être exactement le terme cherché"><input id="mot-entier" type="checkbox"> Mot entier</label>
-      <label title="Les termes doivent se suivre, dans n'importe quel ordre"><input id="contigus" type="checkbox"> Mots contigus</label>
-      <span class="exemples">Exemples :
-        <a href="#/q/2:255">2:255</a> <a href="#/q/p%2050">p 50</a>
-        <a href="#/q/%D8%B1%D8%AD%D9%85" lang="ar">رحم</a>
-        <a href="#/q/%D8%B1%D8%AD%D9%85%20%D8%BA%D9%81%D8%B1" lang="ar">رحم غفر</a>
-        <a href="#/q/sabr">sabr</a> <a href="#/stats">statistiques</a>
-      </span>
+      <label title="Mot entier : le mot doit être exactement le terme cherché"><input id="mot-entier" type="checkbox" aria-label="Mot entier"> ME</label>
+      <label title="Mots contigus : les termes doivent se suivre, dans n'importe quel ordre"><input id="contigus" type="checkbox" aria-label="Mots contigus"> MC</label>
+      <a class="lien-stats" href="#/stats" title="Statistiques des racines" aria-label="Statistiques des racines">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/></svg>
+      </a>
+      <label class="choix-trad" title="Commentaire traditionnel, cité seulement pour la comparaison ; affiché avec les commentaires de chaque verset" hidden>
+        <select id="traduction" aria-label="Commentaire traditionnel"><option value="">No Comment</option></select>
+      </label>
     </div>
-    <p class="info-latin"><span aria-hidden="true">ℹ️</span> Le latin est cherché dans la translittération, les commentaires Alfamous et le commentaire traditionnel choisi.</p>
-    <label class="choix-trad" hidden>
-      <span title="Commentaires traditionnels, cités seulement pour la comparaison ; affichés avec les commentaires de chaque verset">Commentaires traditionnels</span>
-      <select id="traduction"><option value="">aucun</option></select>
-    </label>
   </header>
 
   <main id="contenu" aria-live="polite"></main>

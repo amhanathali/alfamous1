@@ -43,9 +43,6 @@ a { color: var(--lien); }
 .logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
 .logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
 .entete-actions { display: flex; align-items: center; gap: 10px; }
-.choix-trad { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--discret); max-width: 920px; margin: 6px auto 0; }
-.choix-trad select { max-width: 280px; }
-.info-latin { max-width: 920px; margin: 6px auto 0; font-size: 13px; color: var(--discret); }
 select, input, button { font: inherit; color: inherit; }
 /* Champs de saisie : 16 px au moins partout, sinon l'iPhone zoome quand on les touche (le zoom reste permis).
    Un champ prend la taille de son parent, mais jamais moins de 16 px ; tests/champs-16px.test.mjs. */
@@ -56,11 +53,11 @@ select { background: var(--surface); border: 1px solid var(--bordure); border-ra
 .recherche { display: flex; gap: 8px; margin-top: 12px; }
 .recherche .champ { flex: 1; min-width: 0; position: relative; display: flex; }
 .recherche input {
-  flex: 1; min-width: 0; font-size: 18px; padding: 10px 44px 10px 14px; border-radius: 10px;
+  flex: 1; min-width: 0; font-size: 18px; padding: 10px 76px 10px 14px; border-radius: 10px;
   border: 1px solid var(--bordure); background: var(--surface);
 }
 .recherche .effacer {
-  position: absolute; padding: 0; right: 6px; top: 50%; transform: translateY(-50%);
+  position: absolute; padding: 0; right: 38px; top: 50%; transform: translateY(-50%);
   width: 30px; height: 30px; border-radius: 50%; border: 0; background: transparent;
   color: var(--discret); font-weight: 400; font-size: 20px; line-height: 1; cursor: pointer;
 }
@@ -76,8 +73,19 @@ select { background: var(--surface); border: 1px solid var(--bordure); border-ra
 .recherche .bouton-chercher:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 :root[data-theme='sombre'] .recherche .bouton-chercher { color: #1d2024; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme='clair']) .recherche .bouton-chercher { color: #1d2024; } }
-.options { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
-.exemples a { margin: 0 3px; }
+/* Une seule ligne : ME, MC, icône des statistiques, commentaire traditionnel (le menu déroulant se rétrécit). */
+.options { display: flex; flex-wrap: nowrap; gap: 14px; align-items: center; font-size: 14px; color: var(--discret); margin-top: 8px; }
+.options > label { flex: none; display: inline-flex; align-items: center; gap: 4px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.lien-stats { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; color: var(--discret); }
+.lien-stats:hover, .lien-stats:focus-visible { color: var(--accent); background: var(--accent-doux); }
+.lien-stats svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.options .choix-trad { flex: 0 1 280px; min-width: 0; margin-left: auto; font-weight: 400; }
+.options .choix-trad select { width: 100%; min-width: 0; max-width: none; text-overflow: ellipsis; }
+/* ---------- Aide (#/aide) ---------- */
+.aide-page { max-width: 760px; }
+.aide-page h2 { font-size: 18px; margin: 20px 0 6px; }
+.aide-page li { margin: 4px 0; }
+.aide-page .exemples-aide a { margin-right: 10px; }
 
 /* ---------- Contenu ---------- */
 main { padding: 16px; min-height: 60vh; }
@@ -267,9 +275,13 @@ code { background: var(--accent-doux); padding: 0 4px; border-radius: 4px; }
 .ecrire.connexion .btn { margin: 6px 4px 0; }
 
 /* ---------- Menu Lecture / Mes Notes / Forum (phase 2) ---------- */
-.menu { display: flex; gap: 4px; max-width: 920px; margin: 8px auto 0; border-bottom: 1px solid var(--bordure); }
-.menu a { padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 15px; }
+/* Sept onglets : sur téléphone, le menu défile horizontalement ; le trait du bas est une ombre intérieure
+   (une bordure avec marge négative serait rognée par le défilement). */
+.menu { display: flex; gap: 4px; max-width: 920px; margin: 8px auto 0; box-shadow: inset 0 -1px var(--bordure); overflow-x: auto; scrollbar-width: none; }
+.menu::-webkit-scrollbar { display: none; }
+.menu a { flex: none; padding: 6px 12px; text-decoration: none; color: var(--discret); border-bottom: 2px solid transparent; font-size: 15px; white-space: nowrap; }
 .menu a.actif { color: var(--texte); border-bottom-color: var(--accent); font-weight: 600; }
+@media (max-width: 520px) { .menu a { padding: 6px 8px; } }
 
 /* ---------- Mes Notes et forum ---------- */
 .barre-outils { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
@@ -653,3 +665,67 @@ button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
 .outils-champ button:hover, .outils-champ button:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
 .outils-champ .icone-bouton { width: 14px; height: 14px; }
 .outils-etat { color: var(--discret); }
+
+/* ---------- Clavier arabe à l'écran (clavier.js) ---------- */
+/* Icône collée au champ : dans le champ, à droite (le texte ne passe pas dessous). */
+.avec-clavier { position: relative; display: flex; align-items: center; flex: 1 1 auto; min-width: 0; }
+.avec-clavier > input.a-clavier { flex: 1; min-width: 0; padding-right: 38px; }
+/* Zone de texte et éditeur d'article : icône en haut à droite. */
+.avec-clavier.zone { display: block; }
+.avec-clavier.zone > .bouton-clavier { top: 6px; right: 6px; transform: none; z-index: 1; }
+.avec-clavier.zone > textarea.a-clavier, .avec-clavier.zone > .a-clavier[contenteditable] { padding-right: 40px; }
+.avec-clavier.zone > textarea.a-clavier { display: block; width: 100%; }
+/* Champ masqué (ex. éditeur visuel pendant le mode HTML) : pas d'icône. */
+.avec-clavier:has(> .a-clavier[hidden]) > .bouton-clavier { display: none; }
+.ctx-source > .avec-clavier { flex-basis: 100%; }
+.bouton-clavier {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 32px; height: 28px; padding: 0;
+  border: 0; border-radius: 6px; background: transparent; color: var(--discret); cursor: pointer; display: grid; place-items: center;
+}
+.recherche .bouton-clavier { right: 6px; }
+.bouton-clavier svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bouton-clavier:hover, .bouton-clavier:focus-visible, .bouton-clavier[aria-pressed='true'] { color: var(--accent); background: var(--accent-doux); }
+/* Le panneau : petite fenêtre flottante, déplaçable par sa barre ; ou ancré en bas (la page garde de la place). */
+body.clavier-ouvert { padding-bottom: var(--hauteur-clavier, 220px); }
+.clavier-ar {
+  position: fixed; z-index: 1000; width: min(440px, calc(100vw - 8px)); background: var(--surface);
+  border: 1px solid var(--bordure); border-radius: 12px; box-shadow: 0 10px 32px rgba(0, 0, 0, .22);
+  padding: 0 5px 6px; user-select: none; -webkit-user-select: none; left: 50%; bottom: 12px;
+}
+.clavier-ar:not(.ancre) { bottom: auto; }
+.clavier-ar.deplace { opacity: .92; box-shadow: 0 14px 40px rgba(0, 0, 0, .3); }
+.clavier-ar.ancre {
+  left: 0; right: 0; bottom: 0; top: auto; width: auto; border-radius: 0; border-width: 2px 0 0; border-color: var(--accent);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, .12); padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+/* Barre du haut : nom, poignée, ancrer / détacher, fermer. */
+.clavier-titre { display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: center; gap: 4px; height: 30px; cursor: grab; touch-action: none; }
+.clavier-ar.deplace .clavier-titre { cursor: grabbing; }
+.clavier-ar.ancre .clavier-titre { cursor: default; }
+.clavier-nom { font: 12px/1 var(--latin); color: var(--discret); padding-left: 4px; }
+.clavier-poignee { width: 44px; height: 4px; border-radius: 2px; background: var(--bordure); }
+.clavier-ar.ancre .clavier-poignee { visibility: hidden; }
+.clavier-ar .clavier-outil {
+  justify-self: end; width: 30px; height: 26px; border: 0; background: transparent; color: var(--discret);
+  display: grid; place-items: center; font: 400 20px/1 var(--latin); border-radius: 6px;
+}
+.clavier-ar .clavier-outil:hover { background: var(--accent-doux); color: var(--accent); }
+.clavier-ar .clavier-outil svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.clavier-ar .clavier-fermer { grid-column: 4; }
+.clavier-rangees { max-width: 640px; margin: 0 auto; display: grid; gap: 4px; }
+.clavier-page { display: grid; gap: 4px; }
+.clavier-rangee { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 3px; direction: rtl; }
+.clavier-ar .clavier-rangee button {
+  min-width: 0; height: 36px; padding: 0; border: 1px solid var(--bordure); border-radius: 6px; background: var(--fond);
+  color: var(--texte); font: 20px/1 var(--arabe); cursor: pointer; touch-action: manipulation;
+}
+.clavier-ar .clavier-rangee button:active { background: var(--accent-doux); border-color: var(--accent); }
+.clavier-ar button.marque { font-size: 22px; }
+.clavier-page.symboles .clavier-rangee { direction: ltr; }
+.clavier-page.symboles button { font: 17px/1 var(--latin) !important; }
+.clavier-bas { grid-template-columns: 1.2fr 1.2fr 1fr 4fr 1.3fr 1.3fr; direction: ltr; }
+.clavier-ar .clavier-bas button { font: 600 15px/1 var(--latin); }
+.clavier-ar .clavier-bas .clavier-page-bouton { font: 600 15px/1 var(--latin); color: var(--accent); }
+.clavier-ar .clavier-bas [data-touche=' '] { font-weight: 400; color: var(--discret); }
+@media (max-width: 400px) { .clavier-ar .clavier-rangee button { height: 34px; font-size: 18px; } .clavier-rangee { gap: 2px; } }
+@media print { .clavier-ar, .bouton-clavier { display: none !important; } }

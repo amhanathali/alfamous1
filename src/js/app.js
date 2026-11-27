@@ -191,11 +191,11 @@ async function vueAccueil() {
       <ul>
         <li><b>Plusieurs termes</b> : séparez-les par un espace ou « + ». Les versets affichés contiennent <b>tous</b> les termes.
           Exemples : <a href="${lienRequete('رحم غفر')}" lang="ar">رحم غفر</a> (deux racines), <a href="${lienRequete('رحمن رحيم')}" lang="ar">رحمن رحيم</a> (deux mots).</li>
-        <li><b>Mots contigus</b> : les termes doivent se suivre (dans n'importe quel ordre).</li>
-        <li><b>Mot entier</b> : le mot doit être exactement le terme, et pas seulement le contenir.</li>
+        <li><b>MC</b> (mots contigus) : les termes doivent se suivre (dans n'importe quel ordre).</li>
+        <li><b>ME</b> (mot entier) : le mot doit être exactement le terme, et pas seulement le contenir.</li>
         <li>Préfixes : <code>r:</code> force la recherche par racine, <code>m:</code> par mot.
           Les lettres ا و ي non tapées sont ignorées, comme dans l'ancienne application (« كتب » trouve ٱلْكِتَـٰبُ).</li>
-        <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens. <a href="#/stats">Statistiques des racines</a>.</li>
+        <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens. <a href="#/stats">Statistiques des racines</a>. Plus de détails : <a href="#/aide">Aide</a>.</li>
       </ul></div>
     <div class="grille-sourates">${liste.map((x) => `<a href="${lienRequete(String(x.n))}">
       <span class="n">${x.n}</span><span>${echapper(nomSourate(x.n)[1])}</span><span class="ar" lang="ar">${echapper(nomSourate(x.n)[0])}</span></a>`).join('')}</div>`;
@@ -236,7 +236,7 @@ function modeTexte() {
 function aideContigus(nbSansContigus) {
   if (!nbSansContigus) return 'Aucun verset ne correspond.';
   return `Aucun verset où ces termes <b>se suivent</b>. ${pluriel(nbSansContigus, 'verset')} les contien${nbSansContigus > 1 ? 'nent' : 't'} tous à des places différentes :
-    <button class="lien-bouton" data-sans-contigus>décocher « Mots contigus »</button>.`;
+    <button class="lien-bouton" data-sans-contigus>décocher « MC » (mots contigus)</button>.`;
 }
 contenu.addEventListener('click', (e) => {
   if (!e.target.closest('[data-sans-contigus]')) return;
@@ -387,6 +387,46 @@ async function vueStats() {
   dessiner('');
 }
 
+// ---------- Aide (#/aide) ----------
+// Page tenue à jour au fil de l'avancement de l'application. Elle reprend les explications de l'accueil
+// (onglet Lecture), les exemples de saisie et la note sur la recherche en lettres latines, retirés de l'en-tête.
+function vueAide() {
+  const ex = (q, ar = false) => `<a href="${lienRequete(q)}"${ar ? ' lang="ar"' : ''}>${echapper(q)}</a>`;
+  contenu.innerHTML = `<div class="titre"><h1>Aide</h1><span class="resume">mise à jour au fil de l'application</span></div>
+    <div class="aide-page">
+      <h2>Rechercher</h2>
+      <p>Cherchez un verset (${ex('2:255')}), une sourate (${ex('19')}), une page (${ex('p 50')}),
+        un ou plusieurs mots en arabe ou en lettres latines, ou une ou plusieurs racines.</p>
+      <ul>
+        <li><b>Plusieurs termes</b> : séparez-les par un espace ou « + ». Les versets affichés contiennent <b>tous</b> les termes.
+          Exemples : ${ex('رحم غفر', true)} (deux racines), ${ex('رحمن رحيم', true)} (deux mots).</li>
+        <li>Préfixes : <code>r:</code> force la recherche par racine, <code>m:</code> par mot.
+          Les lettres ا و ي non tapées sont ignorées, comme dans l'ancienne application (« كتب » trouve ٱلْكِتَـٰبُ).</li>
+        <li><span aria-hidden="true">ℹ️</span> Le latin est cherché dans la translittération, les commentaires Alfamous et le commentaire traditionnel choisi.</li>
+        <li>Cliquez sur un mot arabe pour voir sa lecture, sa racine et son sens.</li>
+      </ul>
+      <p class="exemples-aide">Exemples de saisie : ${ex('2:255')} ${ex('2:255-257')} ${ex('p 50')} ${ex('رحم', true)} ${ex('رحم غفر', true)} ${ex('رحمن رحيم', true)} ${ex('r:كتب')} ${ex('sabr')}</p>
+      <h2>Réglages sous le champ de recherche</h2>
+      <ul>
+        <li><b>ME</b> (mot entier) : le mot doit être exactement le terme, et pas seulement le contenir.</li>
+        <li><b>MC</b> (mots contigus) : les termes doivent se suivre (dans n'importe quel ordre).</li>
+        <li><b>Icône des statistiques</b> : <a href="#/stats">statistiques des racines</a> (occurrences de chaque racine).</li>
+        <li><b>Commentaire traditionnel</b> (menu déroulant, « No Comment » par défaut) : un commentaire traditionnel,
+          cité seulement pour la comparaison, affiché avec les commentaires de chaque verset.</li>
+      </ul>
+      <h2>Clavier arabe</h2>
+      <ul>
+        <li>L'icône de clavier, collée à chaque champ de saisie (recherche, titres, filtres, commentaires, notes, éditeur
+          d'article…), ouvre un <b>clavier arabe</b> compact. Le clavier du téléphone est alors masqué.</li>
+        <li>Barre du haut : faites-la <b>glisser</b> pour déplacer le clavier (sa place est gardée) ; l'icône voisine
+          l'<b>ancre</b> en bas de l'écran ou le rend flottant ; <b>×</b> ferme le clavier arabe et rend le clavier habituel.</li>
+        <li>Rangée du bas : <b>123</b> chiffres et symboles ; <b>◌َ</b> voyelles, chiffres arabes et ponctuation arabe
+          (le même bouton, devenu <b>أبج</b>, revient aux lettres) ; <b>+</b> sépare des termes de recherche ;
+          <b>⌫</b> efface ; <b>↵</b> lance la recherche (ou passe à la ligne dans un texte).</li>
+      </ul>
+    </div>`;
+}
+
 function message(html) { contenu.innerHTML = `<p class="message">${html}</p>`; }
 
 // ---------- Routage (#/q/…, #/stats) ----------
@@ -417,6 +457,7 @@ async function router() {
     try { await routeLexique(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
+  if (location.hash === '#/aide') { $('#requete').value = ''; $('#effacer').hidden = true; document.title = 'Aide — Alfamous'; vueAide(); window.scrollTo(0, 0); return; }
   if (location.hash === '#/stats') { $('#requete').value = ''; $('#effacer').hidden = true; document.title = 'Statistiques — Alfamous'; return vueStats().catch(erreur); }
   const m = location.hash.match(/^#\/q\/(.*)$/);
   const q = m ? decodeURIComponent(m[1]).trim() : '';

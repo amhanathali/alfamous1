@@ -1,6 +1,38 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — en-tête compact et onglet Aide (branche `interface/entete-compacte`)
+- Sous le champ de recherche, une seule ligne de réglages : cases **ME** (mot entier) et **MC** (mots contigus),
+  avec info-bulle et nom accessible complets ; icône des statistiques (lien `#/stats`, sans libellé) ; menu des
+  commentaires traditionnels sans libellé, valeur par défaut « No Comment » (rétrécit sur téléphone).
+- Retirés de l'en-tête : la ligne d'exemples de saisie et la note « ℹ️ Le latin est cherché… », déplacées dans
+  l'Aide.
+- Nouvel onglet **Aide** (`#/aide`, dernier du menu) : explications de l'accueil Lecture, exemples de saisie, note
+  sur la recherche en latin, rôle des réglages ME / MC / statistiques / commentaire. À compléter au fil de
+  l'application.
+- Menu : défile horizontalement sur téléphone (sept onglets possibles) ; le trait du bas devient une ombre
+  intérieure pour ne pas être rogné.
+- Textes mis à jour : accueil (ME / MC, lien vers l'Aide), bouton « décocher « MC » (mots contigus) ».
+- **Clavier arabe à l'écran** (`src/js/clavier.js`) : icône collée au champ de recherche, aux champs « dir=auto »
+  (filtres, clés du lexique, notes…) et aux zones de texte (dans la barre Copier / Effacer). Ouvert, il masque le
+  clavier du système (`inputmode="none"`) ; fermé (bouton ×), l'inputmode d'avant est remis et le champ reprend le
+  focus, ce qui rend le clavier du système. Suit le champ actif ; se ferme au changement d'écran. Rangée du bas :
+  ×, +, espace, ⌫, ↵ (recherche ou retour à la ligne). Tests : `tests/clavier.test.mjs`.
+- Clavier arabe, retours d'essai : icône sur **tous** les champs texte (titres, références, nom affiché, filtres…,
+  plus seulement « dir=auto »), sur les zones de texte (en haut à droite, collée au champ, au lieu de la barre
+  Copier / Effacer) et sur l'éditeur visuel des articles (masquée en mode HTML). Exclus : courriel, mot de passe,
+  cases, lecteur audio, code HTML. Nouvelle page **123** : chiffres 0-9 et symboles : - ( ) { } [ ] | \ = * / < > etc.
+  Le focus et le curseur sont rendus au champ quand l'icône est posée.
+- Clavier arabe **compact et amovible** : petite fenêtre flottante (440 px au plus), déplaçable à la souris ou au doigt
+  par sa barre du haut (nom, poignée, bouton ancrer / détacher, ×) ; mode **ancré** en bas, pleine largeur, au choix.
+  Ancrage et position gardés dans le navigateur (`localStorage`, repli sans). S'il recouvre le champ, il se place
+  dessous (ou dessus). Trois pages de trois rangées : lettres ; **123** chiffres et symboles ; **◌َ** voyelles et
+  signes, chiffres arabes ١٢٣, ponctuation arabe et derniers symboles. Touches plus basses (36 px).
+- Corrigé : dans le filtre de la liste des **Articles** (et celui des **Membres**), le clavier arabe se fermait à
+  chaque lettre. Ces filtres redessinent leur champ à chaque frappe ; le clavier suit désormais le champ qui remplace
+  le sien (clavier du système toujours masqué, icône reposée), au passage du focus ou, à défaut, à la frappe suivante.
+  Test ajouté ; balayage dans Chrome des champs publics (recherche, Lexique, Articles, Forum, Notes, Aide).
+
 ### Ajouté — configuration de Claude Code et ménage (branche `outils/claude-config`)
 - `.claude/settings.json` : réponses en français, mode auto ; commandes courantes autorisées (npm, node, git hors
   fusion, ouverture de PR, .bat d'essai) ; confirmation exigée pour fusionner, déployer et importer ; interdits :
