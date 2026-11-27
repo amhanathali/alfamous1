@@ -33,12 +33,13 @@ export function menuNotes() {
   if (!zone) return;
   const h = location.hash;
   const actif = (re) => (re.test(h) ? ' actif' : '');
-  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?|aide)/.test(h) ? '' : 'actif'}">Lecture</a>
+  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?|temoignages?|aide)/.test(h) ? '' : 'actif'}">Lecture</a>
     <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
     <a href="#/articles" class="${actif(/^#\/articles?(\/|$|\?)/).trim()}">Articles</a>
     <a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}"${session.utilisateur && session.niveau >= 1 ? '' : ' title="Connectez-vous pour utiliser Notes"'}>Notes</a>
     <a href="#/forum" class="${actif(/^#\/(forum|fil)/).trim()}">Forum</a>
     ${session.niveau >= 3 ? `<a href="#/membres" class="${actif(/^#\/membres/).trim()}">Membres</a>` : ''}
+    <a href="#/temoignages" class="${actif(/^#\/temoignages?(\/|$)/).trim()}">Témoignages</a>
     <a href="#/aide" class="${actif(/^#\/aide$/).trim()}">Aide</a>`;
 }
 

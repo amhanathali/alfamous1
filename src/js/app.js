@@ -14,6 +14,7 @@ import { initHistorique, noterRecherche } from './historique.js';
 import { initSelection, caseChoisir } from './selection.js';
 import { routeMembres, initMembres } from './membres.js';
 import { routeArticles } from './articles.js';
+import { routeTemoignages } from './temoignages.js';
 import { initArticlesLiens } from './articles-liens.js';
 import { initLecteur, boutonEcouter } from './lecteur.js';
 import { versetVoisin } from './lecteur-outils.js';
@@ -428,6 +429,16 @@ function vueAide() {
         <li><b>Commentaire traditionnel</b> (menu déroulant, « No Comment » par défaut) : un commentaire traditionnel,
           cité seulement pour la comparaison, affiché avec les commentaires de chaque verset.</li>
       </ul>
+      <h2>Témoignages</h2>
+      <ul>
+        <li>L'onglet <a href="#/temoignages">Témoignages</a> réunit des parcours personnels, lisibles par tous, les plus récents d'abord.</li>
+        <li><b>Témoigner</b> : connectez-vous (courriel vérifié), puis « + Témoigner ». Le témoignage est publié tout de suite ;
+          une ligne vide sépare les paragraphes.</li>
+        <li><b>Masquer mon nom (publier en Anonyme)</b> : la page affiche « Anonyme » ; ni votre nom ni votre compte n'y
+          figurent. Vous restez l'auteur : vous pouvez le modifier, et cocher ou décocher la case plus tard
+          (chaque modification est gardée dans l'historique).</li>
+        <li>Les modérateurs peuvent masquer un témoignage ; seul l'administrateur peut le supprimer.</li>
+      </ul>
       <h2>Clavier arabe</h2>
       <ul>
         <li>L'icône de clavier, collée à chaque champ de saisie (recherche, titres, filtres, commentaires, notes, éditeur
@@ -463,6 +474,12 @@ async function router() {
   if (/^#\/articles?(\/|$|\?)/.test(location.hash)) {
     $('#requete').value = ''; $('#effacer').hidden = true;
     try { await routeArticles(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
+    return;
+  }
+  // Témoignages (#/temoignages, #/temoignage/<id>, #/temoignages/nouveau, #/temoignage/<id>/modifier)
+  if (/^#\/temoignages?(\/|$)/.test(location.hash)) {
+    $('#requete').value = ''; $('#effacer').hidden = true;
+    try { await routeTemoignages(contenu); } catch (e) { erreur(e); } finally { window.scrollTo(0, 0); }
     return;
   }
   // Lexique (#/lexique, #/lexique/<clé>)
@@ -555,7 +572,7 @@ initCompte();
 initLecteur({ contenu, naviguer: (hash) => { if (location.hash === hash) return; sansHistorique = true; location.hash = hash; } })
   .catch((e) => console.error('Lecteur audio :', e));
 // Connexion ou déconnexion : menu à jour ; Mes Notes et forum redessinés.
-surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?))/.test(location.hash)) router(); });
+surChangement(() => { menuNotes(); if (/^#\/(notes|note\/|forum|fil\/|lexique$|membres$|articles?(\/|$|\?)|temoignages?(\/|$))/.test(location.hash)) router(); });
 Promise.all([
   initTraductions(),
   D.sourates().then((l) => { nbVersets = [0, ...l.map((x) => x.versets)]; }).catch(() => {}),

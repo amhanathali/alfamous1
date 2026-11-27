@@ -160,3 +160,36 @@ Fil du forum lié à un article : `lien: { type: 'article', cle }`.
 
 Index : `firestore.indexes.json` (statut + publieLe ; famille ; libellés, sourates, versets, racines, lexique en
 `array-contains` ; statut + modifieLe).
+
+## Témoignages (onglet Témoignages)
+Publiés tout de suite par un membre (niveau ≥ 1), lus par tous. Règles : `firestore.rules` ; tests :
+`tests/regles/temoignages.test.mjs`.
+
+### `temoignages/{id}` — partie publique
+| Champ | Type | Contenu |
+| --- | --- | --- |
+| `titre` | texte | 1 à 200 caractères ; vide si masqué |
+| `texte` | texte | 40 à 20 000 caractères, texte simple (ligne vide = paragraphe) ; vide si masqué |
+| `anonyme` | booléen | Case « Masquer mon nom (publier en Anonyme) » |
+| `auteurUid`, `auteurNom` | texte \| null | Compte et nom de l'auteur ; **`null` et `''` si anonyme** (le document est public : l'uid permettrait de retrouver la personne par ses commentaires) |
+| `creeLe`, `modifieLe` | horodatage | Publication, dernière modification (`null` au départ) |
+| `nbVersions` | entier | 1 à la création, +1 à chaque modification |
+| `masque` | `{ par, parNom, le }` \| null | Masquage par un modérateur |
+| `import` | objet | Témoignages importés seulement : `{ source: 'alfamous-amha', ancienId, publieLe, le }` |
+
+Sous-collections :
+| Chemin | Contenu | Lecture | Écriture |
+| --- | --- | --- | --- |
+| `prive/auteur` | `{ auteurUid, auteurNom }` : auteur réel, même anonyme | l'auteur lui-même, l'admin | créé dans le même lot que le témoignage, jamais ajouté à un témoignage existant |
+| `versions/{n}` | `{ titre, texte, le }` (sans nom : l'anonymat est gardé) | tous, sauf témoignage masqué (2+) | l'auteur, dans le lot de la modification |
+| `prive/texte` | `{ titre, texte }` d'un témoignage masqué | niveaux 2–3 | au masquage / démasquage |
+
+Opérations (en un seul lot) :
+- **Publier** : document + `prive/auteur` + `limites/{uid}`.
+- **Modifier** (auteur réel d'après `prive/auteur`, témoignage non masqué) : `versions/{nbVersions}` + titre, texte,
+  case anonyme (et donc `auteurUid`/`auteurNom`), `modifieLe`, `nbVersions + 1`.
+- **Masquer / démasquer** (2+) : comme les fils du forum. **Supprimer** : admin (sous-collections comprises).
+
+Import : `npm run importer:temoignages` lit publiquement l'ancienne collection `alfamous-amha/temoignages` (jamais
+modifiée) ; approuvés seulement ; identifiants stables `imp-t-<ancien id>` ; courriel jamais recopié ; `prive/auteur`
+relié au compte de l'auteur pour « Amha », sinon `auteurUid: null` (non modifiable depuis le site).

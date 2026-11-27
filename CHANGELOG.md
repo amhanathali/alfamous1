@@ -1,6 +1,26 @@
 # Journal des changements
 
 ## [Non publié]
+### Ajouté — onglet Témoignages et import depuis l'ancienne application (branche `temoignages/onglet`)
+- Menu : onglet **Témoignages** avant Aide (`src/js/temoignages.js`, sur le modèle de l'onglet Articles) : liste
+  (plus récents d'abord, filtre), lecture, « + Témoigner » (niveau ≥ 1, publié tout de suite, limite de fréquence),
+  modification par l'auteur avec historique, masquage (2+), suppression (3).
+- Case **« Masquer mon nom (publier en Anonyme) »** : la page affiche « Anonyme » ; le document public ne porte alors
+  ni le nom ni le compte (sinon l'uid permettrait de retrouver la personne par ses commentaires). L'auteur réel est
+  dans `temoignages/{id}/prive/auteur`, lu par lui seul et par l'admin ; c'est ce document qui lui donne le droit de
+  modifier. La case peut être cochée ou décochée en modifiant.
+- Règles Firestore `temoignages` (+ `versions`, `prive/auteur`, `prive/texte`) et 12 tests avec l'émulateur
+  (`tests/regles/temoignages.test.mjs`).
+- `npm run importer:temoignages` (`scripts/importer-temoignages.mjs`) : lit publiquement l'ancienne collection
+  `temoignages` du projet `alfamous-amha` (API REST, aucune clé, rien n'y est écrit), copie locale dans
+  `import/temoignages/` (hors Git). Seuls les témoignages approuvés sont repris (13 aujourd'hui) ; alias « anonyme »
+  ou « moi » → Anonyme, « Amha » → Amha Nathali (relié à son compte) ; le courriel n'est jamais recopié ; HTML de
+  l'ancien forum (`<br>`, liens) → texte simple. Modes à blanc, `--ecrire`, `--projet essai|prod`, `--verifier`,
+  `--purger`, `--forcer`, comme l'import des articles. Tests : `tests/temoignages.test.mjs`.
+- `npm run emulateurs:peupler` : deux témoignages d'essai du membre (un signé, un anonyme), puis import des vrais
+  témoignages dans les émulateurs.
+- Aide : section Témoignages.
+
 ### Ajouté — champ de recherche des sourates sur l'accueil (branche `interface/filtre-sourates`)
 - Accueil (onglet Lecture) : un champ au-dessus de la grille filtre les sourates pendant la frappe, avec le nombre
   trouvé ; Entrée ouvre la première sourate affichée ; message si aucune ne correspond.

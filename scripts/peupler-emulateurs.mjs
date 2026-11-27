@@ -13,6 +13,8 @@ import { initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { readFile } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 process.env.FIREBASE_AUTH_EMULATOR_HOST ||= '127.0.0.1:9099';
 process.env.FIRESTORE_EMULATOR_HOST ||= '127.0.0.1:8085';
@@ -124,3 +126,22 @@ for (const [id, a] of Object.entries(ARTICLES)) {
 }
 await db.doc('commentaires/essai-art-1').set(com('essai-a1', uids[1], 'Membre Essai', "[Texte d'essai] Commentaire sur l'article.", 21, { type: 'article' }));
 console.log('Articles d\'essai prêts : 2 publiés, 1 brouillon (http://localhost:5050/#/articles ; rédiger : modo@ ou admin@essai.local).');
+
+// Témoignages d'essai du membre : un signé, un anonyme (« Masquer mon nom ») ; prive/auteur dit qui en est l'auteur.
+const TEM = {
+  'essai-tem-1': { titre: "[Essai] Témoignage signé", anonyme: false, auteurUid: uids[1], auteurNom: 'Membre Essai', j: 24 },
+  'essai-tem-2': { titre: "[Essai] Témoignage anonyme", anonyme: true, auteurUid: null, auteurNom: '', j: 25 },
+};
+for (const [id, t] of Object.entries(TEM)) {
+  await db.recursiveDelete(db.doc(`temoignages/${id}`));
+  await db.doc(`temoignages/${id}`).set({
+    titre: t.titre, texte: "[Texte d'essai] Un parcours raconté en quelques lignes.\n\nSecond paragraphe : la connexion en membre@essai.local permet de le modifier.",
+    anonyme: t.anonyme, auteurUid: t.auteurUid, auteurNom: t.auteurNom, creeLe: jour(t.j), modifieLe: null, nbVersions: 1, masque: null,
+  });
+  await db.doc(`temoignages/${id}/prive/auteur`).set({ auteurUid: uids[1], auteurNom: 'Membre Essai' });
+}
+console.log('Témoignages d\'essai prêts : 1 signé, 1 anonyme (membre@essai.local).');
+// Les vrais témoignages de l'ancienne application (lecture publique, jamais modifiée), écrits dans les émulateurs seulement.
+try {
+  execFileSync(process.execPath, [fileURLToPath(new URL('./importer-temoignages.mjs', import.meta.url)), '--ecrire'], { stdio: 'inherit', env: process.env });
+} catch { console.log('Import des témoignages de l\'ancienne application impossible (connexion ?) : seuls les témoignages d\'essai sont là.'); }
