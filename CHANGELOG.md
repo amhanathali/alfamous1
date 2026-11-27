@@ -1,6 +1,28 @@
 # Journal des changements
 
 ## [Non publié]
+### Modifié — lecture, commentaires et champs (branche `interface/lecture-commentaires`, demande de l'auteur du 26 nov.)
+- En-tête : le choix de la traduction passe sous la ligne des exemples et s'appelle « Commentaires traditionnels »
+  (option « aucun ») ; une note ℹ️ sous les exemples : « Le latin est cherché dans la translittération, les
+  commentaires Alfamous et le commentaire traditionnel choisi ». Le choix « Chercher le latin dans » est supprimé.
+- Recherche en lettres latines (`chercherLatin`, `recherche.js`) : à la fois dans la translittération, dans le
+  commentaire traditionnel choisi et dans les commentaires Alfamous des versets (lus une fois par session sur le
+  serveur, masqués exclus, relus après chaque écriture). Chaque résultat indique « Trouvé dans : … » ; la
+  translittération s'ouvre quand elle contient le mot, le commentaire traditionnel s'affiche surligné quand c'est lui.
+- Le commentaire traditionnel choisi n'est plus sous chaque verset : il s'affiche en tête des commentaires du verset
+  (bouton Commentaires), et le bouton le compte (ex. « 3 commentaires » = 2 Alfamous + 1 traditionnel).
+- Translittération masquée par défaut ; bouton « Aa » à côté de ▶ sur chaque verset pour l'afficher ou la masquer.
+- Onglet « Mes Notes » renommé « Notes », visible pour tous : sans connexion, « Connectez-vous pour utiliser Notes »
+  avec Se connecter / Créer un compte ; courriel non vérifié, message dédié. « Mes Notes liées » → « Notes liées ».
+- Icônes devant les boutons Modifier, Supprimer… et Enregistrer… de tous les écrans, et « Copier » / « Effacer »
+  (avec « Annuler » pendant 8 s) sous chaque champ d'édition (commentaires, définitions, notes, réponses, motifs,
+  article, Dossier pour Claude en copie seule) : module `src/js/champs.js`.
+- Renvois dans les commentaires, définitions et notes : en plus de 3:14 et r:رحم, `r:3.14` (verset), `r:1`
+  (sourate, dès 1:1), `p50` (page), `m:رحم+سلم` et `m:abc+xyz` (recherche de mots) ; un nombre seul reste du texte.
+  Aide des champs mise à jour (`AIDE_RENVOIS`).
+- Tests : `tests/lecture-commentaires.test.mjs` (recherche latine, icônes) et renvois ; `npm test` 96/96. Essai dans
+  Chrome (ordinateur et 375 px), avec une traduction d'essai non versionnée.
+
 ### Ajouté — écouter et suivre la lecture (branche `lecture/ecouter-suivre`, cadrage `docs/LECTURE-AUDIO.md`)
 - Bouton « écouter » rond à côté de la référence de chaque verset (onglet Lecture) : lit à partir de ce verset.
   Nom accessible « Écouter à partir du verset 3:14 », zone de toucher de 44 px.

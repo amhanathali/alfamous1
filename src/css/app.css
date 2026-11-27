@@ -43,7 +43,9 @@ a { color: var(--lien); }
 .logo { font: 700 24px/1 var(--latin); color: var(--texte); text-decoration: none; letter-spacing: -.01em; }
 .logo-sous { display: block; font-weight: 400; font-size: 13px; color: var(--discret); margin-top: 2px; }
 .entete-actions { display: flex; align-items: center; gap: 10px; }
-.choix-trad { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--discret); }
+.choix-trad { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--discret); max-width: 920px; margin: 6px auto 0; }
+.choix-trad select { max-width: 280px; }
+.info-latin { max-width: 920px; margin: 6px auto 0; font-size: 13px; color: var(--discret); }
 select, input, button { font: inherit; color: inherit; }
 /* Champs de saisie : 16 px au moins partout, sinon l'iPhone zoome quand on les touche (le zoom reste permis).
    Un champ prend la taille de son parent, mais jamais moins de 16 px ; tests/champs-16px.test.mjs. */
@@ -619,3 +621,35 @@ body.lecteur-ouvert.lecteur-reduit { padding-bottom: 80px; }
   .lecteur-texte { max-height: 120px; }
 }
 @media print { .lecteur, .ecouter { display: none !important; } }
+
+/* ---------- Translittération par verset, résultats latins, commentaire traditionnel avec les commentaires ---------- */
+article.verset > .tr { display: none; }
+article.verset.tr-visible > .tr { display: block; }
+.bouton-tr {
+  position: relative; width: 28px; height: 28px; padding: 0; border-radius: 50%; border: 1px solid var(--bordure);
+  background: var(--surface); color: var(--discret); cursor: pointer; display: inline-grid; place-items: center; flex: none;
+}
+.bouton-tr::after { content: ''; position: absolute; inset: -8px; }
+.bouton-tr svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.bouton-tr:hover, .bouton-tr:focus-visible { border-color: var(--accent); color: var(--accent); outline: none; }
+.bouton-tr[aria-pressed='true'] { background: var(--accent-doux); border-color: var(--accent); color: var(--accent); }
+.trouve-dans { margin: 6px 0 0; font-size: 13px; color: var(--discret); }
+.tr .mot.surligne, .trad .mot.surligne { background: var(--surligne); }
+.com-trad { border-left: 3px solid var(--bordure); padding: 4px 0 6px 12px; margin: 0 0 12px; }
+.com-trad .com-meta { font-size: 13px; color: var(--discret); display: flex; gap: 8px; align-items: baseline; }
+.com-trad .trad-source { font-weight: 600; color: var(--texte); }
+.com-trad .com-texte { margin: 4px 0 0; }
+
+/* ---------- Icônes des boutons Modifier / Supprimer / Enregistrer ---------- */
+button.avec-icone { display: inline-flex; align-items: center; gap: 5px; }
+.icone-bouton { width: 15px; height: 15px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Copier / Effacer sous les champs d'édition ---------- */
+.outils-champ { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; margin: 4px 0 2px; font-size: 13px; }
+.outils-champ button {
+  display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--bordure); background: var(--surface);
+  color: var(--discret); border-radius: 6px; padding: 2px 8px; cursor: pointer; font-size: 13px; min-height: 28px;
+}
+.outils-champ button:hover, .outils-champ button:focus-visible { color: var(--accent); border-color: var(--accent); outline: none; }
+.outils-champ .icone-bouton { width: 14px; height: 14px; }
+.outils-etat { color: var(--discret); }

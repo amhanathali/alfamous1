@@ -8,7 +8,7 @@
 import * as D from './donnees.js';
 import { firebase, avecDelai } from './firebase.js';
 import { session, ouvrirFenetre, fermerFenetre } from './compte.js';
-import { echapper, messageErreur, TEXTE_MAX } from './commentaires-format.js';
+import { echapper, messageErreur, TEXTE_MAX, AIDE_RENVOIS } from './commentaires-format.js';
 import { afficherCommentaires, publierCommentaire } from './commentaires.js';
 import { blocArticlesLexique } from './articles-liens.js';
 import { normaliserCle, estRacine, racinesProches, grouperEntrees, filtrerEntrees, CLE_MAX } from './lexique-outils.js';
@@ -182,7 +182,7 @@ function fenetreNouvelle(cle = '', msg = '') {
       <label>Clé : mot, racine ou expression (les voyelles seront retirées)
         <input name="cle" required maxlength="${CLE_MAX}" dir="auto" value="${echapper(cle)}" placeholder="بشر"></label>
       <label>Première définition
-        <textarea name="texte" required maxlength="${TEXTE_MAX}" rows="6" placeholder="Texte simple ; renvois possibles : 2:255, r:أحد"></textarea></label>
+        <textarea name="texte" required maxlength="${TEXTE_MAX}" rows="6" placeholder="Texte simple ; ${AIDE_RENVOIS}"></textarea></label>
       <p class="aide">Si la clé existe déjà, la définition s'ajoute à cette entrée. Publiée tout de suite, signée « ${echapper(session.nom)} ».</p>
       <p class="form-msg" role="alert">${echapper(msg)}</p>
       <div class="fenetre-bas"><button type="button" class="btn" data-fermer>Annuler</button><button class="btn principal">Publier</button></div>
