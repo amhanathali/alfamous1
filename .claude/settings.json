@@ -1,0 +1,58 @@
+{
+  "language": "french",
+  "permissions": {
+    "defaultMode": "auto",
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git switch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git pull:*)",
+      "Bash(git fetch:*)",
+      "Bash(git rebase:*)",
+      "Bash(git stash:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr edit:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr ready:*)",
+      "Bash(code:*)",
+      "Bash(ESSAI_LOCAL.bat:*)",
+      "Bash(LANCER_ALFAMOUS1.bat:*)",
+      "Bash(LANCER_EMULATEURS.bat:*)"
+    ],
+    "ask": [
+      "Bash(gh pr merge:*)",
+      "Bash(git merge:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(npx firebase deploy:*)",
+      "Bash(deployerAlfamous1.bat:*)",
+      "Bash(npm run importer:*)",
+      "Bash(npm run importer\\:articles:*)",
+      "Bash(npm run niveau:*)"
+    ],
+    "deny": [
+      "Bash(git push origin main:*)",
+      "Bash(git push origin HEAD\\:main:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Edit(**/fTabVersets1.js)",
+      "Edit(**/fTabLexique1.js)",
+      "Read(**/key.json)",
+      "Read(**/*adminsdk*.json)",
+      "Read(**/client_secret*.json)",
+      "Read(**/quick-login.json)"
+    ]
+  }
+}
