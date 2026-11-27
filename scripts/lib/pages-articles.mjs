@@ -100,7 +100,8 @@ function gabarit(site, { titre, desc, canonique, type = 'website', image = '', j
   <meta property="og:description" content="${echapper(desc)}">
   <meta property="og:url" content="${echapper(canonique)}">${image ? `\n  <meta property="og:image" content="${echapper(image)}">` : ''}
   <meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%238a4b16'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='serif'%3EA%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/png" href="/img/logo.png">
+  <link rel="apple-touch-icon" href="/img/logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
   <link rel="stylesheet" href="/css/app.css">
   <link rel="stylesheet" href="/css/articles-public.css">
@@ -108,7 +109,7 @@ function gabarit(site, { titre, desc, canonique, type = 'website', image = '', j
 </head>
 <body class="page-publique">
   <header class="pub-entete">
-    <a class="logo" href="/articles/">Alfamous<span class="logo-sous">articles · le sens des mots du Coran</span></a>
+    <a class="logo" href="/articles/"><img class="logo-image" src="/img/logo.png" alt="" width="40" height="40"><span>Alfamous<span class="logo-sous">articles · le sens des mots du Coran</span></span></a>
     <nav class="pub-menu" aria-label="Sections"><a href="/articles/">Articles</a><a href="${echapper(site.atelier)}/">L'atelier du codex</a><a href="/articles/flux.xml">Flux</a></nav>
   </header>
   <main class="pub-contenu">

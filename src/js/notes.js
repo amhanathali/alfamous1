@@ -37,7 +37,8 @@ export function menuNotes() {
   if (!zone) return;
   const h = location.hash;
   const actif = (re) => (re.test(h) ? ' actif' : '');
-  zone.innerHTML = `<a href="#/" class="${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?|temoignages?|aide)/.test(h) ? '' : 'actif'}">Lecture</a>
+  // Lecture : une loupe au lieu du mot (le champ de recherche n'apparaît que dans cet onglet).
+  zone.innerHTML = `<a href="#/" class="onglet-icone${/^#\/(notes|note|forum|fil|lexique|membres|articles?\/?|temoignages?|aide)/.test(h) ? '' : ' actif'}" title="Lecture et recherche" aria-label="Lecture et recherche"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg></a>
     <a href="#/lexique" class="${actif(/^#\/lexique/).trim()}">Lexique</a>
     <a href="#/articles" class="${actif(/^#\/articles?(\/|$|\?)/).trim()}">Articles</a>
     <a href="#/notes" class="${actif(/^#\/notes?(\/|$)/).trim()}"${session.utilisateur && session.niveau >= 1 ? '' : ' title="Connectez-vous pour utiliser Notes"'}>Notes</a>
